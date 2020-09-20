@@ -11,11 +11,11 @@ class TransactionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 250,
+      height: 300,
       child: ListView.builder( //useful for long long list 
         itemBuilder: (ctx, index) { //context flutter generate
-        print(ctx);
-        print(index);
+        // print(ctx);
+        // print(index);
           return Card(
             child: Row(
               children: [
@@ -32,7 +32,7 @@ class TransactionList extends StatelessWidget {
                   ),
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    '\$${transactions[index].amount}', //string interpolation!!11 with ${}
+                    '\$${transactions[index].amount.toStringAsFixed(2)}', //string interpolation!!11 with ${}
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
