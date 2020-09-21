@@ -13,18 +13,20 @@ class _NewTransactionState extends State<NewTransaction> {
 
   final amountController = TextEditingController();
 
-  void submitData(){
+  void submitData() {
     final enteredTitle = titleController.text;
     final enteredAmount = double.parse(amountController.text);
-    
-    if(enteredTitle.isEmpty || enteredAmount <=0) {
+
+    if (enteredTitle.isEmpty || enteredAmount <= 0) {
       return;
     }
 
-    widget.addNewTransaction(
-                  enteredTitle,
-                  enteredAmount,
-                );
+    widget.addNewTransaction( //widget : key word to access other class method
+      enteredTitle,
+      enteredAmount,
+    );
+    
+    Navigator.of(context).pop(); //context :  special variable created by state class,pop() will close popup input by done key
   }
 
   @override
@@ -39,7 +41,8 @@ class _NewTransactionState extends State<NewTransaction> {
             TextField(
               decoration: InputDecoration(labelText: 'Title'),
               controller: titleController,
-              onSubmitted: (_)=>submitData(), // '_' : receive value but will ignore
+              onSubmitted: (_) =>
+                  submitData(), // '_' : receive value but will ignore
               // onChanged: (val) {
               //   inputTitle = val;
               // },
@@ -48,7 +51,8 @@ class _NewTransactionState extends State<NewTransaction> {
               decoration: InputDecoration(labelText: 'Amount'),
               controller: amountController,
               keyboardType: TextInputType.number,
-              onSubmitted: (_)=>submitData(), // '_' : receive value but will ignore
+              onSubmitted: (_) =>
+                  submitData(), // '_' : receive value but will ignore
               // onChanged: (val) => inputAmount = val,
             ),
             FlatButton(
