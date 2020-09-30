@@ -7,10 +7,14 @@ import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
   final Function addNewTransaction;
-  NewTransaction(this.addNewTransaction);
+  NewTransaction(this.addNewTransaction){
+    print('Constructor NewTransaction Widget');
+  }
 
   @override
-  _NewTransactionState createState() => _NewTransactionState();
+  _NewTransactionState createState() {
+    print('createState NewTransactionState Widget');
+    return _NewTransactionState();}
 }
 
 class _NewTransactionState extends State<NewTransaction> {
@@ -19,6 +23,32 @@ class _NewTransactionState extends State<NewTransaction> {
   final _amountController = TextEditingController();
 
   DateTime _selectedDate;
+
+  _NewTransactionState(){
+    print('Constructor NewTransactionState');
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    print('initState');
+    super.initState(); //super refers to parent's class
+  }
+
+  @override
+  void didUpdateWidget(NewTransaction oldWidget) {
+    // TODO: implement didUpdateWidget
+
+    print('didUpdateWidget');
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    print('dispose');
+    // TODO: implement dispose
+    super.dispose();
+  }
+
 
   void _submitData() {
     if (_amountController.text.isEmpty) {
