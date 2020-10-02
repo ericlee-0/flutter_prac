@@ -18,7 +18,8 @@ class CategoryItem extends StatelessWidget {
     //   ),
     // );
     Navigator.of(context).pushNamed( //for more complicated app routing
-      '/category-meals',
+      // '/category-meals',
+      CategoryMealsScreen.routeName, //required static routeName value
       arguments: {
         'id': id,
         'title': title,
