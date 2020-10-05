@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import './screens/meal_detail_screen.dart';
 import 'screens/category_meals_screen.dart';
 import 'screens/categories_screen.dart';
 
@@ -37,8 +38,23 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (ctx)=> CategoriesScreen(),
         // '/category-meals': (context)=> CategoryMealsScreen(),
-        CategoryMealsScreen.routeName : (context) => CategoryMealsScreen() //requuired static routeName property
+        CategoryMealsScreen.routeName : (context) => CategoryMealsScreen(), //requuired static routeName property
+        MealDetailScreen.routeName: (context)=>MealDetailScreen()
       },
+      onGenerateRoute: (settings){  //when the route nema is not registered on above, it goes to here 
+        print(settings.arguments);
+        // if(settings.name == '/meal-detail'){
+        //   return MaterialPageRoute();
+        // }
+        // else if(settings.name == '/simething-else'){
+        //   return MaterialPageRoute()
+        // }
+        // return MaterialPageRoute(builder:(ctx)=>CategoriesScreen());
+      },
+      onUnknownRoute:(settings){ // when the route info is not exist, going no where, it comes here
+      // use when it links 'page not found' or showing wrong address page
+        return MaterialPageRoute(builder: (ctx)=>CategoriesScreen());
+      } ,
     );
   }
 }
