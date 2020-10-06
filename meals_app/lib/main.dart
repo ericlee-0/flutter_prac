@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import './screens/filters_screen.dart';
 import './screens/tabs_screen.dart';
 import './screens/meal_detail_screen.dart';
 import './screens/category_meals_screen.dart';
@@ -41,7 +42,8 @@ class MyApp extends StatelessWidget {
         '/': (ctx)=> TabsScreen(),
         // '/category-meals': (context)=> CategoryMealsScreen(),
         CategoryMealsScreen.routeName : (context) => CategoryMealsScreen(), //requuired static routeName property
-        MealDetailScreen.routeName: (context)=>MealDetailScreen()
+        MealDetailScreen.routeName: (context) => MealDetailScreen(),
+        FiltersScreen.routeName: (context) => FiltersScreen(),
       },
       onGenerateRoute: (settings){  //when the route nema is not registered on above, it goes to here 
         print(settings.arguments);
