@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-import '../widgets/main_drswer.dart';
+import '../widgets/main_drawer.dart';
 import './favorites_screen.dart';
 
 import './categories_screen.dart';
