@@ -1,18 +1,57 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import './dummy_data.dart';
 import './screens/filters_screen.dart';
 import './screens/tabs_screen.dart';
 import './screens/meal_detail_screen.dart';
 import './screens/category_meals_screen.dart';
 import './screens/categories_screen.dart';
+import './models/meal.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Map<String, bool> _filters = {
+    'gluten': false,
+    'lactose': false,
+    'vegan': false,
+    'vegetarian': false,
+  };
+
+  List<Meal> _availableMeals = DUMMY_MEALS;
+
+  void _setFilters(Map<String, bool> filterData) {
+    
+    setState(() {
+      _filters = filterData;
+      _availableMeals = DUMMY_MEALS.where((meal) {
+        if (_filters['gluten'] && !meal.isGlutenFree) {
+          return false; // to newly generated list
+        }
+        if (_filters['lactose'] && !meal.isLactoseFree) {
+          return false; // to newly generated list
+        }
+        if (_filters['vegan'] && !meal.isVegan) {
+          return false; // to newly generated list
+        }
+        if (_filters['vegetarian'] && !meal.isVegetarian) {
+          return false; // to newly generated list
+        }
+        return true;
+      }).toList();
+    });
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,13 +78,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/', //default is '/'
       routes: {
         // '/': (ctx)=> CategoriesScreen(),
-        '/': (ctx)=> TabsScreen(),
+        '/': (ctx) => TabsScreen(),
         // '/category-meals': (context)=> CategoryMealsScreen(),
-        CategoryMealsScreen.routeName : (context) => CategoryMealsScreen(), //requuired static routeName property
+        CategoryMealsScreen.routeName: (context) => CategoryMealsScreen(
+            _availableMeals), //requuired static routeName property
         MealDetailScreen.routeName: (context) => MealDetailScreen(),
-        FiltersScreen.routeName: (context) => FiltersScreen(),
+        FiltersScreen.routeName: (context) => FiltersScreen(_filters,_setFilters),
       },
-      onGenerateRoute: (settings){  //when the route nema is not registered on above, it goes to here 
+      onGenerateRoute: (settings) {
+        //when the route nema is not registered on above, it goes to here
         print(settings.arguments);
         // if(settings.name == '/meal-detail'){
         //   return MaterialPageRoute();
@@ -55,10 +96,11 @@ class MyApp extends StatelessWidget {
         // }
         // return MaterialPageRoute(builder:(ctx)=>CategoriesScreen());
       },
-      onUnknownRoute:(settings){ // when the route info is not exist, going no where, it comes here
-      // use when it links 'page not found' or showing wrong address page
-        return MaterialPageRoute(builder: (ctx)=>CategoriesScreen());
-      } ,
+      onUnknownRoute: (settings) {
+        // when the route info is not exist, going no where, it comes here
+        // use when it links 'page not found' or showing wrong address page
+        return MaterialPageRoute(builder: (ctx) => CategoriesScreen());
+      },
     );
   }
 }
