@@ -58,7 +58,7 @@ class MealItem extends StatelessWidget {
     Navigator.of(context).pushNamed(
       MealDetailScreen.routeName,
       arguments: id,
-    ).then((result){
+    ).then((result){// result receive when navigator pop() happened that will triger removeitem function
       if(result != null){
         removeItem(result);
       }

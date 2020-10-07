@@ -23,7 +23,7 @@ class _CategoryMealsScreenState extends State<CategoryMealsScreen> {
   @override
   void didChangeDependencies() {
     if (!_loadedInitData) {
-      final routeArgs =
+      final routeArgs =  //context is global but it generates after init state so we can use didChangeDependencies
           ModalRoute.of(context).settings.arguments as Map<String, String>;
       categoryTitle = routeArgs['title'];
       final categoryId = routeArgs['id'];

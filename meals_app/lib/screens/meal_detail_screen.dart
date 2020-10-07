@@ -82,7 +82,7 @@ class MealDetailScreen extends StatelessWidget {
           Icons.delete,
         ),
         onPressed: () {
-          Navigator.of(context).pop(mealId);
+          Navigator.of(context).pop(mealId); //pop transfered mealId and back to the previous page
           
         },
       ),
