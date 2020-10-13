@@ -37,8 +37,8 @@ class ProductItem extends StatelessWidget {
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
-          leading: Consumer<Product>(
-            builder: (context, product, child) => IconButton(
+          leading: Consumer<Product>( //consumer makes partially rebuild which reduicing resources instead of rebuilding whole widgets
+            builder: (context, product, child) => IconButton( //child : item  which doen't want to rebuild
               icon: Icon(
                   product.isFavorite ? Icons.favorite : Icons.favorite_border),
               color: Theme.of(context).accentColor,
