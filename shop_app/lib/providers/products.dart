@@ -67,25 +67,25 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> addProduct(Product product) {
+  Future<void> addProduct(Product product) async {
+    // automaticall wrap into a future so don't need to return future
     const url =
-        'https://flutter-shop-app-7d1f3.firebaseio.com/products.json'; //only firebase can create sub storing are as products.json
-    return http
-        .post(
-      url,
-      body: json.encode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavorite': product.isFavorite,
-      }),
-    )
-        .then((response) {
-          // print(json.decode(response.body));
+        'https://flutter-shop-app-7d1f3.firebaseio.com/products'; //only firebase can create sub storing are as products.json
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        }),
+      );
+
       final newProduct = Product(
         // id: DateTime.now().toString(),
-        id:json.decode(response.body)['name'],
+        id: json.decode(response.body)['name'],
         title: product.title,
         description: product.description,
         price: product.price,
@@ -94,11 +94,15 @@ class Products with ChangeNotifier {
       _items.add(newProduct);
       // _items.insert(0,newProduct);// at the beginin of the list
       notifyListeners(); //if data is changed trigger this function to update the
-      // return Future.value();
-    }).catchError((error){
+
+    } catch (error) {
       print(error);
       throw error;
-    });
+    }
+
+    // }).catchError((error){ don't need because of await
+
+    // });
   }
 
   void updateProduct(String id, Product newProduct) {
