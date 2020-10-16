@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -65,17 +67,35 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-    );
-    _items.add(newProduct);
-    // _items.insert(0,newProduct);// at the beginin of the list
-    notifyListeners(); //if data is changed trigger this function to update the
+  Future<void> addProduct(Product product) {
+    const url =
+        'https://flutter-shop-app-7d1f3.firebaseio.com/products.json'; //only firebase can create sub storing are as products.json
+    return http
+        .post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    )
+        .then((response) {
+          // print(json.decode(response.body));
+      final newProduct = Product(
+        // id: DateTime.now().toString(),
+        id:json.decode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
+      _items.add(newProduct);
+      // _items.insert(0,newProduct);// at the beginin of the list
+      notifyListeners(); //if data is changed trigger this function to update the
+      // return Future.value();
+    });
   }
 
   void updateProduct(String id, Product newProduct) {
@@ -83,13 +103,12 @@ class Products with ChangeNotifier {
     if (prodIndex >= 0) {
       _items[prodIndex] = newProduct;
       notifyListeners();
-    }
-    else{
+    } else {
       print('...');
     }
   }
 
-  void deleteProduct(String id){
+  void deleteProduct(String id) {
     _items.removeWhere((element) => element.id == id);
     notifyListeners();
   }
