@@ -95,6 +95,9 @@ class Products with ChangeNotifier {
       // _items.insert(0,newProduct);// at the beginin of the list
       notifyListeners(); //if data is changed trigger this function to update the
       // return Future.value();
+    }).catchError((error){
+      print(error);
+      throw error;
     });
   }
 
