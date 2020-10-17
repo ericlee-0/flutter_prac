@@ -1,4 +1,13 @@
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
+
+import 'package:http/http.dart' as http;
+
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+// import 'package:http/http.dart' as http;
+// import './product.dart';
+import '../models/http_exception.dart';
 
 class Product with ChangeNotifier{
   final String id;
@@ -17,9 +26,30 @@ class Product with ChangeNotifier{
     this.isFavorite = false,
   });
 
-  void toggleFavoritesStatus(){
+  // void toggleFavoritesStatus(){
+  //   isFavorite = !isFavorite;
+  //   notifyListeners();
+  // }
+
+  Future<void> toggleFavoritesStatus() async {
+    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json';
+    // final existingProductIndex =
+    //     _items.indexWhere((element) => element.id == id);
+    // var existingFavoriteSStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
+    final response = await http.patch(url,
+          body: json.encode({
+            'isFavorite': isFavorite
+          }));
+
+    if (response.statusCode >= 400) { // only post request throw error other reques just send different status code such as 300 400 etc..
+      isFavorite = !isFavorite;
+      notifyListeners();
+      throw HttpException('Could not change favorite status!');
+    }
+
+    // existingProduct = null;
   }
 
  
