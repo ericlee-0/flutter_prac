@@ -4,7 +4,7 @@ import '../widgets/app_drawer.dart';
 import './cart_screen.dart';
 
 import '../widgets/products_grid.dart';
-// import '../providers/products.dart';
+import '../providers/products.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
 
@@ -20,6 +20,32 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    //1. Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+    // 2.Future.delayed(Duration.zero).then((value) {
+    //   Provider.of<Products>(context).fetchAndSetProducts();
+    // });
+    // 3. using didchangedependencies
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      _isLoading = true;
+      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +82,8 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
               child: ch,
               value: cart.itemCount.toString(),
             ),
-            child: IconButton( //this passed to builder as ch and avoid rebuilding
+            child: IconButton(
+              //this passed to builder as ch and avoid rebuilding
               icon: Icon(
                 Icons.shopping_cart,
               ),
@@ -68,7 +95,11 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
