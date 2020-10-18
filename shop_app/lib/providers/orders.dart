@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+
 import './cart.dart';
 
 class OrderItem {
@@ -38,11 +39,33 @@ class Orders with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  dynamic dateTimeEncode(dynamic item) {
-    if (item is DateTime) {
-      return item.toIso8601String();
+  Future<void> fetchAndSetOrders() async {
+    const url = 'https://flutter-shop-app-7d1f3.firebaseio.com/orders.json';
+    final response = await http.get(url);
+    final List<OrderItem> loadedOrders = [];
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    if(extractedData == null){
+      return;
     }
-    return item;
+    extractedData.forEach((orderId, orderData) {
+      loadedOrders.add(
+        OrderItem(
+          id: orderId,
+          amount: orderData['amount'],
+          dateTime: DateTime.parse(orderData['dateTime']),
+          products: (orderData['products'] as List<dynamic>).map(
+            (e) => CartItem(
+              title: e['title'],
+              id: e['id'],
+              price: e['price'],
+              quantity: e['quantity'],
+            ),
+          ).toList(),
+        ),
+      );
+    });
+    _orders = loadedOrders.reversed.toList();
+    notifyListeners();
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
@@ -53,12 +76,14 @@ class Orders with ChangeNotifier {
           body: json.encode({
             'amount': total,
             'dateTime': timestamp.toIso8601String(),
-            'products': cartProducts.map((e) => {
-                  'id': e.id,
-                  'title': e.title,
-                  'quantity': e.quantity,
-                  'price': e.price,
-                }).toList(),
+            'products': cartProducts
+                .map((e) => {
+                      'id': e.id,
+                      'title': e.title,
+                      'quantity': e.quantity,
+                      'price': e.price,
+                    })
+                .toList(),
           }));
       _orders.insert(
         0,
