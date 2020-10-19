@@ -43,6 +43,10 @@ class Products with ChangeNotifier {
 
   // var _showFavoritesOnly = false;
 
+  final String authToken;
+
+  Products(this.authToken, this._items);
+
   List<Product> get items {
     // if (_showFavoritesOnly) {
     //   return _items.where((element) => element.isFavorite).toList();
@@ -69,7 +73,7 @@ class Products with ChangeNotifier {
   // }
 
   Future<void> fetchAndSetProducts() async {
-    const url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products.json';
+    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -96,8 +100,8 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     // automaticall wrap into a future so don't need to return future
-    const url =
-        'https://flutter-shop-app-7d1f3.firebaseio.com/products.json'; //only firebase can create sub storing are as products.json
+    final url =
+        'https://flutter-shop-app-7d1f3.firebaseio.com/products.json?auth=$authToken'; //only firebase can create sub storing are as products.json
     try {
       final response = await http.post(
         url,
@@ -138,7 +142,7 @@ class Products with ChangeNotifier {
 
     if (prodIndex >= 0) {
       final url =
-          'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json';
+          'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json?auth=$authToken';
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -154,7 +158,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json';
+    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json?auth=$authToken';
     final existingProductIndex =
         _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingProductIndex];
