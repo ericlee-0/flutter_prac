@@ -44,8 +44,9 @@ class Products with ChangeNotifier {
   // var _showFavoritesOnly = false;
 
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -72,14 +73,28 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> fetchAndSetProducts() async {
-    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products.json?auth=$authToken';
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {//[] set default value
+    // print('authtoken: $authToken, userId : $userId');
+    final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"': '';
+    var url =
+        'https://flutter-shop-app-7d1f3.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      if(extractedData == null){
+      if (extractedData == null) {
+        print('extractedData  is null');
         return;
       }
+      url =
+          'https://flutter-shop-app-7d1f3.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(url);
+      // print(favoriteResponse.body);
+      // var favoriteData;
+      // if(favoriteResponse.body !=null){
+        final favoriteData = json.decode(favoriteResponse.body);
+      // }
+      
+      // print(favoriteData);
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -88,9 +103,11 @@ class Products with ChangeNotifier {
           description: prodData['description'],
           price: prodData['price'],
           imageUrl: prodData['imageUrl'],
-          isFavorite: prodData['isFavorite'],
+          isFavorite:
+              favoriteData == null ? false : favoriteData[prodId] == null ? false: favoriteData[prodId], //?? if null
         ));
       });
+      // print('loadedProduct[0]:');
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
@@ -110,7 +127,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
+          'creatorId':userId,
         }),
       );
 
@@ -158,7 +175,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json?auth=$authToken';
+    final url =
+        'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json?auth=$authToken';
     final existingProductIndex =
         _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingProductIndex];

@@ -31,17 +31,17 @@ class Product with ChangeNotifier{
   //   notifyListeners();
   // }
 
-  Future<void> toggleFavoritesStatus(String token) async {
-    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/products/$id.json?auth=$token';
+  Future<void> toggleFavoritesStatus(String token, String userId) async {
+    final url = 'https://flutter-shop-app-7d1f3.firebaseio.com/userFavorites/$userId/$id.json?auth=$token';
     // final existingProductIndex =
     //     _items.indexWhere((element) => element.id == id);
     // var existingFavoriteSStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final response = await http.patch(url,
-          body: json.encode({
-            'isFavorite': isFavorite
-          }));
+    final response = await http.put(url,
+          body: json.encode(
+            isFavorite
+          ));
 
     if (response.statusCode >= 400) { // only post request throw error other reques just send different status code such as 300 400 etc..
       isFavorite = !isFavorite;
