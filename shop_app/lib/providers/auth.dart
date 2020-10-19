@@ -1,5 +1,6 @@
 // import 'package:flutter/material.dart';
 import 'dart:convert';
+// import 'dart:html';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import '../models/http_exception.dart';
@@ -76,5 +77,12 @@ class Auth with ChangeNotifier {
 
   Future<void> signIn(String email, String password) async {
     return _authenticate(email, password, 'signInWithPassword');
+  }
+
+  void logout(){
+    _token =null;
+    _userId = null;
+    _expiryDate = null;
+    notifyListeners();
   }
 }
