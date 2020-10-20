@@ -36,7 +36,7 @@ class ProductItem extends StatelessWidget {
             );
           },
           child: Hero(
-            tag: product.id,
+            tag: product.id, //going to product detail screen
             child: FadeInImage(
               placeholder: AssetImage('assets/images/product-placeholder.png'),
               image: NetworkImage(product.imageUrl),
