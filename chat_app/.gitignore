@@ -31,7 +31,11 @@
 .pub/
 /build/
 android/
-ios/
+
+ios/*
+!ios/Runner
+ios/Runner/*
+!ios/Runner/info.plist
 
 # Web related
 lib/generated_plugin_registrant.dart
