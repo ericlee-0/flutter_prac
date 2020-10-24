@@ -20,8 +20,11 @@ class _UserImagePickerState extends State<UserImagePicker> {
 
   Future<void> _getImage() async {
     try {
-      
-      final pickedImageFile = await picker.getImage(source: ImageSource.camera);
+      final pickedImageFile = await picker.getImage(
+        source: ImageSource.camera,
+        imageQuality: 50,
+        maxWidth: 150,
+      );
 
       setState(() {
         if (pickedImageFile != null) {
@@ -33,7 +36,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
       widget.imagePickFn(File(pickedImageFile.path));
     } catch (err) {
       // print(err);
-      if(err != null){
+      if (err != null) {
         retrieveLostData();
       }
     }
@@ -46,7 +49,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
     }
     if (response.file != null) {
       setState(() {
-         _pickedImage = File(response.file.path);
+        _pickedImage = File(response.file.path);
         // if (response.type == RetrieveType.video) {
         //   _handleVideo(response.file);
         // } else {
