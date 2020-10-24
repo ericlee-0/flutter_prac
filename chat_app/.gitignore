@@ -30,7 +30,15 @@
 .pub-cache/
 .pub/
 /build/
-android/
+
+android/*
+!build.gradle
+android/app/*
+!android/app/build.gradle
+android/app/src/main/*
+!android/app/src/main/AndroidManifest.xml
+
+
 
 ios/*
 !ios/Runner
