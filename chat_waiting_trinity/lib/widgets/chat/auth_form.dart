@@ -49,128 +49,134 @@ class _AuthFormState extends State<AuthForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            // width: ,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 3.0, bottom: 3.0, left: 3.0),
-              color: const Color(0xFF4285F4),
-              onPressed: ()=>widget.signInWithGoogle(context),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/images/google-logo.png',
-                    height: 40.0,
-                  ),
-                  Container(
-                      padding: EdgeInsets.only(left: 20.0, right: 20.0),
-                      child: Text(
-                        "Sign in with Google",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      )),
-                ],
+    return InkWell(
+      splashColor: Colors.transparent,
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Container(
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              // width: ,
+              child: RaisedButton(
+                padding: EdgeInsets.only(top: 3.0, bottom: 3.0, left: 3.0),
+                color: const Color(0xFF4285F4),
+                onPressed: () => widget.signInWithGoogle(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'assets/images/google-logo.png',
+                      height: 40.0,
+                    ),
+                    Container(
+                        padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                        child: Text(
+                          "Sign in with Google",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        )),
+                  ],
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 100),
-          Card(
-            margin: EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // if (!_isSignIn) UserImagePicker(_pickedImage),
-                      TextFormField(
-                        key: ValueKey('email'),
-                        // autocorrect: false,
-                        textCapitalization: TextCapitalization.none,
-                        enableSuggestions: false,
-                        validator: (value) {
-                          bool emailValid = RegExp(
-                                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                              .hasMatch(value);
-                          if (value.isEmpty || !emailValid) {
-                            return 'Prease enter a valid email address.';
-                          }
-
-                          return null;
-                        },
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email Address',
-                        ),
-                        onSaved: (value) {
-                          _userEmail = value;
-                        },
-                      ),
-                      if (!_isSignIn)
+            // SizedBox(height: 100),
+            Card(
+              margin: EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // if (!_isSignIn) UserImagePicker(_pickedImage),
                         TextFormField(
-                          key: ValueKey('username'),
-                          autocorrect: true,
-                          textCapitalization: TextCapitalization.words,
+                          key: ValueKey('email'),
+                          // autocorrect: false,
+                          textCapitalization: TextCapitalization.none,
                           enableSuggestions: false,
                           validator: (value) {
-                            if (value.isEmpty || value.length < 2) {
-                              return 'Please enter at least 2 characters';
+                            bool emailValid = RegExp(
+                                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                .hasMatch(value);
+                            if (value.isEmpty || !emailValid) {
+                              return 'Prease enter a valid email address.';
+                            }
+
+                            return null;
+                          },
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email Address',
+                          ),
+                          onSaved: (value) {
+                            _userEmail = value;
+                          },
+                        ),
+                        if (!_isSignIn)
+                          TextFormField(
+                            key: ValueKey('username'),
+                            autocorrect: true,
+                            textCapitalization: TextCapitalization.words,
+                            enableSuggestions: false,
+                            validator: (value) {
+                              if (value.isEmpty || value.length < 2) {
+                                return 'Please enter at least 2 characters';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(labelText: 'Username'),
+                            onSaved: (value) {
+                              _userName = value;
+                            },
+                          ),
+                        TextFormField(
+                          key: ValueKey('password'),
+                          validator: (value) {
+                            if (value.isEmpty || value.length < 6) {
+                              return 'Password must be at least 6 characters long.';
                             }
                             return null;
                           },
-                          decoration: InputDecoration(labelText: 'Username'),
+                          decoration: InputDecoration(labelText: 'Password'),
+                          obscureText: true,
                           onSaved: (value) {
-                            _userName = value;
+                            _userPassword = value;
                           },
                         ),
-                      TextFormField(
-                        key: ValueKey('password'),
-                        validator: (value) {
-                          if (value.isEmpty || value.length < 6) {
-                            return 'Password must be at least 6 characters long.';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(labelText: 'Password'),
-                        obscureText: true,
-                        onSaved: (value) {
-                          _userPassword = value;
-                        },
-                      ),
-                      SizedBox(height: 12),
-                      if (widget.isLoading) CircularProgressIndicator(),
-                      if (!widget.isLoading)
-                        RaisedButton(
-                          child: Text(_isSignIn ? 'SignIn' : 'SignUp'),
-                          onPressed: _userSubmit,
-                        ),
-                      if (!widget.isLoading)
-                        FlatButton(
-                          textColor: Theme.of(context).primaryColor,
-                          onPressed: () {
-                            setState(() {
-                              _isSignIn = !_isSignIn;
-                            });
-                          },
-                          child: Text(_isSignIn
-                              ? 'Creat new account'
-                              : 'I already have an account'),
-                        ),
-                      // SizedBox(height: 20),
-                    ],
+                        SizedBox(height: 12),
+                        if (widget.isLoading) CircularProgressIndicator(),
+                        if (!widget.isLoading)
+                          RaisedButton(
+                            child: Text(_isSignIn ? 'SignIn' : 'SignUp'),
+                            onPressed: _userSubmit,
+                          ),
+                        if (!widget.isLoading)
+                          FlatButton(
+                            textColor: Theme.of(context).primaryColor,
+                            onPressed: () {
+                              setState(() {
+                                _isSignIn = !_isSignIn;
+                              });
+                            },
+                            child: Text(_isSignIn
+                                ? 'Creat new account'
+                                : 'I already have an account'),
+                          ),
+                        // SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

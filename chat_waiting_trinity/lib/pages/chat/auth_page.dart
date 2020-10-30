@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../widgets/chat/auth_form.dart';
@@ -34,7 +34,7 @@ class _AuthPageState extends State<AuthPage> {
         authResult = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
-        print('authResut: $authResult');
+        // print('authResut: $authResult');
         // final ref = FirebaseStorage.instance
         //     .ref() //access root clould strage
         //     .child('user_image') //sub folder
@@ -44,14 +44,14 @@ class _AuthPageState extends State<AuthPage> {
 
         // final url = await ref.getDownloadURL();
 
-        // await FirebaseFirestore.instance
-        //     .collection('users')
-        //     .doc(authResult.user.uid)
-        //     .set({
-        //   'username': username,
-        //   'email': email,
-        //   'image_url':url,
-        // });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(authResult.user.uid)
+            .set({
+          'username': username,
+          'email': email,
+          // 'image_url':url,
+        });
       }
     } catch (err) {
       print(err.message);
@@ -75,26 +75,33 @@ class _AuthPageState extends State<AuthPage> {
       setState(() {
         _isLoading = true;
       });
-    // model.state =ViewState.Busy;
-    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
-    GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-    AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
+      // model.state =ViewState.Busy;
+      GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
+      GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
       authResult = await _auth.signInWithCredential(credential);
-    User _user = authResult.user;
-    assert(!_user.isAnonymous);
-    assert(await _user.getIdToken() != null);
-    // User currentUser = await _auth.currentUser();
-    User currentUser = _auth.currentUser;
-    assert(_user.uid == currentUser.uid);
-    // model.state = ViewState.Idle;
-    print("User Name: ${_user.displayName}");
-    print("User Email ${_user.email}");
-    }
-    catch (err) {
+      User _user = authResult.user;
+      assert(!_user.isAnonymous);
+      assert(await _user.getIdToken() != null);
+      // User currentUser = await _auth.currentUser();
+      User currentUser = _auth.currentUser;
+      assert(_user.uid == currentUser.uid);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .set({
+        'username': currentUser.displayName,
+        'email': currentUser.email,
+        // 'image_url':url,
+      });
+      // model.state = ViewState.Idle;
+      // print("User Name: ${_user.displayName}");
+      // print("User Email ${_user.email}");
+    } catch (err) {
       print(err.message);
       if (err != null) {
         Scaffold.of(ctx).showSnackBar(
@@ -112,7 +119,7 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: AuthForm(_submitAuthForm, _signInWithGoogle, _isLoading),
     );
