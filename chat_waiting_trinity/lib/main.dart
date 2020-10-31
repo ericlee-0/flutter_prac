@@ -1,18 +1,41 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import './pages/chat/chat_room_list_page.dart';
 import './pages/chat/auth_page.dart';
-
+import './pages/chat/user_profile_edit_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  var _userId;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _userId = '';
+    
+  }
+  String _getUserId(){
+    var user = FirebaseAuth.instance.currentUser;
+          // setState(() {
+          //   _userId = user.uid;
+          // });
+          return user.uid;
+  }
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,10 +60,15 @@ class MyApp extends StatelessWidget {
           );
         }
         if(userSnapshot.hasData){
+          
+          // print(user.uid);
           return ChatRoomListPage();
         }
         return AuthPage();
       }),
+      routes: {
+              UserProfileEditPage.routeName:(ctx)=>UserProfileEditPage(_getUserId()),
+            },
     );
   }
 }

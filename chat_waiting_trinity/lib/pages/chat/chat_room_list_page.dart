@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import './user_profile_edit_page.dart';
 
 class ChatRoomListPage extends StatelessWidget {
   @override
@@ -29,10 +30,24 @@ class ChatRoomListPage extends StatelessWidget {
                   ),
                   value: 'logout',
                 ),
+                DropdownMenuItem(
+                  child: Container(
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text('Edit Profile')
+                      ],
+                    ),
+                  ),
+                  value: 'edit',
+                ),
               ],
               onChanged: (itemIdentifier) {
-                if (itemIdentifier == 'logout') {
-                  FirebaseAuth.instance.signOut();
+                if (itemIdentifier == 'edit') {
+                  Navigator.of(context).pushNamed(UserProfileEditPage.routeName);
                 }
               })
         ],
