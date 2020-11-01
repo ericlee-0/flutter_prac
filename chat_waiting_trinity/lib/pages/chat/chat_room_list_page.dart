@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './user_profile_edit_page.dart';
+import '../../widgets/chat/user_profile_image_picker.dart';
 
 class ChatRoomListPage extends StatelessWidget {
   @override
@@ -44,6 +45,20 @@ class ChatRoomListPage extends StatelessWidget {
                   ),
                   value: 'edit',
                 ),
+                DropdownMenuItem(
+                  child: Container(
+                    child: Row(
+                      children: [
+                        Icon(Icons.exit_to_app),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text('Test Page')
+                      ],
+                    ),
+                  ),
+                  value: 'test',
+                ),
               ],
               onChanged: (itemIdentifier) {
                 if (itemIdentifier == 'edit') {
@@ -51,6 +66,8 @@ class ChatRoomListPage extends StatelessWidget {
                 }
                 else if (itemIdentifier == 'logout') {
                   FirebaseAuth.instance.signOut();
+                }else if (itemIdentifier == 'test') {
+                  Navigator.of(context).pushNamed(UserProfileImagePicker.routeName);
                 }
               })
         ],

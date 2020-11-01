@@ -97,11 +97,13 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                             children = <Widget>[
                               Card(
                                 child: CircleAvatar(
+                                  
                                   radius: 80,
                                   backgroundColor: Colors.white,
                                   backgroundImage: NetworkImage(
                                       _userImageUrl),
                                 ),
+                                
                               ),
                               Row(
                                 mainAxisAlignment:

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import './pages/chat/chat_room_list_page.dart';
 import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
+import './widgets/chat/user_profile_image_picker.dart';
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -68,6 +70,7 @@ class _MyAppState extends State<MyApp> {
       }),
       routes: {
               UserProfileEditPage.routeName:(ctx)=>UserProfileEditPage(_getUserId()),
+              UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
             },
     );
   }
