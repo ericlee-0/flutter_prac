@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
       }),
       routes: {
               UserProfileEditPage.routeName:(ctx)=>UserProfileEditPage(_getUserId()),
-              UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+              // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
             },
     );
   }

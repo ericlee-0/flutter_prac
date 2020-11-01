@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import '../../widgets/chat/user_profile_image_picker.dart';
 
 class UserProfileEditPage extends StatefulWidget {
   static const routeName = '/user-profile-edit';
@@ -14,12 +16,18 @@ class UserProfileEditPage extends StatefulWidget {
 
 class _UserProfileEditPageState extends State<UserProfileEditPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController userNameController = TextEditingController();
+  // final TextEditingController userNameController = TextEditingController();
   var _isLoading = false;
   var _userName;
   var _userImageUrl;
-
+  File _userImageFile;
   // final String userId;
+
+  void _pickedImage(File image) {
+    setState(() {
+      _userImageFile = image;
+    });
+  }
 
   Future<String> _initUserData() async {
     print('userId: ${widget.userId}');
@@ -43,14 +51,26 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
         setState(() {
           _isLoading = true;
         });
+        var url;
+        if (_userImageFile != null) {
+          final ref = FirebaseStorage.instance
+              .ref() //access root clould strage
+              .child('user_image') //sub folder
+              .child(widget.userId + '.jpg'); //filename
 
+          // print(ref.path);
+          await ref.putFile(_userImageFile).onComplete;
+
+          // print('before get url');
+          url = await ref.getDownloadURL();
+        }
         await FirebaseFirestore.instance
             .collection('users')
             .doc(widget.userId)
             .update({
           'username': _userName,
           // 'email': email,
-          // 'image_url':url,
+          'image_url': (url != null) ? url : _userImageUrl,
         });
       } catch (error) {
         print(error);
@@ -95,50 +115,8 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                           List<Widget> children;
                           if (snapshot.hasData) {
                             children = <Widget>[
-                              Card(
-                                child: CircleAvatar(
-                                  
-                                  radius: 80,
-                                  backgroundColor: Colors.white,
-                                  backgroundImage: NetworkImage(
-                                      _userImageUrl),
-                                ),
-                                
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  FlatButton.icon(
-                                    label: Flexible(
-                                      fit: FlexFit.loose,
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Text(
-                                          'Camera',
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                    icon: Icon(Icons.camera_alt),
-                                    onPressed: () {},
-                                  ),
-                                  FlatButton.icon(
-                                    label: Flexible(
-                                      fit: FlexFit.loose,
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Text(
-                                          'Gallery',
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                    icon: Icon(Icons.image_search),
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              ),
+                              UserProfileImagePicker(
+                                  _pickedImage, _userImageUrl),
                               TextFormField(
                                 key: ValueKey('username'),
                                 initialValue: _userName,

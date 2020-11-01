@@ -4,9 +4,10 @@ import 'package:image_picker/image_picker.dart';
 
 class UserProfileImagePicker extends StatefulWidget {
   static const routeName = '/user-profile-image-picker';
-  // final Function(File pickedImage) imagePickerFn;
+  final Function(File pickedImage) imagePickerFn;
+  final String userImageUrl;
 
-  // UserProfileImagePicker(this.imagePickerFn);
+  UserProfileImagePicker(this.imagePickerFn,this.userImageUrl);
   @override
   _UserProfileImagePickerState createState() => _UserProfileImagePickerState();
 }
@@ -29,8 +30,8 @@ class _UserProfileImagePickerState extends State<UserProfileImagePicker> {
     try {
       final pickedImageFile = await picker.getImage(
         source: imageS,
-        imageQuality: 70,
-        maxWidth: 150,
+        // imageQuality: 70,
+        maxWidth: 250,
       );
       print('picked image');
       setState(() {
@@ -40,7 +41,7 @@ class _UserProfileImagePickerState extends State<UserProfileImagePicker> {
           print('No image selected.');
         }
       });
-      // widget.imagePickFn(File(pickedImageFile.path));
+      widget.imagePickerFn(_pickedImage);
     } catch (err) {
       print(err);
       if (err != null) {
@@ -63,6 +64,7 @@ class _UserProfileImagePickerState extends State<UserProfileImagePicker> {
         //   _handleImage(response.file);
         // }
       });
+      widget.imagePickerFn(_pickedImage);
     } else {
       // _handleError(response.exception);
       print('retrievelostdata error');
@@ -70,60 +72,88 @@ class _UserProfileImagePickerState extends State<UserProfileImagePicker> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Center(
-          child: PopupMenuButton<SelectImageSource>(
-            onSelected: (SelectImageSource result) {
-              setState(() {
-                _selectedImageSource = result;
-              });
-              print(_selectedImageSource);
-              _getImage();
-            },
-            child: Stack(
-              alignment: Alignment.center,
-              // overflow: Overflow.visible,
-              clipBehavior: Clip.none,
-              children: [
-                Card(
-                  child: CircleAvatar(
-                    radius: 80,
-                    backgroundColor: Colors.white,
-                    // backgroundImage: NetworkImage(_userImageUrl),
-                    backgroundImage: _pickedImage != null
-                        ? FileImage(_pickedImage)
-                        : AssetImage('assets/images/user_image_default.png'),
-                  ),
-                ),
-                Positioned(
-                    top: 80,
-                    right: -150,
-                    bottom: 0,
-                    left: 0,
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.grey,
-                      size: 50,
-                    )),
-              ],
-            ),
-            itemBuilder: (ctx) => <PopupMenuEntry<SelectImageSource>>[
-              const PopupMenuItem<SelectImageSource>(
-                value: SelectImageSource.fromCamera,
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Profile Image Change', textAlign: TextAlign.center,),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FlatButton(
                 child: Text('Camera Image'),
+                onPressed: () {
+                  // Navigator.of(context).pop();
+                  setState(() {
+                    _selectedImageSource = SelectImageSource.fromCamera;
+                  });
+                  print(_selectedImageSource);
+                  _getImage();
+                  Navigator.of(context).pop();
+                },
               ),
-              const PopupMenuItem<SelectImageSource>(
-                value: SelectImageSource.fromGallery,
+              FlatButton(
                 child: Text('Gallery Image'),
+                onPressed: () {
+                  // Navigator.of(context).pop();
+                  setState(() {
+                    _selectedImageSource = SelectImageSource.fromGallery;
+                  });
+                  print(_selectedImageSource);
+                  _getImage();
+                  Navigator.of(context).pop();
+                },
               ),
+              // FlatButton(
+              //   child: Text('Cancel'),
+              //   onPressed: () {
+              //     Navigator.of(context).pop();
+              //   },
+              // ),
             ],
           ),
-        ),
-        
-      ),
+          // actions: [
+
+          // ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+            alignment: Alignment.center,
+            // overflow: Overflow.visible,
+            clipBehavior: Clip.none,
+            children: [
+              // Card(
+                // child: 
+                CircleAvatar(
+                  radius: 80,
+                  backgroundColor: Colors.white,
+                  // backgroundImage: NetworkImage(_userImageUrl),
+                  backgroundImage: _pickedImage != null
+                      ? FileImage(_pickedImage)
+                      : NetworkImage(widget.userImageUrl),
+                ),
+              // ),
+              Positioned(
+                  top: 80,
+                  right: -150,
+                  bottom: 0,
+                  left: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.camera_alt),
+                    color: Colors.grey,
+                    iconSize: 50,
+                    onPressed: _showMyDialog,
+                  )),
+            ],
+          
+     
     );
   }
 }

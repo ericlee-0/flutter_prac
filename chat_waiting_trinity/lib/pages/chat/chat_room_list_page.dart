@@ -67,7 +67,7 @@ class ChatRoomListPage extends StatelessWidget {
                 else if (itemIdentifier == 'logout') {
                   FirebaseAuth.instance.signOut();
                 }else if (itemIdentifier == 'test') {
-                  Navigator.of(context).pushNamed(UserProfileImagePicker.routeName);
+                  // Navigator.of(context).pushNamed(UserProfileImagePicker.routeName);
                 }
               })
         ],
