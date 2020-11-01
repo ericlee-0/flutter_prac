@@ -49,6 +49,9 @@ class ChatRoomListPage extends StatelessWidget {
                 if (itemIdentifier == 'edit') {
                   Navigator.of(context).pushNamed(UserProfileEditPage.routeName);
                 }
+                else if (itemIdentifier == 'logout') {
+                  FirebaseAuth.instance.signOut();
+                }
               })
         ],
       ),

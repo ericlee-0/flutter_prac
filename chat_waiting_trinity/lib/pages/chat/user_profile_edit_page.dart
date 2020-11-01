@@ -14,23 +14,54 @@ class UserProfileEditPage extends StatefulWidget {
 
 class _UserProfileEditPageState extends State<UserProfileEditPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController userNameController = TextEditingController();
+  var _isLoading = false;
   var _userName;
   var _userImageUrl;
 
   // final String userId;
 
-  Future<List> _initUserData() async {
+  Future<String> _initUserData() async {
     print('userId: ${widget.userId}');
     final resultUserData = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
         .get();
     _userName = resultUserData.data()['username'];
+    _userImageUrl = resultUserData.data()['image_url'];
     print('username: $_userName');
     // setState(() {
     //   _userName = _userName['username'];
     // });
-    return [_userName, _userImageUrl];
+    return 'succeeded';
+  }
+
+  Future<void> _updateProfile() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      try {
+        setState(() {
+          _isLoading = true;
+        });
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .update({
+          'username': _userName,
+          // 'email': email,
+          // 'image_url':url,
+        });
+      } catch (error) {
+        print(error);
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -38,10 +69,15 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
     // final String userId = ModalRoute.of(context).settings.arguments as String;
     // _initUserData(userId);
     return Scaffold(
-        appBar: AppBar(
-          title: Text('User'),
-        ),
-        body: Center(
+      appBar: AppBar(
+        title: Text('User Profile'),
+      ),
+      body: InkWell(
+        splashColor: Colors.transparent,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: Center(
           child: Card(
             margin: EdgeInsets.all(20),
             child: SingleChildScrollView(
@@ -52,18 +88,19 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      FutureBuilder(
-                        future: _initUserData(),
-                        builder: (ctx, snapshot) {
-                          print(snapshot);
-                          return Column(
-                            children: [
+                      FutureBuilder<String>(
+                        future:
+                            _initUserData(), // a previously-obtained Future<String> or null
+                        builder: (context, snapshot) {
+                          List<Widget> children;
+                          if (snapshot.hasData) {
+                            children = <Widget>[
                               Card(
                                 child: CircleAvatar(
                                   radius: 80,
                                   backgroundColor: Colors.white,
-                                  backgroundImage: AssetImage(
-                                      'assets/images/user_image_default.png'),
+                                  backgroundImage: NetworkImage(
+                                      _userImageUrl),
                                 ),
                               ),
                               Row(
@@ -107,20 +144,49 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                                 textCapitalization: TextCapitalization.words,
                                 enableSuggestions: false,
                                 validator: (value) {
-                                  if (value.isEmpty || value.length < 4) {
-                                    return 'Please enter at least 4 characters';
+                                  if (value.isEmpty || value.length < 2) {
+                                    return 'Please enter at least 2 characters';
                                   }
                                   return null;
                                 },
                                 decoration:
                                     InputDecoration(labelText: 'Username'),
                                 onSaved: (value) {
-                                  // setState(() {
-                                  //   _userName = value;
-                                  // });
+                                  _userName = value;
                                 },
                               ),
-                            ],
+                            ];
+                          } else if (snapshot.hasError) {
+                            children = <Widget>[
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 60,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Text('Error: ${snapshot.error}'),
+                              )
+                            ];
+                          } else {
+                            children = <Widget>[
+                              SizedBox(
+                                child: CircularProgressIndicator(),
+                                width: 60,
+                                height: 60,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 16),
+                                child: Text('Awaiting result...'),
+                              )
+                            ];
+                          }
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: children,
+                            ),
                           );
                         },
                       ),
@@ -129,14 +195,24 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
                       Padding(
                         padding: EdgeInsets.only(top: 50),
                       ),
-                      RaisedButton(
-                          child: Text('Update Profile'), onPressed: () {}),
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : RaisedButton(
+                              child: Text('Update Profile'),
+                              onPressed: () {
+                                _updateProfile();
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                              },
+                            )
                     ],
                   ),
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

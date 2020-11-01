@@ -1,8 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../widgets/chat/auth_form.dart';
 
 class AuthPage extends StatefulWidget {
@@ -14,11 +15,13 @@ class _AuthPageState extends State<AuthPage> {
   final _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isLoading = false;
+  File _imageFile;
+
   void _submitAuthForm(
     String email,
     String password,
     String username,
-    // File image,
+    // File defaultImage,
     var isSignIn,
     BuildContext ctx,
   ) async {
@@ -26,6 +29,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       setState(() {
         _isLoading = true;
+        _imageFile = File('assets/images/user_image_default.png');
       });
       if (isSignIn) {
         authResult = await _auth.signInWithEmailAndPassword(
@@ -34,15 +38,17 @@ class _AuthPageState extends State<AuthPage> {
         authResult = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
-        // print('authResut: $authResult');
-        // final ref = FirebaseStorage.instance
-        //     .ref() //access root clould strage
-        //     .child('user_image') //sub folder
-        //     .child(authResult.user.uid + '.jpg'); //filename
-
-        // await ref.putFile(image).onComplete;
-
-        // final url = await ref.getDownloadURL();
+        print('authResut: $authResult');
+        final ref = FirebaseStorage.instance
+            .ref() //access root clould strage
+            .child('user_image') //sub folder
+            .child('user_image_default.png'); //filename
+// print(ref.path);
+//         await ref
+//             .putFile(_imageFile)
+//             .onComplete;
+// print('before get url');
+        final url = await ref.getDownloadURL();
 
         await FirebaseFirestore.instance
             .collection('users')
@@ -50,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
             .set({
           'username': username,
           'email': email,
-          // 'image_url':url,
+          'image_url':url,
         });
       }
     } catch (err) {
@@ -119,7 +125,7 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: AuthForm(_submitAuthForm, _signInWithGoogle, _isLoading),
     );
