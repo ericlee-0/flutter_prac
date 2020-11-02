@@ -56,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
             .set({
           'username': username,
           'email': email,
-          'image_url':url,
+          'image_url': url,
         });
       }
     } catch (err) {
@@ -96,13 +96,20 @@ class _AuthPageState extends State<AuthPage> {
       // User currentUser = await _auth.currentUser();
       User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
+
+      final ref = FirebaseStorage.instance
+          .ref() //access root clould strage
+          .child('user_image') //sub folder
+          .child('user_image_default.png'); //filename
+      final url = await ref.getDownloadURL();
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .set({
         'username': currentUser.displayName,
         'email': currentUser.email,
-        // 'image_url':url,
+        'image_url': url,
       });
       // model.state = ViewState.Idle;
       // print("User Name: ${_user.displayName}");

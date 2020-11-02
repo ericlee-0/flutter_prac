@@ -1,3 +1,4 @@
+import 'package:chat_waiting_trinity/pages/chat/user_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import './pages/chat/chat_room_list_page.dart';
 import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
+import './pages/chat/user_list_page.dart';
 import './widgets/chat/user_profile_image_picker.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,16 +29,16 @@ class _MyAppState extends State<MyApp> {
     // TODO: implement initState
     super.initState();
     _userId = '';
-    
   }
-  String _getUserId(){
+
+  String _getUserId() {
     var user = FirebaseAuth.instance.currentUser;
-          // setState(() {
-          //   _userId = user.uid;
-          // });
-          return user.uid;
+    // setState(() {
+    //   _userId = user.uid;
+    // });
+    return user.uid;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,23 +56,27 @@ class _MyAppState extends State<MyApp> {
             )),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: StreamBuilder(stream: FirebaseAuth.instance.authStateChanges(),builder: (ctx, userSnapshot){
-        if(userSnapshot.connectionState == ConnectionState.waiting){
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if(userSnapshot.hasData){
-          
-          // print(user.uid);
-          return ChatRoomListPage();
-        }
-        return AuthPage();
-      }),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (userSnapshot.hasData) {
+              // print(user.uid);
+              return ChatRoomListPage();
+            }
+            return AuthPage();
+          }),
       routes: {
-              UserProfileEditPage.routeName:(ctx)=>UserProfileEditPage(_getUserId()),
-              // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
-            },
+        UserProfileEditPage.routeName: (ctx) =>
+            UserProfileEditPage(_getUserId()),
+        UserListPage.routeName: (ctx) => UserListPage(),
+        ChatRoomListPage.routeName:(ctx) => ChatRoomListPage(),
+        // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+      },
     );
   }
 }

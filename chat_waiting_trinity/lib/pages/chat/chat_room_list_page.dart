@@ -1,9 +1,25 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './user_profile_edit_page.dart';
-import '../../widgets/chat/user_profile_image_picker.dart';
+import './user_list_page.dart';
 
-class ChatRoomListPage extends StatelessWidget {
+class ChatRoomListPage extends StatefulWidget {
+  static const routeName = '/chat-room-list';
+  @override
+  _ChatRoomListPageState createState() => _ChatRoomListPageState();
+}
+
+class _ChatRoomListPageState extends State<ChatRoomListPage> {
+  int _currentBottomNavigationIndex = 1;
+
+void _bottomNavigation(int index){
+
+  if(index == 0){
+    Navigator.of(context).pushReplacementNamed(UserListPage.routeName);
+  }
+
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,6 +90,25 @@ class ChatRoomListPage extends StatelessWidget {
       ),
       body: Container(
         child: Text('Chat Room List'),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Users',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble),
+            label: 'Chats',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.more_horiz),
+            label: 'Etc',
+          ),
+        ],
+        currentIndex: _currentBottomNavigationIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _bottomNavigation,
       ),
     );
   }
