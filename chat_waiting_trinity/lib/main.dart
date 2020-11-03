@@ -8,6 +8,7 @@ import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
 import './pages/chat/user_list_page.dart';
 import './widgets/chat/user_profile_image_picker.dart';
+import './pages/chat/char_room_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,10 +72,12 @@ class _MyAppState extends State<MyApp> {
             return AuthPage();
           }),
       routes: {
+        // '/': (ctx) => ,
         UserProfileEditPage.routeName: (ctx) =>
             UserProfileEditPage(_getUserId()),
         UserListPage.routeName: (ctx) => UserListPage(),
         ChatRoomListPage.routeName:(ctx) => ChatRoomListPage(),
+        ChatRoomPage.routeName:(ctx) => ChatRoomPage(),
         // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
       },
     );

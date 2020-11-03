@@ -33,7 +33,7 @@ class _UserListPageState extends State<UserListPage> {
               );
             }
             final userData = snapshot.data.documents;
-            print('streambuilder: ${userData.length}');
+            // print('streambuilder: ${userData.length}');
             return SingleChildScrollView(
               child: SizedBox(
                 // height: 500,
@@ -41,7 +41,7 @@ class _UserListPageState extends State<UserListPage> {
                   children: [ListTile(title:Text('Current User Box')),
                     ListView.builder(
                       shrinkWrap: true,
-                      itemCount: 3,
+                      itemCount: userData.length,
                       itemBuilder: (ctx, index) => ListTile(
                         // title:Text('User ${userData[index].documentID}'),
                         key: ValueKey(userData[index].documentID),
