@@ -1,4 +1,5 @@
 import 'package:chat_waiting_trinity/pages/chat/user_list_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +9,8 @@ import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
 import './pages/chat/user_list_page.dart';
 import './widgets/chat/user_profile_image_picker.dart';
-import './pages/chat/char_room_page.dart';
+import 'pages/chat/chat_room_page.dart';
+import './pages/chat/user_profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +80,7 @@ class _MyAppState extends State<MyApp> {
         UserListPage.routeName: (ctx) => UserListPage(),
         ChatRoomListPage.routeName:(ctx) => ChatRoomListPage(),
         ChatRoomPage.routeName:(ctx) => ChatRoomPage(),
+        UserProfilePage.routeName:(ctx) => UserProfilePage(),
         // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
       },
     );

@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './user_profile_edit_page.dart';
 import './user_list_page.dart';
-import './char_room_page.dart';
+import 'chat_room_page.dart';
 import 'package:intl/intl.dart';
 
 
@@ -17,6 +17,7 @@ class ChatRoomListPage extends StatefulWidget {
 
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   int _currentBottomNavigationIndex = 1;
+  final _user = FirebaseAuth.instance.currentUser;
 
 void _bottomNavigation(int index){
 
@@ -24,11 +25,12 @@ void _bottomNavigation(int index){
     Navigator.of(context).pushReplacementNamed(UserListPage.routeName);
   }
 if(index == 2){
-    Navigator.of(context).pushReplacementNamed(ChatRoomPage.routeName);
+    Navigator.of(context).pushNamed(ChatRoomPage.routeName);
   }
 }
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat'),
@@ -98,7 +100,7 @@ if(index == 2){
       ),
       body: StreamBuilder(
           // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
-          stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').orderBy('lastMessageCreatedAt').snapshots(),
+          stream: FirebaseFirestore.instance.collection('users').doc(_user.uid).collection('chatRooms').orderBy('lastMessageCreatedAt').snapshots(),
           builder: (ctx, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -116,11 +118,11 @@ if(index == 2){
                       itemBuilder: (ctx, index) => ListTile(
                         // title:Text('chats chatData'),
                         key: ValueKey(chatRoomListData[index].documentID),
-                        title: Text(chatRoomListData[index]['firstUserName']),
+                        title: Text(chatRoomListData[index]['chatUserName']),
                         subtitle: Text(chatRoomListData[index]['lastMessage']),
                         leading: CircleAvatar(
                           backgroundImage:
-                              NetworkImage(chatRoomListData[index]['firstUserImageUrl']),
+                              NetworkImage(chatRoomListData[index]['chatUserImageUrl']),
                           radius: 25,
                         ),
                         trailing: Text(DateFormat.yMMMd().format(chatRoomListData[index]['lastMessageCreatedAt'].toDate())),

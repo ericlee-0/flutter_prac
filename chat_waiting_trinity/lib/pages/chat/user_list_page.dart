@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './chat_room_list_page.dart';
+import './user_profile_page.dart';
 
 class UserListPage extends StatefulWidget {
   static const routeName = '/user-list-page';
@@ -25,7 +26,10 @@ class _UserListPageState extends State<UserListPage> {
         title: Text('User List'),
       ),
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users').orderBy('username', descending: true ).snapshots(),
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .orderBy('username', descending: true)
+              .snapshots(),
           builder: (ctx, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -38,7 +42,8 @@ class _UserListPageState extends State<UserListPage> {
               child: SizedBox(
                 // height: 500,
                 child: Column(
-                  children: [ListTile(title:Text('Current User Box')),
+                  children: [
+                    ListTile(title: Text('Current User Box')),
                     ListView.builder(
                       shrinkWrap: true,
                       itemCount: userData.length,
@@ -52,6 +57,13 @@ class _UserListPageState extends State<UserListPage> {
                           radius: 25,
                         ),
                         onTap: () {
+                          Navigator.pushNamed(
+                              context, UserProfilePage.routeName,
+                              arguments: {
+                                'chatUserId':userData[index].documentID,
+                                'chatUserName':userData[index]['username'],
+                                'chatUserImageUrl':userData[index]['image_url'],
+                              });
                           print(userData[index].documentID);
                         },
                       ),
