@@ -12,6 +12,27 @@ class ChatRoomController {
   static ChatRoomController get instance => ChatRoomController();
   final _user = FirebaseAuth.instance.currentUser;
 
+  Future<void> chatContinue(
+      BuildContext context, Map<String,dynamic> chatUserInfo) async {
+    final userSelfData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_user.uid)
+        .get();
+    Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
+      'chatRoomId': chatUserInfo['chatRoomId'],
+      'chatRoomType': chatUserInfo['chatRoomType'],
+      'chatUserId': chatUserInfo['chatUserId'],
+      'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
+      'chatUserName': chatUserInfo['chatUserName'],
+      'userSelfId': _user.uid,
+      'userSelfImageUrl': userSelfData['image_url'],
+      'userSelfName': userSelfData['username'],
+      // 'chatUserImageUrl':userData[index]['image_url'],
+    });
+
+    return;
+  }
+
   Future<void> chat1on1(
       BuildContext context, Map<String, dynamic> chatUserInfo) async {
     // print(userIds.contains('otherUserId'));
