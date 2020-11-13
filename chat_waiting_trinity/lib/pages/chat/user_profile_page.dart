@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../controllers/chat_room_controller.dart';
+import './user_profile_edit_page.dart';
 
 class UserProfilePage extends StatelessWidget {
   static const routeName = '/user-profile-page';
@@ -26,6 +27,14 @@ class UserProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.all(28.0),
                   child: Text(args['chatUserName']),
                 ),
+                currentUser.uid == args['chatUserId'] ? RaisedButton(
+                  child: Text('Edit Profile'),
+                  onPressed: () {
+                    // print(args[0]);
+                    print(currentUser.uid);
+                    Navigator.of(context)
+                      .pushNamed(UserProfileEditPage.routeName);
+                  },):
                 RaisedButton(
                   child: Text('Start chat 1 on 1'),
                   onPressed: () {

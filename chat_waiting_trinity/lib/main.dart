@@ -1,5 +1,6 @@
 import 'package:chat_waiting_trinity/pages/chat/user_list_page.dart';
 
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +12,7 @@ import './pages/chat/user_list_page.dart';
 import './widgets/chat/user_profile_image_picker.dart';
 import 'pages/chat/chat_room_page.dart';
 import './pages/chat/user_profile_page.dart';
+import './providers/auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,45 +46,54 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat_Wainting_Trinity',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        backgroundColor: Colors.green,
-        accentColor: Colors.deepPurple,
-        accentColorBrightness: Brightness.dark,
-        buttonTheme: ButtonTheme.of(context).copyWith(
-            buttonColor: Colors.pink,
-            textTheme: ButtonTextTheme.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            )),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (ctx) => Auth(),
+        ),
+        // StreamProvider<User>.value(value: FirebaseAuth.instance.authStateChanges()),
+      ],
+      child: MaterialApp(
+        title: 'Chat_Wainting_Trinity',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          backgroundColor: Colors.green,
+          accentColor: Colors.deepPurple,
+          accentColorBrightness: Brightness.dark,
+          buttonTheme: ButtonTheme.of(context).copyWith(
+              buttonColor: Colors.pink,
+              textTheme: ButtonTextTheme.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              )),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: StreamBuilder(
+            stream: Auth.instance.authState,
+            // stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (ctx, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (userSnapshot.hasData) {
+                // print(user.uid);
+                return ChatRoomListPage();
+              }
+              return AuthPage();
+            }),
+        routes: {
+          // '/': (ctx) => ,
+          UserProfileEditPage.routeName: (ctx) =>
+              UserProfileEditPage(Auth.instance.userId),
+          UserListPage.routeName: (ctx) => UserListPage(),
+          ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
+          ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+          UserProfilePage.routeName: (ctx) => UserProfilePage(),
+          // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+        },
       ),
-      home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (ctx, userSnapshot) {
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (userSnapshot.hasData) {
-              // print(user.uid);
-              return ChatRoomListPage();
-            }
-            return AuthPage();
-          }),
-      routes: {
-        // '/': (ctx) => ,
-        UserProfileEditPage.routeName: (ctx) =>
-            UserProfileEditPage(_getUserId()),
-        UserListPage.routeName: (ctx) => UserListPage(),
-        ChatRoomListPage.routeName:(ctx) => ChatRoomListPage(),
-        ChatRoomPage.routeName:(ctx) => ChatRoomPage(),
-        UserProfilePage.routeName:(ctx) => UserProfilePage(),
-        // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
-      },
     );
   }
 }

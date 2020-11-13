@@ -8,6 +8,8 @@ import './user_profile_edit_page.dart';
 import './user_list_page.dart';
 import 'chat_room_page.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth.dart';
 
 class ChatRoomListPage extends StatefulWidget {
   static const routeName = '/chat-room-list';
@@ -30,6 +32,9 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final getAuth = Provider.of<Auth>(context, listen:false).userId;
+    final getAuthState = Provider.of<Auth>(context, listen:false).authState;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat'),
@@ -92,6 +97,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
                   FirebaseAuth.instance.signOut();
                   Navigator.of(context).pushNamed('/');
                 } else if (itemIdentifier == 'test') {
+                  print(getAuthState);
                   // Navigator.of(context).pushNamed(UserProfileImagePicker.routeName);
                 }
               })
