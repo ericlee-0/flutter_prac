@@ -1,4 +1,5 @@
-import 'package:chat_waiting_trinity/pages/chat/user_list_page.dart';
+import './pages/chat/user_list_page.dart';
+import './widgets/waiting/waiting_list.dart';
 
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import './widgets/chat/user_profile_image_picker.dart';
 import 'pages/chat/chat_room_page.dart';
 import './pages/chat/user_profile_page.dart';
 import './providers/auth.dart';
+import './pages/waiting/join_waiting_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,21 +70,22 @@ class _MyAppState extends State<MyApp> {
               )),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: StreamBuilder(
-            stream: Auth.instance.authState,
-            // stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (ctx, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (userSnapshot.hasData) {
-                // print(user.uid);
-                return ChatRoomListPage();
-              }
-              return AuthPage();
-            }),
+        home: MyHomePage(),
+        // StreamBuilder(
+        //     stream: Auth.instance.authState,
+        //     // stream: FirebaseAuth.instance.authStateChanges(),
+        //     builder: (ctx, userSnapshot) {
+        //       if (userSnapshot.connectionState == ConnectionState.waiting) {
+        //         return Center(
+        //           child: CircularProgressIndicator(),
+        //         );
+        //       }
+        //       if (userSnapshot.hasData) {
+        //         // print(user.uid);
+        //         return ChatRoomListPage();
+        //       }
+        //       return AuthPage();
+        //     }),
         routes: {
           // '/': (ctx) => ,
           UserProfileEditPage.routeName: (ctx) =>
@@ -92,6 +95,7 @@ class _MyAppState extends State<MyApp> {
           ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
           UserProfilePage.routeName: (ctx) => UserProfilePage(),
           // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+          // WaitingListPage.routeName: (ctx) => WaitingListPage()
         },
       ),
     );
@@ -116,69 +120,77 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+enum SelectPage { home, waiting, chat }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class _MyHomePageState extends State<MyHomePage> {
+  var _selectedPage;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _selectedPage = SelectPage.home;
   }
+
+  Widget _mainPage() {
+    
+      
+    if(_selectedPage == SelectPage.waiting){
+      return JoinWaitingPage();
+    }
+    if(_selectedPage == SelectPage.chat){
+      return StreamBuilder(
+            stream: Auth.instance.authState,
+            // stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (ctx, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (userSnapshot.hasData) {
+                // print(user.uid);
+                return ChatRoomListPage();
+              }
+              return AuthPage();
+            });
+    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Current Waiting List'),
+      ),
+      body: WaitingList(),
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  _selectedPage = SelectPage.waiting;
+                });
+              },
+              tooltip: 'Join Waiting List',
+              child: Icon(Icons.add),
+            ),
+            FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedPage = SelectPage.chat;
+                  });
+                },
+                tooltip: 'Chat',
+                child: Icon(Icons.chat)),
+          ],
+        ),
+      );
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+   
+    return _mainPage(); 
+    
   }
 }
