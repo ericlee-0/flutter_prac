@@ -15,6 +15,7 @@ import 'pages/chat/chat_room_page.dart';
 import './pages/chat/user_profile_page.dart';
 import './providers/auth.dart';
 import './pages/waiting/join_waiting_page.dart';
+import './widgets/waiting/waiting_list_drawer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -124,12 +125,18 @@ enum SelectPage { home, waiting, chat }
 
 class _MyHomePageState extends State<MyHomePage> {
   var _selectedPage;
+  String _selectList='active';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _selectedPage = SelectPage.home;
+  }
+  void _selectListOption(String selected) {
+    setState(() {
+      _selectList = selected;
+    });
   }
 
   Widget _mainPage() {
@@ -156,10 +163,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Current Waiting List'),
+        
       ),
+      drawer:WaitingListDrawer(_selectListOption),
       body: Container(child: 
       
-        WaitingList(),
+        WaitingList(_selectList),
        
       ),
       floatingActionButton: Row(

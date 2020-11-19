@@ -37,12 +37,19 @@ class JoinWaitingController {
     // print('joinController $reserveAt');
     // final diff = now.difference(reserveAt);
     // var selectedStatus;
+    List<dynamic> status;
     try {
+      final docRef = await FirebaseFirestore.instance
+      .doc(docpath).get();
+
+      status = docRef.data()['waitingStatus'];
+      status.add(selectedStatus);
       await FirebaseFirestore.instance
           // .collection('waiting')
           .doc(docpath)
           .update({
-        'waitingStatus': FieldValue.arrayUnion([selectedStatus])
+        // 'waitingStatus': FieldValue.arrayUnion([selectedStatus])
+        'waitingStatus':status
       });
       // print(docpath);
       // print(selectedStatus);

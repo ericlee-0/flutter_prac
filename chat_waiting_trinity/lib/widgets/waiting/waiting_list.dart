@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/join_waiting_controller.dart';
+import '../../controllers/waiting_list_controller.dart';
 
 class WaitingList extends StatefulWidget {
+  final String listOption;
+  WaitingList(this.listOption);
   // static final routeName = '/waiting-list';
   @override
   _WaitingListState createState() => _WaitingListState();
@@ -64,6 +67,22 @@ class _WaitingListState extends State<WaitingList> {
     return Text(time);
   }
 
+  List<QueryDocumentSnapshot> _listData(dynamic data) {
+    if (widget.listOption == 'pending') {
+      return WaitingListController.instance.getPendingList(data);
+    }
+    if (widget.listOption == 'waiting') {
+      return WaitingListController.instance.getPendingList(data);
+    }
+    if (widget.listOption == 'checkedIn') {
+      return WaitingListController.instance.getCheckedInList(data);
+    }
+    if (widget.listOption == 'done') {
+      return WaitingListController.instance.getDoneList(data);
+    }
+    return WaitingListController.instance.getActiveList(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -71,7 +90,9 @@ class _WaitingListState extends State<WaitingList> {
           .collection('waiting')
           .doc(_docId)
           .collection('list')
-          // .orderBy('forWhen', descending: true)
+          .orderBy('reserveAt', descending: true)
+          // .where('waitingStatus', whereIn: ['pending','waiting','checkedIn'])
+          // .where('phone', isEqualTo: '3334445555')
           .snapshots(),
       builder: (ctx, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -79,9 +100,9 @@ class _WaitingListState extends State<WaitingList> {
             child: CircularProgressIndicator(),
           );
         }
-        final waitingData = snapshot.data.documents;
+        var waitingData = snapshot.data.documents;
         print('streambuilder: ${waitingData.length}');
-
+        waitingData = _listData(waitingData);
         return ListView.builder(
           shrinkWrap: true,
           itemCount: waitingData.length,
@@ -194,7 +215,6 @@ class _WaitingListState extends State<WaitingList> {
                 ),
                 onTap: () {
                   print(waitingData[index].documentID);
-                  
                 },
               ),
             ],
