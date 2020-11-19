@@ -80,129 +80,113 @@ class _WaitingListState extends State<WaitingList> {
         }
         final waitingData = snapshot.data.documents;
         print('streambuilder: ${waitingData.length}');
-        return SingleChildScrollView(
-          child: Container(
-           
-              child: Column(
-                children: [
-                  // ListTile(title: Text('Current waiting ')),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: waitingData.length,
-                    itemBuilder: (ctx, index) => ExpansionTile(
-                      // title:Text('User ${userData[index].documentID}'),
-                      key: ValueKey(waitingData[index].documentID.toString()),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: waitingData.length,
+          itemBuilder: (ctx, index) => ExpansionTile(
+            // title:Text('User ${userData[index].documentID}'),
+            key: ValueKey(waitingData[index].documentID.toString()),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(waitingData[index]['name'],
+                    style:
+                        TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                // Text(DateFormat('HH:MM')
+                //     .format(waitingData[index]['reserveAt'].toDate())),
+                _waitingTime(waitingData[index]['reserveAt']),
+              ],
+            ),
+            leading: CircleAvatar(
+              child: Text(waitingData[index]['people'].toString()),
+              radius: 25,
+            ),
+            trailing: Text(
+              _guestStatus,
+              style: TextStyle(backgroundColor: Colors.blueAccent),
+            ),
+            children: [
+              ListTile(
+                // title: Text('Guest Info'),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(waitingData[index]['name'],
-                              style: TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.bold)),
-                          // Text(DateFormat('HH:MM')
-                          //     .format(waitingData[index]['reserveAt'].toDate())),
-                          _waitingTime(waitingData[index]['reserveAt']),
+                          Text('Reservation# :' +
+                              waitingData[index]['reservationNumber']
+                                  .toString()),
+                          Text(
+                            'Request time is ' +
+                                waitingData[index]['reserveAt'].substring(
+                                    waitingData[index]['reserveAt'].length - 5),
+                          ),
+                          Text('Phone#: ' + waitingData[index]['phone']),
+                          Text('Reserved at ' +
+                              waitingData[index]['createdAt']
+                                  .toDate()
+                                  .toString()),
                         ],
                       ),
-                      leading: CircleAvatar(
-                        child: Text(waitingData[index]['people'].toString()),
-                        radius: 25,
-                      ),
-                      trailing: Text(
-                        _guestStatus,
-                        style: TextStyle(backgroundColor: Colors.blueAccent),
-                      ),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        ListTile(
-                          // title: Text('Guest Info'),
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Reservation# :' +
-                                        waitingData[index]['reservationNumber']
-                                            .toString()),
-                                    Text(
-                                      'Request time is ' +
-                                          waitingData[index]['reserveAt']
-                                              .substring(waitingData[index]
-                                                          ['reserveAt']
-                                                      .length -
-                                                  5),
-                                    ),
-                                    Text(
-                                        'Phone#: ' + waitingData[index]['phone']),
-                                    Text('Reserved at ' +
-                                        waitingData[index]['createdAt']
-                                            .toDate()
-                                            .toString()),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  DropdownButton<String>(
-                                    // isExpanded: true,
-                                    key: Key('guest_status'),
-                                    value: _guestStatus,
-                                    onChanged: (String string) =>
-                                        setState(() => _guestStatus = string),
-                                    selectedItemBuilder: (BuildContext context) {
-                                      return _guestStatusList
-                                          .map<Widget>((String item) {
-                                        return Text(item);
-                                      }).toList();
-                                    },
-                                    items: _guestStatusList.map((String item) {
-                                      return DropdownMenuItem<String>(
-                                        child: SizedBox(
-                                            // width: 200.0,
-                                            child: Text('Status $item')),
-                                        value: item,
-                                      );
-                                    }).toList(),
-                                    // icon: null,
-                                  ),
-                                  DropdownButton<String>(
-                                    // isExpanded: true,
-                                    key: Key('guest_message'),
-                                    value: _guestMessage,
-                                    onChanged: (String string) =>
-                                        setState(() => _guestMessage = string),
-                                    selectedItemBuilder: (BuildContext context) {
-                                      return _guestMessageList
-                                          .map<Widget>((String item2) {
-                                        return Text(item2);
-                                      }).toList();
-                                    },
-                                    items: _guestMessageList.map((String item2) {
-                                      return DropdownMenuItem<String>(
-                                        child: SizedBox(
-                                            // width: 200.0,
-                                            child: Text('M: $item2')),
-                                        value: item2,
-                                      );
-                                    }).toList(),
-                                    // icon: null,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            print(waitingData[index].documentID);
+                        DropdownButton<String>(
+                          // isExpanded: true,
+                          key: Key('guest_status'),
+                          value: _guestStatus,
+                          onChanged: (String string) =>
+                              setState(() => _guestStatus = string),
+                          selectedItemBuilder: (BuildContext context) {
+                            return _guestStatusList.map<Widget>((String item) {
+                              return Text(item);
+                            }).toList();
                           },
+                          items: _guestStatusList.map((String item) {
+                            return DropdownMenuItem<String>(
+                              child: SizedBox(
+                                  // width: 200.0,
+                                  child: Text('Status $item')),
+                              value: item,
+                            );
+                          }).toList(),
+                          // icon: null,
+                        ),
+                        DropdownButton<String>(
+                          // isExpanded: true,
+                          key: Key('guest_message'),
+                          value: _guestMessage,
+                          onChanged: (String string) =>
+                              setState(() => _guestMessage = string),
+                          selectedItemBuilder: (BuildContext context) {
+                            return _guestMessageList
+                                .map<Widget>((String item2) {
+                              return Text(item2);
+                            }).toList();
+                          },
+                          items: _guestMessageList.map((String item2) {
+                            return DropdownMenuItem<String>(
+                              child: SizedBox(
+                                  // width: 200.0,
+                                  child: Text('M: $item2')),
+                              value: item2,
+                            );
+                          }).toList(),
+                          // icon: null,
                         ),
                       ],
                     ),
-                  ),
-                ],
-              
-            ),
+                  ],
+                ),
+                onTap: () {
+                  print(waitingData[index].documentID);
+                },
+              ),
+            ],
           ),
         );
       },

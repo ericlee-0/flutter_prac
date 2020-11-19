@@ -274,6 +274,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                         _phone = value;
                       },
                     ),
+                   
                     TextFormField(
                       key: ValueKey('guest_people'),
                       initialValue: '0',

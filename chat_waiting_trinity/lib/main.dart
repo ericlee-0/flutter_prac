@@ -133,66 +133,64 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _mainPage() {
-    
-      
-    if(_selectedPage == SelectPage.waiting){
+    if (_selectedPage == SelectPage.waiting) {
       return JoinWaitingPage();
     }
-    if(_selectedPage == SelectPage.chat){
+    if (_selectedPage == SelectPage.chat) {
       return StreamBuilder(
-            stream: Auth.instance.authState,
-            // stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (ctx, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (userSnapshot.hasData) {
-                // print(user.uid);
-                return ChatRoomListPage();
-              }
-              return AuthPage();
-            });
+          stream: Auth.instance.authState,
+          // stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (userSnapshot.hasData) {
+              // print(user.uid);
+              return ChatRoomListPage();
+            }
+            return AuthPage();
+          });
     }
     return Scaffold(
       appBar: AppBar(
         title: Text('Current Waiting List'),
       ),
-      body: WaitingList(),
-        floatingActionButton: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FloatingActionButton(
-              heroTag: "btn1",
+      body: Container(child: 
+      
+        WaitingList(),
+       
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            heroTag: "btn1",
+            onPressed: () {
+              setState(() {
+                _selectedPage = SelectPage.waiting;
+              });
+            },
+            tooltip: 'Join Waiting List',
+            child: Icon(Icons.add),
+          ),
+          FloatingActionButton(
+              heroTag: "btn2",
               onPressed: () {
                 setState(() {
-                  _selectedPage = SelectPage.waiting;
+                  _selectedPage = SelectPage.chat;
                 });
               },
-              tooltip: 'Join Waiting List',
-              child: Icon(Icons.add),
-            ),
-            FloatingActionButton(
-              heroTag: "btn2",
-                onPressed: () {
-                  setState(() {
-                    _selectedPage = SelectPage.chat;
-                  });
-                },
-                tooltip: 'Chat',
-                child: Icon(Icons.chat)),
-          ],
-        ),
-      );
+              tooltip: 'Chat',
+              child: Icon(Icons.chat)),
+        ],
+      ),
+    );
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
-   
-    return _mainPage(); 
-    
+    return _mainPage();
   }
 }
