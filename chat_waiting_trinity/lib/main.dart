@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         //       return AuthPage();
         //     }),
         routes: {
-          // '/': (ctx) => ,
+          '/home': (ctx) => MyHomePage(),
           UserProfileEditPage.routeName: (ctx) =>
               UserProfileEditPage(Auth.instance.userId),
           UserListPage.routeName: (ctx) => UserListPage(),
@@ -164,6 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             FloatingActionButton(
+              heroTag: "btn1",
               onPressed: () {
                 setState(() {
                   _selectedPage = SelectPage.waiting;
@@ -173,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Icon(Icons.add),
             ),
             FloatingActionButton(
+              heroTag: "btn2",
                 onPressed: () {
                   setState(() {
                     _selectedPage = SelectPage.chat;
