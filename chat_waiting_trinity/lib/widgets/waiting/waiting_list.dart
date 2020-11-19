@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../../controllers/join_waiting_controller.dart';
 
 class WaitingList extends StatefulWidget {
   // static final routeName = '/waiting-list';
@@ -14,9 +15,9 @@ class _WaitingListState extends State<WaitingList> {
   var _guestMessage = 'no message sent';
   final List<String> _guestStatusList = <String>[
     'pending',
-    'checked-in',
-    'seated',
-    'removed'
+    'waiting',
+    'checkedIn',
+    'done',
   ];
   final List<String> _guestMessageList = <String>[
     'no message sent',
@@ -26,12 +27,12 @@ class _WaitingListState extends State<WaitingList> {
     'reservation cancelled'
   ];
 
-  Widget _waitingTime(String reservAt) {
+  Widget _waitingTime(Timestamp reservAt) {
     var now = DateTime.now();
     // var date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    DateTime dataTime = DateFormat('yyyy/MM/dd HH:mm').parse(reservAt);
+    DateTime dataTime = reservAt.toDate();
     var diff = now.difference(dataTime);
-    print(diff);
+    // print(diff);
     var time = '';
 
     if (diff.inSeconds <= 0 ||
@@ -80,6 +81,7 @@ class _WaitingListState extends State<WaitingList> {
         }
         final waitingData = snapshot.data.documents;
         print('streambuilder: ${waitingData.length}');
+
         return ListView.builder(
           shrinkWrap: true,
           itemCount: waitingData.length,
@@ -102,8 +104,9 @@ class _WaitingListState extends State<WaitingList> {
               radius: 25,
             ),
             trailing: Text(
-              _guestStatus,
-              style: TextStyle(backgroundColor: Colors.blueAccent),
+              waitingData[index]['waitingStatus'].last,
+              style: TextStyle(
+                  backgroundColor: Colors.blueAccent, color: Colors.blue[50]),
             ),
             children: [
               ListTile(
@@ -120,8 +123,8 @@ class _WaitingListState extends State<WaitingList> {
                                   .toString()),
                           Text(
                             'Request time is ' +
-                                waitingData[index]['reserveAt'].substring(
-                                    waitingData[index]['reserveAt'].length - 5),
+                                DateFormat('HH:mm').format(
+                                    waitingData[index]['reserveAt'].toDate()),
                           ),
                           Text('Phone#: ' + waitingData[index]['phone']),
                           Text('Reserved at ' +
@@ -139,10 +142,17 @@ class _WaitingListState extends State<WaitingList> {
                           // isExpanded: true,
                           key: Key('guest_status'),
                           value: _guestStatus,
-                          onChanged: (String string) =>
-                              setState(() => _guestStatus = string),
+                          onChanged: (String string) {
+                            JoinWaitingController.instance.setStatus(
+                                waitingData[index].reference.path, string);
+                            print('onchange string $string');
+                            // print(waitingData[index].reference.path);
+                            setState(() => _guestStatus = string);
+                          },
+
                           selectedItemBuilder: (BuildContext context) {
                             return _guestStatusList.map<Widget>((String item) {
+                              // print('serlectedItembuilder $item');
                               return Text(item);
                             }).toList();
                           },
@@ -150,7 +160,7 @@ class _WaitingListState extends State<WaitingList> {
                             return DropdownMenuItem<String>(
                               child: SizedBox(
                                   // width: 200.0,
-                                  child: Text('Status $item')),
+                                  child: Text('S: $item')),
                               value: item,
                             );
                           }).toList(),
@@ -184,6 +194,7 @@ class _WaitingListState extends State<WaitingList> {
                 ),
                 onTap: () {
                   print(waitingData[index].documentID);
+                  
                 },
               ),
             ],

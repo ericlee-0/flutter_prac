@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../controllers/join_waiting_controller.dart';
 
 class JoinWaitingPage extends StatefulWidget {
   @override
@@ -14,7 +15,8 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   var _name = '';
   var _phone = '';
   var _people = '';
-  String _reserveAt;
+  DateTime _reserveAt;
+  String _waitingStatus;
   // String _reserveDate;
   // String _reserveTime;
   var _isLoading = false;
@@ -43,12 +45,15 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                 onPressed: () {
                   setState(() {
                     _selectedReserveTime = SelectTime.nowPick;
+                    _waitingStatus =
+                        JoinWaitingController.instance.defaultStatus;
                   });
                   print(_selectedReserveTime);
 
                   // setState(() {
-                    // _reserveAt = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.now());
-                    _reserveAtController.text = _roundUpTime(DateTime.now());
+                  // _reserveAt = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.now());
+                  _reserveAtController.text = _roundUpTime(DateTime.now());
+
                   // });
                   Navigator.of(context).pop();
                 },
@@ -81,12 +86,18 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     );
   }
 
-  String _roundUpTime(DateTime dt){
-    DateTime roundUpTime =
-          dt.add(Duration(minutes: (5 - dt.minute % 5)));
-        
-    return DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);
+  String _roundUpTime(DateTime dt) {
+    DateTime roundUpTime = dt.add(Duration(minutes: (5 - dt.minute % 5)));
+    _reserveAt = roundUpTime;
+    if (_selectedReserveTime != SelectTime.nowPick) {
+      JoinWaitingController.instance
+          .getStatus(roundUpTime)
+          .then((String value) {
+        _waitingStatus = value;
+      });
+    }
 
+    return DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);
   }
 
   bool _timePassed(String pickedTime) {
@@ -97,13 +108,11 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     final earlier = now.subtract(const Duration(minutes: 5));
     // final earlierFormatted = DateFormat('yyyy/MM/dd HH:mm').format(now);
     // print(pickedTime);
-    final passed = 
-        earlier.isBefore(picked);
+    final passed = earlier.isBefore(picked);
     // print(pickedTime);
     print('earllier: $earlier');
     print(passed);
-    final diff =
-        now.difference(picked);
+    final diff = now.difference(picked);
     print(diff);
 
     return passed;
@@ -166,8 +175,9 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
       //   _reserveAt = DateTime(selectedDate.year, selectedDate.month,
       //       selectedDate.day, selectedTime.hour, selectedTime.minute);
 
-        // _reserveAtController.text = DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);;
-        _reserveAtController.text = _roundUpTime(resultTime);
+      // _reserveAtController.text = DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);;
+      _reserveAtController.text = _roundUpTime(resultTime);
+
       // });
       // print(_reserveAt);
     } catch (e) {
@@ -182,7 +192,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
       _formKey.currentState.save();
       // final docId = _reserveAt.substring(0,10);
       // final docId = DateFormat('yyyy/MM/dd').format(DateTime.now());
-      final docId = DateFormat("yyyy/MM/dd").format(DateFormat('yyyy/MM/dd HH:mm').parse(_reserveAt));
+      final docId = DateFormat("yyyy/MM/dd").format(_reserveAt);
       // final docId = '2020/11/18';
       print(docId);
 
@@ -195,6 +205,10 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 
         if (docSnap.docs.length == 0) {
           reservationNumber = 1;
+          await FirebaseFirestore.instance
+              .collection('waiting')
+              .doc(docId)
+              .set({'currentWaitingTime': 0});
         } else {
           reservationNumber = docSnap.docs.length + 1;
         }
@@ -208,7 +222,8 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
           'people': _people,
           'phone': _phone,
           'reserveAt': _reserveAt,
-          'reservationNumber': reservationNumber
+          'reservationNumber': reservationNumber,
+          'waitingStatus': [_waitingStatus]
         });
       } catch (e) {
         print(e);
@@ -274,7 +289,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                         _phone = value;
                       },
                     ),
-                   
+
                     TextFormField(
                       key: ValueKey('guest_people'),
                       initialValue: '0',
@@ -314,7 +329,9 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                       ),
                       // obscureText: true,
                       onSaved: (value) {
-                       _reserveAt = value;
+                        // _reserveAt =
+                        //     DateFormat('yyyy/MM/dd HH:mm').parse(value);
+                        // JoinWaitingController.instance.getStatus(_reserveAt).then((String value) { _waitingStatus = value; });
                       },
                       onTap: _showMyDialog,
                     ),
