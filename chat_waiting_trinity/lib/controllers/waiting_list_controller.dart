@@ -6,7 +6,7 @@ class WaitingListController {
 
   List<QueryDocumentSnapshot> getWaitingList (List<QueryDocumentSnapshot> data){
     List<QueryDocumentSnapshot> result=[];
-    data.map((e) { if( e['waitingStatus'].last == 'waiting'){
+    data.map((e) { if( e['waitingStatus'] == 'waiting'){
       result.add(e);
     }}).toList();
     // print('id : ${result[0].id} path: ${result[0].reference.path}');
@@ -14,7 +14,7 @@ class WaitingListController {
   }
    List<QueryDocumentSnapshot> getPendingList (List<QueryDocumentSnapshot> data){
     List<QueryDocumentSnapshot> result=[];
-    data.map((e) { if( e['waitingStatus'].last == 'pending'){
+    data.map((e) { if( e['waitingStatus'] == 'pending'){
       result.add(e);
     }}).toList();
     // print('id : ${result[0].id} path: ${result[0].reference.path}');
@@ -22,7 +22,7 @@ class WaitingListController {
   }
    List<QueryDocumentSnapshot> getCheckedInList (List<QueryDocumentSnapshot> data){
     List<QueryDocumentSnapshot> result=[];
-    data.map((e) { if( e['waitingStatus'].last == 'checkedIn'){
+    data.map((e) { if( e['waitingStatus'] == 'checkedIn'){
       result.add(e);
     }}).toList();
     // print('id : ${result[0].id} path: ${result[0].reference.path}');
@@ -30,7 +30,7 @@ class WaitingListController {
   }
    List<QueryDocumentSnapshot> getDoneList (List<QueryDocumentSnapshot> data){
     List<QueryDocumentSnapshot> result=[];
-    data.map((e) { if( e['waitingStatus'].last == 'done'){
+    data.map((e) { if( e['waitingStatus'] == 'done'){
       result.add(e);
     }}).toList();
     // print('id : ${result[0].id} path: ${result[0].reference.path}');
@@ -38,7 +38,7 @@ class WaitingListController {
   }
    List<QueryDocumentSnapshot> getActiveList (List<QueryDocumentSnapshot> data){
     List<QueryDocumentSnapshot> result=[];
-    data.map((e) { if( e['waitingStatus'].last != 'done' && e['waitingStatus'].last !='pending'){
+    data.map((e) { if( e['waitingStatus'] != 'done' && e['waitingStatus'] !='pending'){
       result.add(e);
     }}).toList();
     // print('id : ${result[0].id} path: ${result[0].reference.path}');

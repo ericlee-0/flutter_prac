@@ -10,7 +10,7 @@ class WaitingListDrawer extends StatelessWidget {
         children: [
           AppBar(
             title: Text('Select list option'),
-            automaticallyImplyLeading: false,
+            // automaticallyImplyLeading: false,
           ),
           Divider(),
           ListTile(

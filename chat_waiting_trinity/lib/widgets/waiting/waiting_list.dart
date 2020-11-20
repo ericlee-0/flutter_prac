@@ -38,8 +38,9 @@ class _WaitingListState extends State<WaitingList> {
     // print(diff);
     var time = '';
 
-    if (diff.inSeconds <= 0 ||
-        diff.inSeconds > 0 && diff.inMinutes == 0 ||
+    if (diff.inSeconds <= 0) {
+      time = DateFormat('HH:mm').format(reservAt.toDate());
+    } else if (diff.inSeconds > 0 && diff.inMinutes == 0 ||
         diff.inMinutes > 0 && diff.inHours == 0 ||
         diff.inHours > 0 && diff.inDays == 0) {
       if (diff.inHours > 0) {
@@ -90,7 +91,7 @@ class _WaitingListState extends State<WaitingList> {
           .collection('waiting')
           .doc(_docId)
           .collection('list')
-          .orderBy('reserveAt', descending: true)
+          .orderBy('reserveAt')
           // .where('waitingStatus', whereIn: ['pending','waiting','checkedIn'])
           // .where('phone', isEqualTo: '3334445555')
           .snapshots(),
@@ -125,7 +126,7 @@ class _WaitingListState extends State<WaitingList> {
               radius: 25,
             ),
             trailing: Text(
-              waitingData[index]['waitingStatus'].last,
+              waitingData[index]['waitingStatus'],
               style: TextStyle(
                   backgroundColor: Colors.blueAccent, color: Colors.blue[50]),
             ),
@@ -171,12 +172,12 @@ class _WaitingListState extends State<WaitingList> {
                             setState(() => _guestStatus = string);
                           },
 
-                          selectedItemBuilder: (BuildContext context) {
-                            return _guestStatusList.map<Widget>((String item) {
-                              // print('serlectedItembuilder $item');
-                              return Text(item);
-                            }).toList();
-                          },
+                          // selectedItemBuilder: (BuildContext context) {
+                          //   return _guestStatusList.map<Widget>((String item) {
+                          //     print('serlectedItembuilder $item');
+                          //     return Text(item);
+                          //   }).toList();
+                          // },
                           items: _guestStatusList.map((String item) {
                             return DropdownMenuItem<String>(
                               child: SizedBox(

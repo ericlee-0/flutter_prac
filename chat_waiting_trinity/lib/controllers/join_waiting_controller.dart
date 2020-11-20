@@ -15,21 +15,18 @@ class JoinWaitingController {
   Future<String> getStatus(DateTime reserveAt) async {
     final now = DateTime.now();
     print('joinController $reserveAt');
-    final diff = now.difference(reserveAt);
+    final diff = reserveAt.difference(now);
 
     final docRef = await FirebaseFirestore.instance
         .collection('waiting')
         .doc(DateFormat('yyyy/MM/dd').format(now))
         .get();
-    // print(diff);
-    final currentWaingTime = docRef.data()['currentWaitingTime'];
-    if(diff.inMinutes < (currentWaingTime + 5)){
-      return SelectWaitngStatus.pending.toString().split('.').last;
-    }
+    print('get statsu diff minute${diff.inMinutes}');
+    final currentWaitngTime = docRef.data()['currentWaitingTime'];
+    if (diff.inMinutes < (currentWaitngTime)) {
       return SelectWaitngStatus.waiting.toString().split('.').last;
-    
-
-    
+    }
+    return SelectWaitngStatus.pending.toString().split('.').last;
   }
 
   Future<void> setStatus(String docpath, String selectedStatus) async {
@@ -37,19 +34,19 @@ class JoinWaitingController {
     // print('joinController $reserveAt');
     // final diff = now.difference(reserveAt);
     // var selectedStatus;
-    List<dynamic> status;
+    // List<dynamic> status;
     try {
-      final docRef = await FirebaseFirestore.instance
-      .doc(docpath).get();
+      // final docRef = await FirebaseFirestore.instance
+      // .doc(docpath).get();
 
-      status = docRef.data()['waitingStatus'];
-      status.add(selectedStatus);
+      // status = docRef.data()['waitingStatus'];
+      // status.add(selectedStatus);
       await FirebaseFirestore.instance
           // .collection('waiting')
           .doc(docpath)
           .update({
         // 'waitingStatus': FieldValue.arrayUnion([selectedStatus])
-        'waitingStatus':status
+        'waitingStatus': selectedStatus
       });
       // print(docpath);
       // print(selectedStatus);
@@ -59,5 +56,48 @@ class JoinWaitingController {
     }
 
     // return 'updatedstatus...';
+  }
+
+  Future<void> pendingCheck() async {
+    print('pendingCheck');
+    final now = DateTime.now();
+    final docId = DateFormat('yyyy/MM/dd').format(now);
+    final docRefTime =
+        await FirebaseFirestore.instance.collection('waiting').doc(docId).get();
+    final currentWaitngTime = docRefTime.data()['currentWaitingTime'];
+    print('currentwaitingtime pendingch $currentWaitngTime');
+    final docRef = await FirebaseFirestore.instance
+        .collection('waiting')
+        .doc(docId)
+        .collection('list')
+        .where('waitingStatus', isEqualTo: 'pending')
+        .get();
+
+    // print(docRef.docs[0]);
+    docRef.docs.map((e) async {
+      // print(' map e reserveAt${e['reserveAt']}');
+      final DateTime rev = e['reserveAt'].toDate();
+      final diff = rev.difference(now);
+      if (diff.inMinutes < currentWaitngTime) {
+        print(e.reference.path);
+        await FirebaseFirestore.instance
+            .doc(e.reference.path)
+            .update({'waitingStatus': 'waiting'});
+      }
+    }).toList();
+  }
+
+  Future<void> pendingToWaiting(String docPath) async {
+    try {
+      await FirebaseFirestore.instance
+          // .collection('waiting')
+          .doc(docPath)
+          .update({
+        // 'waitingStatus': FieldValue.arrayUnion([selectedStatus])
+        'waitingStatus': 'waiting'
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -89,13 +90,6 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   String _roundUpTime(DateTime dt) {
     DateTime roundUpTime = dt.add(Duration(minutes: (5 - dt.minute % 5)));
     _reserveAt = roundUpTime;
-    if (_selectedReserveTime != SelectTime.nowPick) {
-      JoinWaitingController.instance
-          .getStatus(roundUpTime)
-          .then((String value) {
-        _waitingStatus = value;
-      });
-    }
 
     return DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);
   }
@@ -185,50 +179,131 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     }
   }
 
+  Future<void> _getStatus() async {
+    final value = await JoinWaitingController.instance.getStatus(_reserveAt);
+    // .then((String value) {
+      // print('getstatus value $value');
+      setState(() {
+        _waitingStatus = value;
+      });
+      // print('waitingstatus getstatus $_waitingStatus');
+    // });
+  }
+
   Future<void> _makeReservation() async {
     final isValid = _formKey.currentState.validate();
     var reservationNumber = 0;
+    final DateTime now = DateTime.now();
     if (isValid) {
       _formKey.currentState.save();
       // final docId = _reserveAt.substring(0,10);
       // final docId = DateFormat('yyyy/MM/dd').format(DateTime.now());
       final docId = DateFormat("yyyy/MM/dd").format(_reserveAt);
+      bool isToday = true;
+      if (_reserveAt.difference(now).inDays != 0) {
+        isToday = false;
+      }
+
       // final docId = '2020/11/18';
       print(docId);
 
       try {
+        DocumentReference result;
+
+        final docRef = await FirebaseFirestore.instance
+            .collection('waiting')
+            .doc(DateFormat('yyyy/MM/dd').format(now))
+            .get();
+
         final docSnap = await FirebaseFirestore.instance
             .collection('waiting')
             .doc(docId)
             .collection('list')
+            // .where('waitingStatus', isEqualTo: 'waiting')
             .get();
-
+        int currentWaitingTime = docRef.data()['currentWaitingTime'];
+        print('current wait time $currentWaitingTime');
+        int currentWaitingTimeUpdated;
+        // docSnap.docs['currentWaitingTime'];
         if (docSnap.docs.length == 0) {
           reservationNumber = 1;
+          // await FirebaseFirestore.instance
+          //     .collection('waiting')
+          //     .doc(docId)
+          //     .set({'currentWaitingTime': 0});
+          currentWaitingTimeUpdated = 0;
+        } else {
+          reservationNumber = docSnap.docs.length + 1;
+          var counterActive = 0;
+          // var currentWaitingTime = 0;
+          docSnap.docs.map((e) {
+            // print(e['waitingStatus']);
+            if (e['waitingStatus'] == 'waiting') {
+              counterActive++;
+            }
+          }).toList();
+          print('counteractive $counterActive');
+          if (counterActive < 5) {
+            currentWaitingTimeUpdated = 10;
+          } else if (counterActive < 10) {
+            currentWaitingTimeUpdated = 30;
+          } else if (counterActive < 20) {
+            currentWaitingTimeUpdated = 45;
+          } else if (counterActive < 30) {
+            currentWaitingTimeUpdated = 60;
+          } else {
+            currentWaitingTimeUpdated = 90;
+          }
+          print('current wainting updated time $currentWaitingTimeUpdated');
+        }
+        if (currentWaitingTime != currentWaitingTimeUpdated) {
           await FirebaseFirestore.instance
               .collection('waiting')
               .doc(docId)
-              .set({'currentWaitingTime': 0});
-        } else {
-          reservationNumber = docSnap.docs.length + 1;
+              .set({'currentWaitingTime': currentWaitingTimeUpdated});
+          await JoinWaitingController.instance.pendingCheck();
         }
-        await FirebaseFirestore.instance
+
+        if (_selectedReserveTime == SelectTime.userPick) {
+          await _getStatus();
+          // print('joinwaitingControllergetStatus triggerred');
+        }
+        print('_waitingStatus $_waitingStatus');
+        // if(_waitingStatus == null){
+        //   Timer(Duration(seconds: 1), (){print('_getstatus null why');});
+        // }
+        result = await FirebaseFirestore.instance
             .collection('waiting')
             .doc(docId)
             .collection('list')
             .add({
-          'createdAt': DateTime.now(),
+          'createdAt': now,
           'name': _name,
           'people': _people,
           'phone': _phone,
           'reserveAt': _reserveAt,
           'reservationNumber': reservationNumber,
-          'waitingStatus': [_waitingStatus]
+          'waitingStatus': _waitingStatus
         });
+        print(result.path);
+        if (_waitingStatus == 'pending' && isToday) {
+          final diff = _reserveAt.difference(now);
+          final triggerTime = diff - Duration(minutes: currentWaitingTime);
+          print('trigger time $triggerTime');
+          // Timer(Duration(seconds: 15, minutes: 0), () {
+          Timer(triggerTime, () {
+            print("Yeah, this line is printed after $triggerTime ");
+            JoinWaitingController.instance.pendingToWaiting(result.path);
+          });
+        }
       } catch (e) {
         print(e);
       }
       print('$_name $_phone $_people $_reserveAt');
+      // Timer(Duration(seconds: 15, minutes: 0), () {
+      //   print("Yeah, this line is printed after 15 second");
+      //   JoinWaitingController.instance.pendingCheck();
+      // });
     }
   }
 
