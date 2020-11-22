@@ -130,11 +130,25 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  void _signInWithPhone(BuildContext ctx, AuthCredential authCred) async {
+    await _auth.signInWithCredential(authCred);
+  }
+
+  void _signInWithPhoneWithOTP(
+      BuildContext ctx, String verId, String smsCode) async {
+    AuthCredential authCreds =
+        PhoneAuthProvider.credential(verificationId: verId, smsCode: smsCode);
+    await _auth.signInWithCredential(authCreds);
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: AuthForm(_submitAuthForm, _signInWithGoogle, _isLoading),
+      body: AuthForm(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
+          _signInWithPhoneWithOTP, _isLoading),
     );
   }
 }

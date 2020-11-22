@@ -261,7 +261,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
               .collection('waiting')
               .doc(docId)
               .set({'currentWaitingTime': currentWaitingTimeUpdated});
-          await JoinWaitingController.instance.pendingCheck();
+          await JoinWaitingController.instance.pendingCheck(currentWaitingTimeUpdated);
         }
 
         if (_selectedReserveTime == SelectTime.userPick) {

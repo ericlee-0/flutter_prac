@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter_aut';
 
 class AuthForm extends StatefulWidget {
-  AuthForm(this.authSubmit, this.signInWithGoogle, this.isLoading);
+  AuthForm(this.authSubmit, this.signInWithGoogle, this.signInWithPhone,
+      this.signInWithPhoneWithOTP, this.isLoading);
 
   final bool isLoading;
   final Function authSubmit;
   final Function signInWithGoogle;
+  final Function signInWithPhone;
+  final Function signInWithPhoneWithOTP;
+  
 
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -14,10 +21,15 @@ class AuthForm extends StatefulWidget {
 
 class _AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
+  final _phoneFormKey = GlobalKey<FormState>();
   var _isSignIn = true;
   var _userEmail = '';
   var _userName = '';
   var _userPassword = '';
+  var _phoneNo = '';
+  var _smsCode = '';
+  String _verificationId = '';
+  bool _codeSent = false;
 
   void _userSubmit() {
     final isValid = _formKey.currentState
@@ -44,6 +56,91 @@ class _AuthFormState extends State<AuthForm> {
         _isSignIn,
         context,
       );
+    }
+  }
+
+  void _submitPhone() {
+    final isValid = _phoneFormKey.currentState
+        .validate(); //will triger all validators in textforms
+    FocusScope.of(context).unfocus();
+    if (isValid) {
+      _phoneFormKey.currentState.save();
+      if (kIsWeb) {
+        if (_codeSent) {
+          _phoneWebSMS();
+        } else {
+          print('web phone login');
+          _signInWithPhoneWeb(_phoneNo);
+        }
+        // running on the web!
+
+      } else {
+        // NOT running on the web! You can check for additional platforms here.
+
+        if (_codeSent) {
+          widget.signInWithPhoneWithOTP(context, _smsCode, _verificationId);
+        } else {
+          _verifyPhone(_phoneNo);
+        }
+      }
+    }
+  }
+
+  void _phoneWebSMS() {
+    widget.signInWithPhoneWithOTP(context, _verificationId, _smsCode);
+  }
+
+  void _signInWithPhoneWeb(String phone) async {
+    try {
+      print('auth signInwithphonenumber.....');
+      print('phone# $phone');
+      ConfirmationResult confirmationResult =
+          await FirebaseAuth.instance.signInWithPhoneNumber(phone);
+     
+
+      _verificationId = confirmationResult.verificationId;
+      setState(() {
+        _codeSent = true;
+      });
+      UserCredential userCredential =
+          await confirmationResult.confirm('654321');
+      print('userCredential: $userCredential');
+    } catch (e) {
+      print(e);
+    }
+    // await _auth.signInWithCredential();
+  }
+
+  Future<void> _verifyPhone(_phoneNo) async {
+    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
+      widget.signInWithPhone(context, authResult);
+    };
+
+    final PhoneVerificationFailed verificationFailed =
+        (FirebaseAuthException authException) {
+      print('${authException.message}');
+    };
+
+    final PhoneCodeSent smsSent = (String verId, [int forseResend]) {
+      _verificationId = verId;
+      setState(() {
+        _codeSent = true;
+      });
+    };
+
+    final PhoneCodeAutoRetrievalTimeout autoTimeOut = (String verId) {
+      _verificationId = verId;
+    };
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: _phoneNo,
+          timeout: const Duration(seconds: 5),
+          verificationCompleted: verified,
+          verificationFailed: verificationFailed,
+          codeSent: smsSent,
+          codeAutoRetrievalTimeout: autoTimeOut);
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -83,6 +180,52 @@ class _AuthFormState extends State<AuthForm> {
                 ),
               ),
             ),
+            Card(
+              margin: EdgeInsets.all(20),
+              child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Form(
+                    key: _phoneFormKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          key: ValueKey('phone'),
+                          keyboardType: TextInputType.phone,
+                          decoration:
+                              InputDecoration(hintText: 'type phone number ex) +16478585678'),
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Prease enter a valid phone number.';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            // setState(() {
+                              _phoneNo = value;
+                            // });
+                          },
+                        ),
+                        if (_codeSent)
+                          TextFormField(
+                            key: ValueKey('phone_verify'),
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(hintText: 'Enter OTP'),
+                            onChanged: (value) {
+                              setState(() {
+                                _smsCode = value;
+                              });
+                            },
+                          ),
+                        RaisedButton(
+                          child: _codeSent ? Text('Verify') : Text('Login'),
+                          onPressed: () {
+                            _submitPhone();
+                          },
+                        ),
+                      ],
+                    ),
+                  )),
+            ),
             // SizedBox(height: 100),
             Card(
               margin: EdgeInsets.all(20),
@@ -95,6 +238,7 @@ class _AuthFormState extends State<AuthForm> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // if (!_isSignIn) UserImagePicker(_pickedImage),
+
                         TextFormField(
                           key: ValueKey('email'),
                           // autocorrect: false,

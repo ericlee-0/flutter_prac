@@ -58,13 +58,14 @@ class JoinWaitingController {
     // return 'updatedstatus...';
   }
 
-  Future<void> pendingCheck() async {
+  Future<void> pendingCheck(int currentWaitingTime) async {
     print('pendingCheck');
     final now = DateTime.now();
     final docId = DateFormat('yyyy/MM/dd').format(now);
-    final docRefTime =
-        await FirebaseFirestore.instance.collection('waiting').doc(docId).get();
-    final currentWaitngTime = docRefTime.data()['currentWaitingTime'];
+    // final docRefTime =
+    //     await FirebaseFirestore.instance.collection('waiting').doc(docId).get();
+    final currentWaitngTime = currentWaitingTime;
+    // docRefTime.data()['currentWaitingTime'];
     print('currentwaitingtime pendingch $currentWaitngTime');
     final docRef = await FirebaseFirestore.instance
         .collection('waiting')
