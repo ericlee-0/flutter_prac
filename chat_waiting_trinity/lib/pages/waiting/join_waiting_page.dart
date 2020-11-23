@@ -226,7 +226,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
           await FirebaseFirestore.instance
               .collection('waiting')
               .doc(docId)
-              .set({'currentWaitingTime': 0});
+              .set({'currentWaitingTime': 0, 'docId':docId});
           currentWaitingTime = 0;
           currentWaitingTimeUpdated = 0;
         } else {

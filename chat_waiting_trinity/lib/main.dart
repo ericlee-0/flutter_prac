@@ -1,3 +1,5 @@
+import './pages/waiting/waiting_time_page.dart';
+
 import './pages/chat/user_list_page.dart';
 import './widgets/waiting/waiting_list.dart';
 
@@ -168,7 +170,8 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer:WaitingListDrawer(_selectListOption),
       body: Container(child: 
       
-        WaitingList(_selectList),
+        // WaitingList(_selectList),
+          WaitingTimePage(),
        
       ),
       floatingActionButton: Row(
