@@ -182,11 +182,11 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   Future<void> _getStatus() async {
     final value = await JoinWaitingController.instance.getStatus(_reserveAt);
     // .then((String value) {
-      // print('getstatus value $value');
-      setState(() {
-        _waitingStatus = value;
-      });
-      // print('waitingstatus getstatus $_waitingStatus');
+    // print('getstatus value $value');
+    setState(() {
+      _waitingStatus = value;
+    });
+    // print('waitingstatus getstatus $_waitingStatus');
     // });
   }
 
@@ -210,29 +210,33 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
       try {
         DocumentReference result;
 
-        final docRef = await FirebaseFirestore.instance
-            .collection('waiting')
-            .doc(DateFormat('yyyy/MM/dd').format(now))
-            .get();
-
         final docSnap = await FirebaseFirestore.instance
             .collection('waiting')
             .doc(docId)
             .collection('list')
             // .where('waitingStatus', isEqualTo: 'waiting')
             .get();
-        int currentWaitingTime = docRef.data()['currentWaitingTime']==null? 0:docRef.data()['currentWaitingTime'];
-        print('current wait time $currentWaitingTime');
+        print('docsnap length : ${docSnap.docs.length}');
+        int currentWaitingTime;
+
         int currentWaitingTimeUpdated;
         // docSnap.docs['currentWaitingTime'];
         if (docSnap.docs.length == 0) {
           reservationNumber = 1;
-          // await FirebaseFirestore.instance
-          //     .collection('waiting')
-          //     .doc(docId)
-          //     .set({'currentWaitingTime': 0});
+          await FirebaseFirestore.instance
+              .collection('waiting')
+              .doc(docId)
+              .set({'currentWaitingTime': 0});
+          currentWaitingTime = 0;
           currentWaitingTimeUpdated = 0;
         } else {
+          final docRef = await FirebaseFirestore.instance
+              .collection('waiting')
+              .doc(DateFormat('yyyy/MM/dd').format(now))
+              .get();
+// print('docref length : ${docRef.data().length}');
+          currentWaitingTime = docRef.data()['currentWaitingTime'];
+          print('current wait time $currentWaitingTime');
           reservationNumber = docSnap.docs.length + 1;
           var counterActive = 0;
           // var currentWaitingTime = 0;
@@ -243,7 +247,9 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
             }
           }).toList();
           print('counteractive $counterActive');
-          if (counterActive < 5) {
+          if (counterActive < 2) {
+            currentWaitingTimeUpdated = 0;
+          } else if (counterActive < 5) {
             currentWaitingTimeUpdated = 10;
           } else if (counterActive < 10) {
             currentWaitingTimeUpdated = 30;
@@ -261,7 +267,8 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
               .collection('waiting')
               .doc(docId)
               .set({'currentWaitingTime': currentWaitingTimeUpdated});
-          await JoinWaitingController.instance.pendingCheck(currentWaitingTimeUpdated);
+          await JoinWaitingController.instance
+              .pendingCheck(currentWaitingTimeUpdated);
         }
 
         if (_selectedReserveTime == SelectTime.userPick) {
