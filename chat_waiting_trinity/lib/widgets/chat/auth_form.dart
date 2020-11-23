@@ -13,7 +13,6 @@ class AuthForm extends StatefulWidget {
   final Function signInWithGoogle;
   final Function signInWithPhone;
   final Function signInWithPhoneWithOTP;
-  
 
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -67,7 +66,7 @@ class _AuthFormState extends State<AuthForm> {
       _phoneFormKey.currentState.save();
       if (kIsWeb) {
         if (_codeSent) {
-          _phoneWebSMS();
+          widget.signInWithPhoneWithOTP(context, _verificationId, _smsCode);
         } else {
           print('web phone login');
           _signInWithPhoneWeb(_phoneNo);
@@ -86,25 +85,20 @@ class _AuthFormState extends State<AuthForm> {
     }
   }
 
-  void _phoneWebSMS() {
-    widget.signInWithPhoneWithOTP(context, _verificationId, _smsCode);
-  }
-
   void _signInWithPhoneWeb(String phone) async {
     try {
-      print('auth signInwithphonenumber.....');
-      print('phone# $phone');
+      // print('auth signInwithphonenumber.....');
+      // print('phone# $phone');
       ConfirmationResult confirmationResult =
           await FirebaseAuth.instance.signInWithPhoneNumber(phone);
-     
 
       _verificationId = confirmationResult.verificationId;
       setState(() {
         _codeSent = true;
       });
-      UserCredential userCredential =
-          await confirmationResult.confirm('654321');
-      print('userCredential: $userCredential');
+      // UserCredential userCredential =
+      //     await confirmationResult.confirm('654321');
+      // print('userCredential: $userCredential');
     } catch (e) {
       print(e);
     }
@@ -191,8 +185,8 @@ class _AuthFormState extends State<AuthForm> {
                         TextFormField(
                           key: ValueKey('phone'),
                           keyboardType: TextInputType.phone,
-                          decoration:
-                              InputDecoration(hintText: 'type phone number ex) +16478585678'),
+                          decoration: InputDecoration(
+                              hintText: 'type phone number ex) +16478585678'),
                           validator: (value) {
                             if (value.isEmpty) {
                               return 'Prease enter a valid phone number.';
@@ -201,7 +195,7 @@ class _AuthFormState extends State<AuthForm> {
                           },
                           onSaved: (value) {
                             // setState(() {
-                              _phoneNo = value;
+                            _phoneNo = value;
                             // });
                           },
                         ),
@@ -216,12 +210,14 @@ class _AuthFormState extends State<AuthForm> {
                               });
                             },
                           ),
-                        RaisedButton(
-                          child: _codeSent ? Text('Verify') : Text('Login'),
-                          onPressed: () {
-                            _submitPhone();
-                          },
-                        ),
+                        if (widget.isLoading) CircularProgressIndicator(),
+                        if (!widget.isLoading)
+                          RaisedButton(
+                            child: _codeSent ? Text('Verify') : Text('Login'),
+                            onPressed: () {
+                              _submitPhone();
+                            },
+                          ),
                       ],
                     ),
                   )),

@@ -205,7 +205,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
       }
 
       // final docId = '2020/11/18';
-      print(docId);
+      print('makereservation docId:$docId');
 
       try {
         DocumentReference result;
@@ -221,7 +221,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
             .collection('list')
             // .where('waitingStatus', isEqualTo: 'waiting')
             .get();
-        int currentWaitingTime = docRef.data()['currentWaitingTime'];
+        int currentWaitingTime = docRef.data()['currentWaitingTime']==null? 0:docRef.data()['currentWaitingTime'];
         print('current wait time $currentWaitingTime');
         int currentWaitingTimeUpdated;
         // docSnap.docs['currentWaitingTime'];

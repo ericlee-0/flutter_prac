@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../widgets/chat/auth_form.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase/firebase.dart' as fb;
 
 class AuthPage extends StatefulWidget {
   @override
@@ -38,26 +40,27 @@ class _AuthPageState extends State<AuthPage> {
         authResult = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
-        print('authResut: $authResult');
-        final ref = FirebaseStorage.instance
-            .ref() //access root clould strage
-            .child('user_image') //sub folder
-            .child('user_image_default.png'); //filename
+        // print('authResut: $authResult');
+        await _registerUser(authResult.user.uid, username, email);
+        // final ref = FirebaseStorage.instance
+        //     .ref() //access root clould strage
+        //     .child('user_image') //sub folder
+        //     .child('user_image_default.png'); //filename
 // print(ref.path);
 //         await ref
 //             .putFile(_imageFile)
 //             .onComplete;
 // print('before get url');
-        final url = await ref.getDownloadURL();
+        // final url = await ref.getDownloadURL();
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(authResult.user.uid)
-            .set({
-          'username': username,
-          'email': email,
-          'image_url': url,
-        });
+        // await FirebaseFirestore.instance
+        //     .collection('users')
+        //     .doc(authResult.user.uid)
+        //     .set({
+        //   'username': username,
+        //   'email': email,
+        //   'image_url': url,
+        // });
       }
     } catch (err) {
       print(err.message);
@@ -72,6 +75,43 @@ class _AuthPageState extends State<AuthPage> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _registerUser(String userId,
+      [String userName='guest' , String userEmail='noEmail']) async {
+    try {
+      // print('registerUser $userId');
+      String imageUrl;
+      var ref;
+      if (kIsWeb) {
+        ref = fb
+            .storage()
+            .refFromURL('gs://chat-waiting-trinity.appspot.com')
+            .child('user_image') //sub folder
+            .child('user_image_default.png'); //f
+        imageUrl = await ref.getDownloadURL();
+        imageUrl = imageUrl.toString();
+      } else {
+        ref = FirebaseStorage.instance
+            .ref() //access root clould strage
+            .child('user_image') //sub folder
+            .child('user_image_default.png'); //filename
+        imageUrl = await ref.getDownloadURL();
+      }
+
+      // print('imageUrl: $imageUrl');
+      // print('username $userName, useremail $userEmail');
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        // 'username': userName == null ? 'guest': userName,
+        // 'email': userEmail == null ? 'noEmail':userEmail,
+        // 'image_url': imageUrl,
+        'username':userName,
+        'email': userEmail,
+        'image_url': imageUrl
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -97,20 +137,22 @@ class _AuthPageState extends State<AuthPage> {
       User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
 
-      final ref = FirebaseStorage.instance
-          .ref() //access root clould strage
-          .child('user_image') //sub folder
-          .child('user_image_default.png'); //filename
-      final url = await ref.getDownloadURL();
+      await _registerUser(
+          authResult.user.uid, currentUser.displayName, currentUser.email);
+      // final ref = FirebaseStorage.instance
+      //     .ref() //access root clould strage
+      //     .child('user_image') //sub folder
+      //     .child('user_image_default.png'); //filename
+      // final url = await ref.getDownloadURL();
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .set({
-        'username': currentUser.displayName,
-        'email': currentUser.email,
-        'image_url': url,
-      });
+      // await FirebaseFirestore.instance
+      //     .collection('users')
+      //     .doc(currentUser.uid)
+      //     .set({
+      //   'username': currentUser.displayName,
+      //   'email': currentUser.email,
+      //   'image_url': url,
+      // });
       // model.state = ViewState.Idle;
       // print("User Name: ${_user.displayName}");
       // print("User Email ${_user.email}");
@@ -131,17 +173,57 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   void _signInWithPhone(BuildContext ctx, AuthCredential authCred) async {
-    await _auth.signInWithCredential(authCred);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final authResult = await _auth.signInWithCredential(authCred);
+      final User _user = authResult.user;
+      final User currentUser = _auth.currentUser;
+      assert(_user.uid == currentUser.uid);
+      await _registerUser(authResult.user.uid);
+    } catch (err) {
+      if (err != null) {
+        Scaffold.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(err.message),
+            backgroundColor: Theme.of(ctx).errorColor,
+          ),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _signInWithPhoneWithOTP(
       BuildContext ctx, String verId, String smsCode) async {
-    AuthCredential authCreds =
-        PhoneAuthProvider.credential(verificationId: verId, smsCode: smsCode);
-    await _auth.signInWithCredential(authCreds);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      AuthCredential authCreds =
+          PhoneAuthProvider.credential(verificationId: verId, smsCode: smsCode);
+      final authResult = await _auth.signInWithCredential(authCreds);
+      final User _user = authResult.user;
+      final User currentUser = _auth.currentUser;
+      assert(_user.uid == currentUser.uid);
+      await _registerUser(authResult.user.uid);
+    } catch (err) {
+      if (err != null) {
+        Scaffold.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(err.message),
+            backgroundColor: Theme.of(ctx).errorColor,
+          ),
+        );
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
