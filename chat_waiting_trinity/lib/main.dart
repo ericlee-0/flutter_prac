@@ -1,4 +1,5 @@
 import './pages/waiting/waiting_time_page.dart';
+import 'package:flutter/foundation.dart';
 
 import './pages/chat/user_list_page.dart';
 import './widgets/waiting/waiting_list.dart';
@@ -11,8 +12,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import './pages/chat/chat_room_list_page.dart';
 import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
-import './pages/chat/user_list_page.dart';
-import './widgets/chat/user_profile_image_picker.dart';
+// import './pages/chat/user_list_page.dart';
+// import './widgets/chat/user_profile_image_picker.dart';
 import 'pages/chat/chat_room_page.dart';
 import './pages/chat/user_profile_page.dart';
 import './providers/auth.dart';
@@ -127,7 +128,7 @@ enum SelectPage { home, waiting, chat }
 
 class _MyHomePageState extends State<MyHomePage> {
   var _selectedPage;
-  String _selectList='active';
+  String _selectList = 'active';
 
   @override
   void initState() {
@@ -135,6 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _selectedPage = SelectPage.home;
   }
+
   void _selectListOption(String selected) {
     setState(() {
       _selectList = selected;
@@ -143,7 +145,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _mainPage() {
     if (_selectedPage == SelectPage.waiting) {
-      return JoinWaitingPage();
+      return StreamBuilder(
+          stream: Auth.instance.authState,
+          // stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, userSnapshot) {
+            if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (userSnapshot.hasData) {
+              return JoinWaitingPage();
+            }
+            return AuthPage();
+          });
     }
     if (_selectedPage == SelectPage.chat) {
       return StreamBuilder(
@@ -164,16 +179,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Current Waiting List'),
-        
+        title: kIsWeb ? Text('Join Waiting') : Text('Current Waiting List'),
       ),
-      drawer:WaitingListDrawer(_selectListOption),
-      body: Container(child: 
-      
-        // WaitingList(_selectList),
-          WaitingTimePage(),
-       
-      ),
+      drawer: kIsWeb ? null : WaitingListDrawer(_selectListOption),
+      body: Container(
+          child: kIsWeb ? WaitingTimePage() : WaitingList(_selectList)),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [

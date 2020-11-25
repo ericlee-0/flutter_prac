@@ -41,7 +41,7 @@ class _AuthPageState extends State<AuthPage> {
             email: email, password: password);
 
         // print('authResut: $authResult');
-        await _registerUser(authResult.user.uid, username, email);
+        await _registerUser(userId:authResult.user.uid, userName:username, userEmail:email);
         // final ref = FirebaseStorage.instance
         //     .ref() //access root clould strage
         //     .child('user_image') //sub folder
@@ -78,8 +78,8 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  Future<void> _registerUser(String userId,
-      [String userName='guest' , String userEmail='noEmail']) async {
+  Future<void> _registerUser({String userId,
+      String userName='guest' , String userEmail='noEmail', String phone=''}) async {
     try {
       // print('registerUser $userId');
       String imageUrl;
@@ -108,7 +108,8 @@ class _AuthPageState extends State<AuthPage> {
         // 'image_url': imageUrl,
         'username':userName,
         'email': userEmail,
-        'image_url': imageUrl
+        'image_url': imageUrl,
+        'phoneNo':phone
       });
     } catch (e) {
       print(e);
@@ -138,7 +139,7 @@ class _AuthPageState extends State<AuthPage> {
       assert(_user.uid == currentUser.uid);
 
       await _registerUser(
-          authResult.user.uid, currentUser.displayName, currentUser.email);
+          userId:authResult.user.uid, userName:currentUser.displayName, userEmail:currentUser.email);
       // final ref = FirebaseStorage.instance
       //     .ref() //access root clould strage
       //     .child('user_image') //sub folder
@@ -181,7 +182,7 @@ class _AuthPageState extends State<AuthPage> {
       final User _user = authResult.user;
       final User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
-      await _registerUser(authResult.user.uid);
+      await _registerUser(userId:authResult.user.uid,phone:_user.phoneNumber);
     } catch (err) {
       if (err != null) {
         Scaffold.of(ctx).showSnackBar(
@@ -209,7 +210,10 @@ class _AuthPageState extends State<AuthPage> {
       final User _user = authResult.user;
       final User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
-      await _registerUser(authResult.user.uid);
+      await _registerUser(userId:authResult.user.uid,phone: _user.phoneNumber);
+      setState(() {
+        _isLoading = false;
+      });
     } catch (err) {
       if (err != null) {
         Scaffold.of(ctx).showSnackBar(

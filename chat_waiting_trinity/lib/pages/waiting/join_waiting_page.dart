@@ -21,12 +21,14 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   // String _reserveDate;
   // String _reserveTime;
   var _isLoading = false;
+  bool _hasDone = false;
   TextEditingController _reserveAtController = TextEditingController();
   // TextEditingController _reserveDateController = TextEditingController();
   // TextEditingController _reserveTimeController = TextEditingController();
   var _selectedReserveTime;
   // DateTime _selectedDate;
   // DateTime _selectedTime;
+  var _reservationNumber = 1;
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -192,7 +194,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 
   Future<void> _makeReservation() async {
     final isValid = _formKey.currentState.validate();
-    var reservationNumber = 0;
+    
     final DateTime now = DateTime.now();
     if (isValid) {
       _formKey.currentState.save();
@@ -206,9 +208,12 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 
       // final docId = '2020/11/18';
       print('makereservation docId:$docId');
-
+      await _showConfirmDialog();
       try {
-        DocumentReference result;
+        setState(() {
+          _isLoading = true;
+        });
+        
 
         final docSnap = await FirebaseFirestore.instance
             .collection('waiting')
@@ -222,11 +227,11 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
         int currentWaitingTimeUpdated;
         // docSnap.docs['currentWaitingTime'];
         if (docSnap.docs.length == 0) {
-          reservationNumber = 1;
+          // _reservationNumber = 1;
           await FirebaseFirestore.instance
               .collection('waiting')
               .doc(docId)
-              .set({'currentWaitingTime': 0, 'docId':docId});
+              .set({'currentWaitingTime': 0, 'docId': docId});
           currentWaitingTime = 0;
           currentWaitingTimeUpdated = 0;
         } else {
@@ -237,7 +242,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 // print('docref length : ${docRef.data().length}');
           currentWaitingTime = docRef.data()['currentWaitingTime'];
           print('current wait time $currentWaitingTime');
-          reservationNumber = docSnap.docs.length + 1;
+          _reservationNumber = docSnap.docs.length + 1;
           var counterActive = 0;
           // var currentWaitingTime = 0;
           docSnap.docs.map((e) {
@@ -266,7 +271,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
           await FirebaseFirestore.instance
               .collection('waiting')
               .doc(docId)
-              .set({'currentWaitingTime': currentWaitingTimeUpdated});
+              .update({'currentWaitingTime': currentWaitingTimeUpdated});
           await JoinWaitingController.instance
               .pendingCheck(currentWaitingTimeUpdated);
         }
@@ -279,7 +284,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
         // if(_waitingStatus == null){
         //   Timer(Duration(seconds: 1), (){print('_getstatus null why');});
         // }
-        result = await FirebaseFirestore.instance
+        final result = await FirebaseFirestore.instance
             .collection('waiting')
             .doc(docId)
             .collection('list')
@@ -289,9 +294,10 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
           'people': _people,
           'phone': _phone,
           'reserveAt': _reserveAt,
-          'reservationNumber': reservationNumber,
+          'reservationNumber': _reservationNumber,
           'waitingStatus': _waitingStatus
         });
+        
         print(result.path);
         if (_waitingStatus == 'pending' && isToday) {
           final diff = _reserveAt.difference(now);
@@ -303,8 +309,15 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
             JoinWaitingController.instance.pendingToWaiting(result.path);
           });
         }
+         setState(() {
+          _isLoading = false;
+          _hasDone = true;
+        });
       } catch (e) {
         print(e);
+        setState(() {
+          _isLoading = false;
+        });
       }
       print('$_name $_phone $_people $_reserveAt');
       // Timer(Duration(seconds: 15, minutes: 0), () {
@@ -314,13 +327,72 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     }
   }
 
+  Future<void> _showConfirmDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Please Confirm Your Reservation',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: Card(
+                  child: Container(
+                    child:Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Name : $_name'),
+                        Text('Number of people : $_people'),
+                        Text('Phone# : $_phone'),
+                        Text('Reserve At : $_reserveAt'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              RaisedButton(
+                child: Text('Confirm'),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+Widget _finished(){
+  return Center(child: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Reservation Number : $_reservationNumber',),
+        RaisedButton(child:Text('Back to Home'),onPressed: (){
+          Navigator.of(context).pushNamed('/home');
+        },)
+      ],
+    ),
+  ));
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Join Wainting List'),
       ),
-      body: InkWell(
+      body: _isLoading? Center(child: CircularProgressIndicator()) :_hasDone? _finished(): InkWell(
         splashColor: Colors.transparent,
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
@@ -359,16 +431,17 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 
                     TextFormField(
                       key: ValueKey('guest_phone'),
+                      keyboardType: TextInputType.phone,
                       validator: (value) {
-                        if (value.isEmpty || value.length < 6) {
-                          return 'Password must be at least 6 characters long.';
+                        if (value.isEmpty || value.length != 10) {
+                          return 'phone must be 10 digits long.';
                         }
                         return null;
                       },
                       decoration: InputDecoration(labelText: 'phone'),
                       // obscureText: true,
                       onSaved: (value) {
-                        _phone = value;
+                        _phone = '+1' + value;
                       },
                     ),
 

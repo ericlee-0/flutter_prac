@@ -29,6 +29,7 @@ class _AuthFormState extends State<AuthForm> {
   var _smsCode = '';
   String _verificationId = '';
   bool _codeSent = false;
+  TextEditingController _phoneVerifiController = TextEditingController();
 
   void _userSubmit() {
     final isValid = _formKey.currentState
@@ -64,12 +65,14 @@ class _AuthFormState extends State<AuthForm> {
     FocusScope.of(context).unfocus();
     if (isValid) {
       _phoneFormKey.currentState.save();
+
       if (kIsWeb) {
         if (_codeSent) {
           widget.signInWithPhoneWithOTP(context, _verificationId, _smsCode);
         } else {
           print('web phone login');
-          _signInWithPhoneWeb(_phoneNo);
+          _signInWithPhoneWeb();
+          _showMyDialog();
         }
         // running on the web!
 
@@ -80,22 +83,24 @@ class _AuthFormState extends State<AuthForm> {
           widget.signInWithPhoneWithOTP(context, _smsCode, _verificationId);
         } else {
           _verifyPhone(_phoneNo);
+          _showMyDialog();
         }
       }
     }
   }
 
-  void _signInWithPhoneWeb(String phone) async {
+  void _signInWithPhoneWeb() async {
     try {
       // print('auth signInwithphonenumber.....');
       // print('phone# $phone');
       ConfirmationResult confirmationResult =
-          await FirebaseAuth.instance.signInWithPhoneNumber(phone);
+          await FirebaseAuth.instance.signInWithPhoneNumber(_phoneNo);
 
       _verificationId = confirmationResult.verificationId;
       setState(() {
         _codeSent = true;
       });
+
       // UserCredential userCredential =
       //     await confirmationResult.confirm('654321');
       // print('userCredential: $userCredential');
@@ -136,6 +141,60 @@ class _AuthFormState extends State<AuthForm> {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Please Enter Verification Code',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                key: ValueKey('phone_verify'),
+                controller: _phoneVerifiController,
+                // initialValue: 'ex)6478581234',
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Enter teh Code',
+                  suffixIcon: IconButton(
+                    onPressed: () => _phoneVerifiController.clear(),
+                    icon: Icon(Icons.clear),
+                  ),
+                ),
+                onChanged: (value) {
+                  _smsCode = value;
+                },
+              ),
+              RaisedButton(
+                child: Text('Verify'),
+                onPressed: () {
+                  _submitPhone();
+
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text('Re-Send the Code'),
+                onPressed: () {
+                  if (kIsWeb) {
+                    _signInWithPhoneWeb();
+                  } else {
+                    _verifyPhone(_phoneNo);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -186,34 +245,35 @@ class _AuthFormState extends State<AuthForm> {
                           key: ValueKey('phone'),
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                              hintText: 'type phone number ex) +16478585678'),
+                              hintText: 'type phone number ex) 6478585678'),
                           validator: (value) {
-                            if (value.isEmpty) {
+                            if (value.isEmpty || value.length != 10) {
                               return 'Prease enter a valid phone number.';
                             }
                             return null;
                           },
                           onSaved: (value) {
                             // setState(() {
-                            _phoneNo = value;
+                            _phoneNo = '+1' + value;
+                            print(_phoneNo);
                             // });
                           },
                         ),
-                        if (_codeSent)
-                          TextFormField(
-                            key: ValueKey('phone_verify'),
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(hintText: 'Enter OTP'),
-                            onChanged: (value) {
-                              setState(() {
-                                _smsCode = value;
-                              });
-                            },
-                          ),
+                        // if (_codeSent)
+                        //   TextFormField(
+                        //     key: ValueKey('phone_verify'),
+                        //     keyboardType: TextInputType.phone,
+                        //     decoration: InputDecoration(hintText: 'Enter OTP'),
+                        //     onChanged: (value) {
+                        //       setState(() {
+                        //         _smsCode = value;
+                        //       });
+                        //     },
+                        //   ),
                         if (widget.isLoading) CircularProgressIndicator(),
                         if (!widget.isLoading)
                           RaisedButton(
-                            child: _codeSent ? Text('Verify') : Text('Login'),
+                            child: Text('Login'),
                             onPressed: () {
                               _submitPhone();
                             },

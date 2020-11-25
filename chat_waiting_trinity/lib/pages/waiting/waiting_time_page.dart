@@ -8,7 +8,7 @@ class WaitingTimePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(docId);
+    // print(docId);
     return Column(
       children: [
         StreamBuilder(
@@ -17,7 +17,7 @@ class WaitingTimePage extends StatelessWidget {
               .where('docId', isEqualTo: docId)
               .snapshots(),
           builder: (ctx, snapshot) {
-            print(snapshot.data.documents);
+            print(snapshot.data.documents[0]);
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
