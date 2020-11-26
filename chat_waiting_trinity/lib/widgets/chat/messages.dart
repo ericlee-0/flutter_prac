@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import './message_bubble.dart';
 
 class Messages extends StatelessWidget {
-  final String chatRoomId;
-  Messages(this.chatRoomId);
+  final String chatRoomPath;
+  Messages(this.chatRoomPath);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats')
-          .doc('1on1')
-          .collection('chatRooms')
-          .doc(chatRoomId)
+          // .doc('1on1')
+          // .collection('chatRooms')
+          .doc(chatRoomPath)
           .collection('chatMessages')
           .orderBy('createdAt', descending: true)
           .snapshots(),

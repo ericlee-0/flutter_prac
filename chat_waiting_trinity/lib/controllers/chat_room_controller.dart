@@ -7,13 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/chat/chat_room_page.dart';
+import 'package:intl/intl.dart';
 
 class ChatRoomController {
   static ChatRoomController get instance => ChatRoomController();
   final _user = FirebaseAuth.instance.currentUser;
 
   Future<void> chatContinue(
-      BuildContext context, Map<String,dynamic> chatUserInfo) async {
+      BuildContext context, Map<String, dynamic> chatUserInfo) async {
     final userSelfData = await FirebaseFirestore.instance
         .collection('users')
         .doc(_user.uid)
@@ -97,6 +98,7 @@ class ChatRoomController {
       });
       Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
         'chatRoomId': chatRoomId,
+        'chatRoomPath':'1on1/chatRooms/$chatRoomId',
         'chatRoomType': '1on1',
         'chatUserId': chatUserInfo['chatUserId'],
         'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
@@ -111,5 +113,51 @@ class ChatRoomController {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> chatWithGuest(BuildContext context,) async {
+    final now = DateTime.now();
+    final String chatRoomId = now.toString();
+    final String docId = DateFormat('yyyy/MM/dd').format(now);
+    final guestInfo = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user.uid)
+          .get();
+          print('hatWithGuest guestid : ${_user.uid}');
+    final advisorInfo = await FirebaseFirestore.instance
+          .collection('users')
+          .where('roll', isEqualTo:'advisor')
+          .get();
+print('hatWithGuest advisorname : ${advisorInfo.docs[0]['username']}');
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc('withGuest')
+        .collection(docId)
+        .doc(chatRoomId)
+        .set({
+          'chatRoomId': chatRoomId,
+      'chatRoomType': 'withGuest',
+      'guestId': _user.uid,
+      'guestName': guestInfo['username'],
+      'guestImageUrl': guestInfo['image_url'],
+      'guestPhone': guestInfo['phoneNo'],
+      'advisorId': advisorInfo.docs[0].id,
+      'advisorName': advisorInfo.docs[0]['username'],
+      'advisorImageUrl': advisorInfo.docs[0]['image_url'],
+    });
+
+    Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
+        'chatRoomId': chatRoomId,
+        'chatRoomPath':'withGuest/$docId/$chatRoomId',
+        'chatRoomType': 'withGuest',
+        'chatUserId': advisorInfo.docs[0].id,
+        'chatUserImageUrl': advisorInfo.docs[0]['image_url'],
+        'chatUserName': advisorInfo.docs[0]['username'],
+        'userSelfId': _user.uid,
+        'userSelfImageUrl': guestInfo['image_url'],
+        'userSelfName': guestInfo['username'],
+        
+        // 'chatUserImageUrl':userData[index]['image_url'],
+      });
   }
 }

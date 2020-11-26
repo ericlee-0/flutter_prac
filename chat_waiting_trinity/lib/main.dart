@@ -19,6 +19,7 @@ import './pages/chat/user_profile_page.dart';
 import './providers/auth.dart';
 import './pages/waiting/join_waiting_page.dart';
 import './widgets/waiting/waiting_list_drawer.dart';
+import './pages/chat/guest_chat_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -98,6 +99,7 @@ class _MyAppState extends State<MyApp> {
           ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
           ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
           UserProfilePage.routeName: (ctx) => UserProfilePage(),
+          GuestChatPage.routeName: (ctx) => GuestChatPage(),
           // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
           // WaitingListPage.routeName: (ctx) => WaitingListPage()
         },
@@ -172,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             if (userSnapshot.hasData) {
               // print(user.uid);
-              return ChatRoomListPage();
+              return kIsWeb ? GuestChatPage():ChatRoomListPage();
             }
             return AuthPage();
           });

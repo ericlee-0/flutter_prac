@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/join_waiting_controller.dart';
+import '../../controllers/sms_controller.dart';
 
 class JoinWaitingPage extends StatefulWidget {
   @override
@@ -373,6 +374,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   }
 
 Widget _finished(){
+  SmsController.instance.sendSms(_phone, 'Hello $_name, Your reservation number is $_reservationNumber. Thank you! See you soon.');
   return Center(child: Padding(
     padding: const EdgeInsets.all(8.0),
     child: Column(

@@ -64,6 +64,7 @@ class MessageBubble extends StatelessWidget {
             ),
           ],
         ),
+        // if(chatInfo['sendUserType']!= 'guest' && chatInfo['sendUserType']!= 'advisor')
         Positioned(
           top: 0,
           left: isSelf ? null : 120,

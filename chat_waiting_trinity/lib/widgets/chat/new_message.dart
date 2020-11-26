@@ -18,12 +18,13 @@ class _NewMessageState extends State<NewMessage> {
     // final user = FirebaseAuth.instance.currentUser;
     // final userData = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
     final Timestamp createdTime = Timestamp.now();
+    print('new message charoompath : ${chatInfo['chatRoomPath']}');
     try{
     await FirebaseFirestore.instance
           .collection('chats')
-          .doc(chatInfo['chatRoomType'])
-          .collection('chatRooms')
-          .doc(chatInfo['chatRoomId'])
+          .doc(chatInfo['chatRoomPath'])
+          // .collection('chatRooms')
+          // .doc(chatInfo['chatRoomId'])
           .collection('chatMessages')
           .add({
         'message': _enteredMessage,

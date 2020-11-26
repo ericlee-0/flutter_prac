@@ -89,7 +89,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         child: Column(
           children: [
             Expanded(
-              child: Messages(args['chatRoomId']),
+              child: Messages(args['chatRoomPath']),
             ),
             NewMessage(args),
             
