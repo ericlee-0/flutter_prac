@@ -6,8 +6,8 @@ class SmsController {
   // TwilioFlutter twilioFlutter;
 
   final TwilioFlutter twilioFlutter = TwilioFlutter(
-        accountSid: 'AC5dccfa54221ea13e4a503bf6caf397fb',
-        authToken: '0dbb78b5da7142e85283401345505a9f',
+        accountSid: '',
+        authToken: '',
         twilioNumber: '+15005550006');
 
 
