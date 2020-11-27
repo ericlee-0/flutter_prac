@@ -10,6 +10,8 @@ import 'chat_room_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth.dart';
+import '../../widgets/chat/user_list.dart';
+import '../../widgets/chat/guest_chat_list.dart';
 
 class ChatRoomListPage extends StatefulWidget {
   static const routeName = '/chat-room-list';
@@ -20,21 +22,96 @@ class ChatRoomListPage extends StatefulWidget {
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   int _currentBottomNavigationIndex = 1;
   final _user = FirebaseAuth.instance.currentUser;
+  // var _guestChatList = false;
 
   void _bottomNavigation(int index) {
+    print('bottom navy select: $index');
     if (index == 0) {
-      Navigator.of(context).pushReplacementNamed(UserListPage.routeName);
+      // Navigator.of(context).pushReplacementNamed(UserListPage.routeName);
+      setState(() {
+        _currentBottomNavigationIndex = 0;
+      });
+    }
+    if (index == 1) {
+      // Navigator.of(context).pushReplacementNamed(UserListPage.routeName);
+      setState(() {
+        _currentBottomNavigationIndex = 1;
+      });
     }
     if (index == 2) {
       Navigator.of(context).pushNamed(ChatRoomPage.routeName);
+    }
+    if (index == 3) {
+      setState(() {
+        // _guestChatList = true;
+        _currentBottomNavigationIndex = 3;
+      });
+    }
+  }
+
+  Widget _bodyController() {
+    if (_currentBottomNavigationIndex == 0) {
+      return UserList(_user.uid);
+    } else if (_currentBottomNavigationIndex == 3) {
+      return GuestChatList(_user.uid);
+    } else if (_currentBottomNavigationIndex == 2) {
+      return Text('text');
+    } else {
+      return StreamBuilder(
+        // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user.uid)
+            .collection('chatRooms')
+            .where('chatRoomType', isEqualTo: '1on1')
+            .orderBy('lastMessageCreatedAt', descending: true)
+            .snapshots(),
+        builder: (ctx, snapshot) {
+          print('user : ${_user.uid}');
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          final chatRoomListData = snapshot.data.documents;
+          // print('streambuilder: ${chatRoomListData}');
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: chatRoomListData.length,
+            itemBuilder: (ctx, index) => ListTile(
+              // title:Text('chats chatData'),
+              key: ValueKey(chatRoomListData[index].documentID),
+              title: Text(chatRoomListData[index]['chatUserName']),
+              subtitle: Text(chatRoomListData[index]['lastMessage']),
+              leading: CircleAvatar(
+                backgroundImage:
+                    NetworkImage(chatRoomListData[index]['chatUserImageUrl']),
+                radius: 25,
+              ),
+              trailing: Text(DateFormat.yMMMd().format(
+                  chatRoomListData[index]['lastMessageCreatedAt'].toDate())),
+              isThreeLine: true,
+              onTap: () {
+                // print(chatRoomListData[index].data());
+                ChatRoomController.instance.chatContinue(context, {
+                  ...chatRoomListData[index].data(),
+                  'chatRoomId': chatRoomListData[index].documentID
+                });
+                // print(chatData[index].documentID);
+              },
+            ),
+          );
+        },
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final getAuth = Provider.of<Auth>(context, listen:false).userId;
-    final getAuthState = Provider.of<Auth>(context, listen:false).authState;
-    
+    final getAuth = Provider.of<Auth>(context, listen: false).userId;
+    final getAuthState = Provider.of<Auth>(context, listen: false).authState;
+    // final _auth = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat'),
@@ -103,68 +180,36 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
               })
         ],
       ),
-      body: StreamBuilder(
-          // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
-          stream: FirebaseFirestore.instance
-              .collection('users')
-              .doc(_user.uid)
-              .collection('chatRooms')
-              .orderBy('lastMessageCreatedAt', descending: true)
-              .snapshots(),
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            final chatRoomListData = snapshot.data.documents;
-            // print('streambuilder: ${chatRoomListData}');
-            return SingleChildScrollView(
-              child: SizedBox(
-                // height: 500,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: chatRoomListData.length,
-                  itemBuilder: (ctx, index) => ListTile(
-                    // title:Text('chats chatData'),
-                    key: ValueKey(chatRoomListData[index].documentID),
-                    title: Text(chatRoomListData[index]['chatUserName']),
-                    subtitle: Text(chatRoomListData[index]['lastMessage']),
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          chatRoomListData[index]['chatUserImageUrl']),
-                      radius: 25,
-                    ),
-                    trailing: Text(DateFormat.yMMMd().format(
-                        chatRoomListData[index]['lastMessageCreatedAt']
-                            .toDate())),
-                    isThreeLine: true,
-                    onTap: () {
-                      // print(chatRoomListData[index].data());
-                      ChatRoomController.instance.chatContinue(context, {
-                        ...chatRoomListData[index].data(),
-                        'chatRoomId': chatRoomListData[index].documentID
-                      });
-                      // print(chatData[index].documentID);
-                    },
-                  ),
-                ),
-              ),
-            );
-          }),
+      body: _bodyController(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
+            icon: Icon(
+              Icons.people,
+              color: Colors.grey,
+            ),
             label: 'Users',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble),
+            icon: Icon(
+              Icons.chat_bubble,
+              color: Colors.grey,
+            ),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz),
+            icon: Icon(
+              Icons.more_horiz,
+              color: Colors.grey,
+            ),
             label: 'Etc',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.emoji_people,
+              color: Colors.grey,
+            ),
+            label: 'Guest',
           ),
         ],
         currentIndex: _currentBottomNavigationIndex,

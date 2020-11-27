@@ -22,6 +22,7 @@ class ChatRoomController {
     Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
       'chatRoomId': chatUserInfo['chatRoomId'],
       'chatRoomType': chatUserInfo['chatRoomType'],
+      'chatRoomPath': chatUserInfo['chatRoomPath'],
       'chatUserId': chatUserInfo['chatUserId'],
       'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
       'chatUserName': chatUserInfo['chatUserName'],
@@ -63,6 +64,7 @@ class ChatRoomController {
         Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
           'chatRoomId': chatRoomId,
           'chatRoomType': '1on1',
+          'chatRoomPath':'1on1/chatRooms/$chatRoomId',
           'chatUserId': chatUserInfo['chatUserId'],
           'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
           'chatUserName': chatUserInfo['chatUserName'],
@@ -81,6 +83,7 @@ class ChatRoomController {
           .doc(chatRoomId)
           .set({
         'chatRoomType': '1on1',
+        'chatRoomPath':'1on1/chatRooms/$chatRoomId',
         'chatUserId': chatUserInfo['chatUserId'],
         'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
         'chatUserName': chatUserInfo['chatUserName'],
@@ -92,6 +95,7 @@ class ChatRoomController {
           .doc(chatRoomId)
           .set({
         'chatRoomType': '1on1',
+        'chatRoomPath':'1on1/chatRooms/$chatRoomId',
         'chatUserId': _user.uid,
         'chatUserImageUrl': userSelfData['image_url'],
         'chatUserName': userSelfData['username'],
@@ -129,6 +133,30 @@ class ChatRoomController {
           .where('roll', isEqualTo:'advisor')
           .get();
 print('hatWithGuest advisorname : ${advisorInfo.docs[0]['username']}');
+ await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user.uid)
+          .collection('chatRooms')
+          .doc(chatRoomId)
+          .set({
+        'chatRoomType': 'withGuest',
+        'chatRoomPath':'withGuest/$docId/$chatRoomId',
+        'chatUserId': advisorInfo.docs[0].id,
+    'chatUserImageUrl': advisorInfo.docs[0]['image_url'],
+        'chatUserName': advisorInfo.docs[0]['username'],
+      });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(advisorInfo.docs[0].id)
+          .collection('chatRooms')
+          .doc(chatRoomId)
+          .set({
+        'chatRoomType': 'withGuest',
+        'chatRoomPath':'withGuest/$docId/$chatRoomId',
+        'chatUserId': _user.uid,
+        'chatUserImageUrl': guestInfo['image_url'],
+        'chatUserName': guestInfo['username'],
+      });
     await FirebaseFirestore.instance
         .collection('chats')
         .doc('withGuest')

@@ -1,4 +1,5 @@
-import 'dart:io';
+// import 'dart:io';
+// import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../widgets/chat/auth_form.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase/firebase.dart' as fb;
+// import 'package:firebase/firebase.dart' as fb;
+
 
 class AuthPage extends StatefulWidget {
   @override
@@ -17,7 +19,7 @@ class _AuthPageState extends State<AuthPage> {
   final _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isLoading = false;
-  File _imageFile;
+  // File _imageFile;
 
   void _submitAuthForm(
     String email,
@@ -31,7 +33,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       setState(() {
         _isLoading = true;
-        _imageFile = File('assets/images/user_image_default.png');
+        // _imageFile = File('assets/images/user_image_default.png');
       });
       if (isSignIn) {
         authResult = await _auth.signInWithEmailAndPassword(
@@ -85,13 +87,15 @@ class _AuthPageState extends State<AuthPage> {
       String imageUrl;
       var ref;
       if (kIsWeb) {
-        ref = fb
-            .storage()
-            .refFromURL('gs://chat-waiting-trinity.appspot.com')
-            .child('user_image') //sub folder
-            .child('user_image_default.png'); //f
-        imageUrl = await ref.getDownloadURL();
-        imageUrl = imageUrl.toString();
+        //firebase 7.3 can not be working with mobile app.
+        // ref = fb
+        //     .storage()
+        //     .refFromURL('gs://chat-waiting-trinity.appspot.com')
+        //     .child('user_image') //sub folder
+        //     .child('user_image_default.png'); //f
+        // imageUrl = await ref.getDownloadURL();
+        // imageUrl = imageUrl.toString();
+        imageUrl = 'https://firebasestorage.googleapis.com/v0/b/chat-waiting-trinity.appspot.com/o/user_image%2Fuser_image_default.png?alt=media&token=a89351f1-39dc-419a-a0d4-8ff9fd226823';
       } else {
         ref = FirebaseStorage.instance
             .ref() //access root clould strage

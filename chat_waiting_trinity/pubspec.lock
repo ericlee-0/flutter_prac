@@ -79,7 +79,7 @@ packages:
     source: hosted
     version: "1.2.0-nullsafety.1"
   firebase:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase
       url: "https://pub.dartlang.org"
@@ -322,13 +322,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.19-nullsafety.2"
-  twilio_flutter:
-    dependency: "direct main"
-    description:
-      name: twilio_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.5"
   typed_data:
     dependency: transitive
     description:
