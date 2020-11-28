@@ -147,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _mainPage() {
+    print('main page');
     if (_selectedPage == SelectPage.waiting) {
       return StreamBuilder(
           stream: Auth.instance.authState,
@@ -175,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             if (userSnapshot.hasData) {
               // print(user.uid);
-              return kIsWeb ? GuestChatPage():ChatRoomListPage();
+             return FirebaseAuth.instance.currentUser.uid == 'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'?  GuestChatPage() : ChatRoomListPage();
             }
             return AuthPage();
           });

@@ -39,12 +39,9 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       });
     }
     if (index == 2) {
-      Navigator.of(context).pushNamed(ChatRoomPage.routeName);
-    }
-    if (index == 3) {
       setState(() {
         // _guestChatList = true;
-        _currentBottomNavigationIndex = 3;
+        _currentBottomNavigationIndex = 2;
       });
     }
   }
@@ -52,10 +49,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
   Widget _bodyController() {
     if (_currentBottomNavigationIndex == 0) {
       return UserList(_user.uid);
-    } else if (_currentBottomNavigationIndex == 3) {
-      return GuestChatList(_user.uid);
     } else if (_currentBottomNavigationIndex == 2) {
-      return Text('text');
+      return GuestChatList(_user.uid); 
     } else {
       return StreamBuilder(
         // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
@@ -197,13 +192,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
             ),
             label: 'Chats',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.more_horiz,
-              color: Colors.grey,
-            ),
-            label: 'Etc',
-          ),
+          
           BottomNavigationBarItem(
             icon: Icon(
               Icons.emoji_people,
