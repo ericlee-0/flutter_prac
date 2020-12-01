@@ -204,88 +204,93 @@ class _AuthFormState extends State<AuthForm> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Container(
-        child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              // width: ,
-              child: RaisedButton(
-                padding: EdgeInsets.only(top: 3.0, bottom: 3.0, left: 3.0),
-                color: const Color(0xFF4285F4),
-                onPressed: () => widget.signInWithGoogle(context),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/images/google-logo.png',
-                      height: 40.0,
-                    ),
-                    Container(
-                        padding: EdgeInsets.only(left: 20.0, right: 20.0),
-                        child: Text(
-                          "Sign in with Google",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        )),
-                  ],
+      child: SingleChildScrollView(
+        child: Container(
+          child: Column(
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(height: 100,),
+              SizedBox(
+                // width: ,
+                child: RaisedButton(
+                  padding: EdgeInsets.only(top: 3.0, bottom: 3.0, left: 3.0),
+                  color: const Color(0xFF4285F4),
+                  onPressed: () => widget.signInWithGoogle(context),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/google-logo.png',
+                        height: 40.0,
+                      ),
+                      Container(
+                          padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                          child: Text(
+                            "Sign in with Google",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Card(
-              margin: EdgeInsets.all(20),
-              child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Form(
-                    key: _phoneFormKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          key: ValueKey('phone'),
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                              hintText: 'type phone number ex) 6478585678'),
-                          validator: (value) {
-                            if (value.isEmpty || value.length != 10) {
-                              return 'Prease enter a valid phone number.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            // setState(() {
-                            _phoneNo = '+1' + value;
-                            print(_phoneNo);
-                            // });
-                          },
-                        ),
-                        // if (_codeSent)
-                        //   TextFormField(
-                        //     key: ValueKey('phone_verify'),
-                        //     keyboardType: TextInputType.phone,
-                        //     decoration: InputDecoration(hintText: 'Enter OTP'),
-                        //     onChanged: (value) {
-                        //       setState(() {
-                        //         _smsCode = value;
-                        //       });
-                        //     },
-                        //   ),
-                        if (widget.isLoading) CircularProgressIndicator(),
-                        if (!widget.isLoading)
-                          RaisedButton(
-                            child: Text('Login'),
-                            onPressed: () {
-                              _submitPhone();
+              Card(
+                margin: EdgeInsets.all(20),
+                child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Form(
+                      key: _phoneFormKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            key: ValueKey('phone'),
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                                hintText: 'Phone number ex) 6478585678'),
+                            validator: (value) {
+                              if (value.isEmpty || value.length != 10) {
+                                return 'Prease enter a valid phone number.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              // setState(() {
+                              _phoneNo = '+1' + value;
+                              print(_phoneNo);
+                              // });
                             },
                           ),
-                      ],
-                    ),
-                  )),
-            ),
-            // SizedBox(height: 100),
-            Card(
-              margin: EdgeInsets.all(20),
-              child: SingleChildScrollView(
+                          // if (_codeSent)
+                          //   TextFormField(
+                          //     key: ValueKey('phone_verify'),
+                          //     keyboardType: TextInputType.phone,
+                          //     decoration: InputDecoration(hintText: 'Enter OTP'),
+                          //     onChanged: (value) {
+                          //       setState(() {
+                          //         _smsCode = value;
+                          //       });
+                          //     },
+                          //   ),
+                          if (widget.isLoading) CircularProgressIndicator(),
+                          if (!widget.isLoading)
+                            Padding(
+                              padding: const EdgeInsets.only(top:15),
+                              child: RaisedButton(
+                                child: Text('Login'),
+                                onPressed: () {
+                                  _submitPhone();
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    )),
+              ),
+              // SizedBox(height: 100),
+              Card(
+                margin: EdgeInsets.all(20),
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Form(
@@ -374,8 +379,8 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

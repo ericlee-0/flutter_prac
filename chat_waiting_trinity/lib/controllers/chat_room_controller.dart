@@ -19,6 +19,14 @@ class ChatRoomController {
         .collection('users')
         .doc(_user.uid)
         .get();
+    if (chatUserInfo['chatUserName'] == 'guest' || chatUserInfo['chatUserName'] == 'test') {
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatUserInfo['chatRoomPath'])
+          .update({'chatBegin': true});
+    }
+    // print('chatroompath ');
+    // chatUserInfo['chatRoomPath']);
     Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
       'chatRoomId': chatUserInfo['chatRoomId'],
       'chatRoomType': chatUserInfo['chatRoomType'],
@@ -120,8 +128,8 @@ class ChatRoomController {
   }
 
   Future<Map<String, dynamic>> chatWithGuest(
-    // BuildContext context,
-  ) async {
+      // BuildContext context,
+      ) async {
     final now = DateTime.now();
     final String chatRoomId = now.toString();
     final String docId = DateFormat('yyyy/MM/dd').format(now);
@@ -158,6 +166,7 @@ class ChatRoomController {
       'chatUserId': _user.uid,
       'chatUserImageUrl': guestInfo['image_url'],
       'chatUserName': guestInfo['username'],
+      'createdAt': chatRoomId
     });
     await FirebaseFirestore.instance
         .collection('chats')
@@ -166,6 +175,7 @@ class ChatRoomController {
         .doc(chatRoomId)
         .set({
       'chatBegin': false,
+      'chatFinished': false,
       'chatRoomId': chatRoomId,
       'chatRoomType': 'withGuest',
       'guestId': _user.uid,
@@ -200,7 +210,7 @@ class ChatRoomController {
     //   'userSelfImageUrl': guestInfo['image_url'],
     //   'userSelfName': guestInfo['username'],
 
-    //  
+    //
     // });
   }
 }

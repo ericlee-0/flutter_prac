@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth.dart';
 import '../../widgets/chat/user_list.dart';
 import '../../widgets/chat/guest_chat_list.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ChatRoomListPage extends StatefulWidget {
   static const routeName = '/chat-room-list';
@@ -24,6 +25,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
   final _user = FirebaseAuth.instance.currentUser;
   // var _guestChatList = false;
 
+  
   void _bottomNavigation(int index) {
     print('bottom navy select: $index');
     if (index == 0) {

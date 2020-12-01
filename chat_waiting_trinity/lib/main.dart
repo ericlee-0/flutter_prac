@@ -146,6 +146,32 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+Future<void> _showExitDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Warning'),
+          content: Text('Do you want sign out?'),
+          actions: [
+            FlatButton(
+                child: Text('Yes'),
+                // onPressed: () => Navigator.pop(c, true),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  FirebaseAuth.instance.signOut();
+                  // Navigator.popAndPushNamed(context, '/home');
+                }),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+          ],
+        );
+      },
+    );
+  }
   Widget _mainPage() {
     print('main page');
     if (_selectedPage == SelectPage.waiting) {
@@ -177,6 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (userSnapshot.hasData) {
               // print(user.uid);
              return FirebaseAuth.instance.currentUser.uid == 'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'?  GuestChatPage() : ChatRoomListPage();
+            // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
             }
             return AuthPage();
           });
@@ -184,6 +211,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: kIsWeb ? Text('Join Waiting') : Text('Current Waiting List'),
+        actions: [
+          ( kIsWeb == true || (FirebaseAuth.instance.currentUser != null && FirebaseAuth.instance.currentUser.uid == 'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'))
+              ? IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: () => _showExitDialog()):IconButton(
+                  icon: Icon(Icons.login),
+                  onPressed: () {}) ]
       ),
       drawer: kIsWeb ? null : WaitingListDrawer(_selectListOption),
       body: Container(
