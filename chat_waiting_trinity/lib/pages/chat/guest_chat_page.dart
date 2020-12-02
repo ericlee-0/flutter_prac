@@ -14,23 +14,55 @@ class GuestChatPage extends StatefulWidget {
 
 class _GuestChatPageState extends State<GuestChatPage> {
   bool _isBegin = false;
-  Map<String, dynamic> _chatRoomData;
+
   String _statusMessage = 'Waiting for  chat with Advisor....';
 
   Future<void> _guestController() async {
-    _chatRoomData = await ChatRoomController.instance.chatWithGuest();
+    final chatRoomData = await ChatRoomController.instance.chatWithGuest();
+    print('created guest chat room');
     FirebaseFirestore.instance
         .collection('chats')
-        .doc(_chatRoomData['chatRoomPath'])
+        .doc(chatRoomData['chatRoomPath'])
         .snapshots()
         .listen((event) {
       if (event.data()['chatBegin'] == true) {
-        _isBegin = true;
-        Navigator.pushNamedAndRemoveUntil(context, ChatRoomPage.routeName, ModalRoute.withName('/home'),arguments: _chatRoomData);
-          
+        _isBegin = false;
+        Navigator.pushNamedAndRemoveUntil(
+            context, ChatRoomPage.routeName, ModalRoute.withName('/home'),
+            arguments: chatRoomData);
       }
     });
     // return Text(_statusMessage);
+  }
+
+  Future<void> _showConfirmDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(''),
+          content: Text('Do you want to chat with advisor?'),
+          actions: [
+            FlatButton(
+                child: Text('Yes'),
+                // onPressed: () => Navigator.pop(c, true),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _isBegin = true;
+                  });
+
+                  // Navigator.popAndPushNamed(context, '/home');
+                }),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -39,65 +71,24 @@ class _GuestChatPageState extends State<GuestChatPage> {
     // if (_isBegin)
     //   Navigator.pushNamed(context, ChatRoomPage.routeName,
     //       arguments: _chatRoomData);
-    _guestController();
+    if (_isBegin) {
+      _guestController();
+    }
     return WillPopScope(
       child: Scaffold(
-          appBar: AppBar(),
-          body: Center(
-            child: Column(
-              children: [
-                CircularProgressIndicator(),
-                Text(_statusMessage),
-              ],
-            ),
-          )
-
-          // body: FutureBuilder(
-          //   future: ChatRoomController.instance.chatWithGuest(),
-          //   builder: (ctx, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return Center(
-          //         child: CircularProgressIndicator(),
-          //       );
-          //     }
-          //     print('future ${snapshot.data}');
-          //     _chatRoomData = snapshot.data;
-          //     return StreamBuilder(
-          //       stream: FirebaseFirestore.instance
-          //           .collection('chats')
-          //           .doc(snapshot.data['chatRoomPath'])
-          //           // .collection('2020/11/27${snapshot.data['chatRoomId']}')
-          //           // .where('chatRoomId', isEqualTo: snapshot.data['chatRoomId'])
-          //           .snapshots()
-          //       // .snapshot.data['chatRoomPath'])
-          //       ,
-          //       builder: (ctx, snapshot2) {
-          //         Widget children;
-          //         if (snapshot2.connectionState == ConnectionState.waiting) {
-          //           children = Center(
-          //             child: CircularProgressIndicator(),
-          //           );
-          //         } else {
-          //           if (snapshot2.data['chatBegin'] == false)
-          //             children = Center(
-          //                 child: Text('Waiting for  chat with Advisor....'));
-          //           else {
-          //             children = Center(child: Text('Advisor Responded....'));
-          //             // setState(() {
-          //             _isBegin = true;
-          //             // });
-
-          //           }
-          //         }
-          //         // print('stream ${snapshot2.data['chatBegin']}');
-
-          //         return children;
-          //         //  Text('Connected chat with Advisor....');
-          //       },
-          //     );
-          //   },
-          // ),
-          ),
+        appBar: AppBar(),
+        body: _isBegin
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    Text(_statusMessage),
+                  ],
+                ),
+              )
+            : _showConfirmDialog(),
+      ),
       onWillPop: () => showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(

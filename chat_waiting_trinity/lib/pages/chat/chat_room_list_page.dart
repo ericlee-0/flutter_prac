@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './user_profile_edit_page.dart';
-import './user_list_page.dart';
-import 'chat_room_page.dart';
+
+// import 'chat_room_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth.dart';
 import '../../widgets/chat/user_list.dart';
 import '../../widgets/chat/guest_chat_list.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ChatRoomListPage extends StatefulWidget {
@@ -24,8 +25,39 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
   int _currentBottomNavigationIndex = 1;
   final _user = FirebaseAuth.instance.currentUser;
   // var _guestChatList = false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final fbm = FirebaseMessaging();
+    fbm.requestNotificationPermissions();
+    fbm.configure(
+      onMessage: (msg) {
+        print(msg);
+        return;
+      },
+      onLaunch: (msg) {
+        print(msg);
+        return;
+      },
+      onResume: (msg) {
+        print(msg);
+        return;
+      },
+      //  onBackgroundMessage: (msg) {
+      //   print(msg);
+      //   return;
+      // }
+    );
+    if (_user.uid == 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
+      
+      fbm.subscribeToTopic('chatGuest');
+      // fbm.subscribeToTopic('chats');
+    }
+    fbm.subscribeToTopic('chats');
+    fbm.subscribeToTopic('users');
+  }
 
-  
   void _bottomNavigation(int index) {
     print('bottom navy select: $index');
     if (index == 0) {
@@ -52,7 +84,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
     if (_currentBottomNavigationIndex == 0) {
       return UserList(_user.uid);
     } else if (_currentBottomNavigationIndex == 2) {
-      return GuestChatList(_user.uid); 
+      return GuestChatList(_user.uid);
     } else {
       return StreamBuilder(
         // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
@@ -194,7 +226,6 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
             ),
             label: 'Chats',
           ),
-          
           BottomNavigationBarItem(
             icon: Icon(
               Icons.emoji_people,

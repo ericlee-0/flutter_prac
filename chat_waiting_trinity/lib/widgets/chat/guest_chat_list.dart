@@ -43,14 +43,14 @@ class _GuestChatListState extends State<GuestChatList> {
           .snapshots(),
 
       builder: (ctx, snapshot) {
-        // print('user : ${_user.uid}');
+        // print('user : ${}');
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
         final chatRoomListData = snapshot.data.documents;
-        // print('streambuilder: ${chatRoomListData}');
+        print('streambuilder: ${chatRoomListData.length}');
         return ListView.builder(
           shrinkWrap: true,
           itemCount: chatRoomListData.length,

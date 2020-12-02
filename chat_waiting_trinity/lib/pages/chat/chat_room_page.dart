@@ -1,6 +1,6 @@
 import 'package:chat_waiting_trinity/widgets/chat/guest_chat_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,26 +18,7 @@ class ChatRoomPage extends StatefulWidget {
 class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
-    final fbm = FirebaseMessaging();
-    fbm.requestNotificationPermissions();
-    fbm.configure(
-      onMessage: (msg) {
-        print(msg);
-        return;
-      },
-      onLaunch: (msg) {
-        print(msg);
-        return;
-      },
-      onResume: (msg) {
-        print(msg);
-        return;
-      },
-      //  onBackgroundMessage: (msg) {
-      //   print(msg);
-      //   return;
-      // }
-    );
+    
     super.initState();
   }
 

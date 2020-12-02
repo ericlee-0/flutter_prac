@@ -2,7 +2,7 @@
 import './pages/waiting/waiting_time_page.dart';
 import 'package:flutter/foundation.dart';
 
-import './pages/chat/user_list_page.dart';
+// import './pages/chat/user_list_page.dart';
 import './widgets/waiting/waiting_list.dart';
 
 import 'package:provider/provider.dart';
@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> {
           '/home': (ctx) => MyHomePage(),
           UserProfileEditPage.routeName: (ctx) =>
               UserProfileEditPage(Auth.instance.userId),
-          UserListPage.routeName: (ctx) => UserListPage(),
+          // UserListPage.routeName: (ctx) => UserListPage(),
           ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
           ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
           UserProfilePage.routeName: (ctx) => UserProfilePage(),

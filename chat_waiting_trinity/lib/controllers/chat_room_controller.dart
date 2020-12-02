@@ -166,7 +166,8 @@ class ChatRoomController {
       'chatUserId': _user.uid,
       'chatUserImageUrl': guestInfo['image_url'],
       'chatUserName': guestInfo['username'],
-      'createdAt': chatRoomId
+      'chatFinished':false,
+      'createdAt': now
     });
     await FirebaseFirestore.instance
         .collection('chats')
@@ -175,7 +176,7 @@ class ChatRoomController {
         .doc(chatRoomId)
         .set({
       'chatBegin': false,
-      'chatFinished': false,
+      // 'chatFinished': false,
       'chatRoomId': chatRoomId,
       'chatRoomType': 'withGuest',
       'guestId': _user.uid,
