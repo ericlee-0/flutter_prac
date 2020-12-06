@@ -37,6 +37,7 @@ dependencies:
   intl: ^0.16.1
   provider: ^4.3.2+2
   firebase_messaging: ^7.0.3
+  flutter_app_badger: ^1.1.2
   
   
   

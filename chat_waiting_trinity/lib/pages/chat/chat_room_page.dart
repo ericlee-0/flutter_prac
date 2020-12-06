@@ -1,3 +1,4 @@
+import '../../controllers/chat_room_controller.dart';
 import 'package:chat_waiting_trinity/widgets/chat/guest_chat_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,11 +19,10 @@ class ChatRoomPage extends StatefulWidget {
 class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   void initState() {
-    
     super.initState();
   }
 
-  Future<void> _showExitDialog() async {
+  Future<void> _showExitDialog(Map<String, dynamic> args) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -34,7 +34,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             FlatButton(
                 child: Text('Yes'),
                 // onPressed: () => Navigator.pop(c, true),
-                onPressed: () {
+                onPressed: () async {
+                  await ChatRoomController.instance
+                      .chatFinish(args['chatRoomPath'], args['userSelfName']);
                   Navigator.of(context).pop();
                   Navigator.popAndPushNamed(context, '/home');
                 }),
@@ -48,10 +50,24 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
+  Future<void> _read(String userId, String roomId) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc('$userId/chatRooms/$roomId')
+        .update({'unRead': 0});
+    print('readed');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final _user = FirebaseAuth.instance.currentUser;
     final Map<String, dynamic> args = ModalRoute.of(context).settings.arguments;
     print('chatroompage');
+    final isSelf = _user.uid == args['userSelfId'];
+    if (isSelf) {
+      _read(args['userSelfId'], args['chatRoomId']);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat Room'),
@@ -59,7 +75,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           (args['userSelfName'] == 'guest' || args['userSelfName'] == 'test')
               ? IconButton(
                   icon: Icon(Icons.exit_to_app),
-                  onPressed: () => _showExitDialog())
+                  onPressed: () => _showExitDialog(args))
               : DropdownButton(
                   underline: Container(),
                   icon: Icon(
@@ -137,6 +153,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                     } else if (itemIdentifier == 'finisihed') {
                       // print('args');
                       // print('args ${args['userSelfId']} ${args['chatRoomId']} ');
+                      await ChatRoomController.instance.chatFinish(
+                          args['chatRoomPath'], args['userSelfName']);
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc(args['userSelfId'])

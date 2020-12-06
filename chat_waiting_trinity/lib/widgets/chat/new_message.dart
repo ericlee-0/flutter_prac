@@ -18,7 +18,7 @@ class _NewMessageState extends State<NewMessage> {
     // final user = FirebaseAuth.instance.currentUser;
     // final userData = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
     final Timestamp createdTime = Timestamp.now();
-    print('new message charoompath : ${chatInfo['chatRoomPath']}');
+    // print('new message charoompath : ${chatInfo['chatRoomPath']}');
     try{
     await FirebaseFirestore.instance
           .collection('chats')
@@ -27,6 +27,7 @@ class _NewMessageState extends State<NewMessage> {
           // .doc(chatInfo['chatRoomId'])
           .collection('chatMessages')
           .add({
+            'read':false,
         'message': _enteredMessage,
         'createdAt': createdTime,
         'sendUserId': chatInfo['userSelfId'],
@@ -53,7 +54,8 @@ class _NewMessageState extends State<NewMessage> {
           .doc(chatInfo['chatRoomId'])
           .update({
         'lastMessage': _enteredMessage,
-        'lastMessageCreatedAt': createdTime
+        'lastMessageCreatedAt': createdTime,
+        'unRead':FieldValue.increment(1)
       });
     }catch(e){
       print(e);

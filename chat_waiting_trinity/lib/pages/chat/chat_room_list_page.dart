@@ -14,6 +14,8 @@ import '../../widgets/chat/user_list.dart';
 import '../../widgets/chat/guest_chat_list.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
+
 
 class ChatRoomListPage extends StatefulWidget {
   static const routeName = '/chat-room-list';
@@ -49,13 +51,8 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       //   return;
       // }
     );
-    if (_user.uid == 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
-      
-      fbm.subscribeToTopic('chatGuest');
-      // fbm.subscribeToTopic('chats');
-    }
-    fbm.subscribeToTopic('chats');
-    fbm.subscribeToTopic('users');
+
+    fbm.subscribeToTopic(_user.uid);
   }
 
   void _bottomNavigation(int index) {
@@ -78,6 +75,30 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
         _currentBottomNavigationIndex = 2;
       });
     }
+  }
+
+  Widget _badge(int value) {
+    FlutterAppBadger.updateBadgeCount(value);
+    return (value == 0)? SizedBox.shrink() :Container(
+      padding: EdgeInsets.all(2.0),
+      // color: Theme.of(context).accentColor,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        color: Colors.red,
+      ),
+      constraints: BoxConstraints(
+        minWidth: 16,
+        minHeight: 16,
+      ),
+      child: Text(
+        value.toString(),
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+        ),
+      ),
+    );
   }
 
   Widget _bodyController() {
@@ -107,28 +128,40 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           return ListView.builder(
             shrinkWrap: true,
             itemCount: chatRoomListData.length,
-            itemBuilder: (ctx, index) => ListTile(
-              // title:Text('chats chatData'),
-              key: ValueKey(chatRoomListData[index].documentID),
-              title: Text(chatRoomListData[index]['chatUserName']),
-              subtitle: Text(chatRoomListData[index]['lastMessage']),
-              leading: CircleAvatar(
-                backgroundImage:
-                    NetworkImage(chatRoomListData[index]['chatUserImageUrl']),
-                radius: 25,
-              ),
-              trailing: Text(DateFormat.yMMMd().format(
-                  chatRoomListData[index]['lastMessageCreatedAt'].toDate())),
-              isThreeLine: true,
-              onTap: () {
-                // print(chatRoomListData[index].data());
-                ChatRoomController.instance.chatContinue(context, {
-                  ...chatRoomListData[index].data(),
-                  'chatRoomId': chatRoomListData[index].documentID
-                });
-                // print(chatData[index].documentID);
-              },
-            ),
+            itemBuilder: (ctx, index) {
+              print('unread No :${chatRoomListData[index]['unRead']}');
+              final unread = chatRoomListData[index]['unRead'];
+              return ListTile(
+                // title:Text('chats chatData'),
+                key: ValueKey(chatRoomListData[index].documentID),
+                title: Text(chatRoomListData[index]['chatUserName']),
+                subtitle: Text(chatRoomListData[index]['lastMessage']),
+                leading: CircleAvatar(
+                  backgroundImage:
+                      NetworkImage(chatRoomListData[index]['chatUserImageUrl']),
+                  radius: 25,
+                ),
+                trailing: Column(
+                  children: [
+                    Text(DateFormat.yMMMd().format(chatRoomListData[index]
+                            ['lastMessageCreatedAt']
+                        .toDate())),
+                    // Badge(value: chatRoomListData[index]['unRead'].toString()),
+                    // (unread == 0)? Container() :_badge(unread.toString()),
+                    _badge(unread),
+                  ],
+                ),
+                isThreeLine: true,
+                onTap: () {
+                  // print(chatRoomListData[index].data());
+                  ChatRoomController.instance.chatContinue(context, {
+                    ...chatRoomListData[index].data(),
+                    'chatRoomId': chatRoomListData[index].documentID
+                  });
+                  // print(chatData[index].documentID);
+                },
+              );
+            },
           );
         },
       );

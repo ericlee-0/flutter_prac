@@ -11,41 +11,24 @@ admin.initializeApp();
 // });
 //https://firebase.google.com/docs/functions/firestore-events
 
-exports.myFunction = functions.firestore.document('users/{documents}')
-    .onCreate((snapshot, context) => {
-        // console.log(snapshot.data());
-        return admin.messaging().sendToTopic('users', {
-            notification: {
-                title: snapshot.data().username,
-                body: 'new user created',
-                clickAction: 'FLUTTER_NOTIFICATION_CLICK'
-            }
-        });
-
-
-        // return;
+exports.newChatMessage = functions.firestore.document('users/{userId}/chatRooms/{roomId}')
+    .onWrite((change, context) => {
+        if (change.after.data().chatRoomType === '1on1') {
+            const payload = { "notification": { "body": `${change.after.data().lastMessage}`, "title": `${change.after.data().chatUserName}` }, "data": { "click_action": "FLUTTER_NOTIFICATION_CLICK", "id": "1", "status": "done" } };
+            return admin.messaging().sendToTopic(context.params.userId, payload);
+        }
+        return null;
     });
 
 exports.requestGuestChat = functions.firestore.document('users/{userId}/chatRooms/{roomId}')
     .onCreate((snapshot, context) => {
-        if (context.params.userId === 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
-            if (snapshot.data().chatRoomType === 'withGuest') {
-                console.log('guest notification');
 
-                const payload = {"notification": {"body": "Plase answer ASAP.","title": "Guest requested a chat"}, "data": {"click_action": "FLUTTER_NOTIFICATION_CLICK", "id": "1", "status": "done"}};
+        if (snapshot.data().chatRoomType === 'withGuest') {
+            console.log('guest notification');
 
-                return admin.messaging().sendToTopic('chatGuest', payload);
-
-
-                
-            }
-          
+            const payload = { "notification": { "body": "Plase answer ASAP.", "title": "Guest requested a chat" }, "data": { "click_action": "FLUTTER_NOTIFICATION_CLICK", "id": "1", "status": "done" } };
+            return admin.messaging().sendToTopic(context.params.userId, payload);
         }
-        else{
-        console.log('chat notification');
-        
-        const payload = {"notification": {"body": `${snapshot.data().lastMessage}` ,"title": `${snapshot.data().chatUserName}`}, "data": {"click_action": "FLUTTER_NOTIFICATION_CLICK", "id": "1", "status": "done"}};
+        return null;
 
-        return admin.messaging().sendToTopic('chats', payload);
-        }
     });

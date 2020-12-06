@@ -6,8 +6,11 @@ import './message_bubble.dart';
 class Messages extends StatelessWidget {
   final String chatRoomPath;
   Messages(this.chatRoomPath);
+
+  
   @override
   Widget build(BuildContext context) {
+    // print('chatroompath $chatRoomPath');
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('chats')
@@ -22,12 +25,13 @@ class Messages extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         final chatDocs = chatSnapshot.data.documents;
+        // print('chatmessage path ${chatDocs[0].reference.path}');
         return ListView.builder(
           reverse: true,
           itemCount: chatDocs.length,
-          itemBuilder: (ctx, index) => MessageBubble(
-              ValueKey(chatDocs[index].documentID), chatDocs[index]),
-        );
+          itemBuilder: (ctx, index) { return MessageBubble(
+              ValueKey(chatDocs[index].documentID), chatDocs[index]);
+          });
       },
     );
   }

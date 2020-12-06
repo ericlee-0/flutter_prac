@@ -13,13 +13,15 @@ class GuestChatList extends StatefulWidget {
 
 class _GuestChatListState extends State<GuestChatList> {
   DateTime today;
-  DateTime roundUpTime ;
+  // DateTime roundUpTime ;
+  String docId;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     today = DateTime.now();
-    roundUpTime = today.subtract(Duration(hours: today.hour ));
+    // roundUpTime = today.subtract(Duration(hours: today.hour ));
+    docId = DateFormat('yyyy/MM/dd').format(today);
 
   }
 
@@ -30,15 +32,17 @@ class _GuestChatListState extends State<GuestChatList> {
 
   @override
   Widget build(BuildContext context) {
-    print('roundup time $roundUpTime');
+    // print('roundup time $roundUpTime');
     return StreamBuilder(
       // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
       stream: FirebaseFirestore.instance
           .collection('users')
           .doc(widget.advisorId)
-          .collection('chatRooms')
-          .where('chatRoomType', isEqualTo: 'withGuest')
-          .where('createdAt', isGreaterThan: roundUpTime)
+          .collection(docId)
+          // .doc(docId)
+          // .where('chatRoomType', isEqualTo: 'withGuest')
+          // .where('createdAt', isGreaterThan: roundUpTime)
+          .orderBy('createdAt')
           // .orderBy('lastMessageCreatedAt', descending: true)
           .snapshots(),
 
@@ -50,7 +54,7 @@ class _GuestChatListState extends State<GuestChatList> {
           );
         }
         final chatRoomListData = snapshot.data.documents;
-        print('streambuilder: ${chatRoomListData.length}');
+        // print('streambuilder: ${chatRoomListData.length}');
         return ListView.builder(
           shrinkWrap: true,
           itemCount: chatRoomListData.length,

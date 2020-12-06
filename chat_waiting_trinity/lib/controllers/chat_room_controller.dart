@@ -19,7 +19,8 @@ class ChatRoomController {
         .collection('users')
         .doc(_user.uid)
         .get();
-    if (chatUserInfo['chatUserName'] == 'guest' || chatUserInfo['chatUserName'] == 'test') {
+    if (chatUserInfo['chatUserName'] == 'guest' ||
+        chatUserInfo['chatUserName'] == 'test') {
       await FirebaseFirestore.instance
           .collection('chats')
           .doc(chatUserInfo['chatRoomPath'])
@@ -61,13 +62,13 @@ class ChatRoomController {
           .where('chatUserId', isEqualTo: chatUserInfo['chatUserId'])
           .get();
 
-      // print(chatRoomsnapshots1.docs[0].id);
+      // print(chatRoomsnapshots.docs.length);
       // print(chatRoomsnapshots.docs[0].data());
       // chatRoomsnapshots.docs.forEach((element) {
       //   print(element.id);
       // });
       if (chatRoomsnapshots.docs.length != 0) {
-        print(chatRoomsnapshots.docs.last.id);
+        // print(chatRoomsnapshots.docs.last.id);
         final String chatRoomId = chatRoomsnapshots.docs.last.id;
         Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
           'chatRoomId': chatRoomId,
@@ -81,47 +82,65 @@ class ChatRoomController {
           'userSelfName': userSelfData['username'],
           // 'chatUserImageUrl':userData[index]['image_url'],
         });
-        return;
+      } else {
+        final String chatRoomId = DateTime.now().toString();
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user.uid)
+            .collection('chatRooms')
+            .doc(chatRoomId)
+            .set({
+          'chatRoomType': '1on1',
+          'chatRoomPath': '1on1/chatRooms/$chatRoomId',
+          'chatUserId': chatUserInfo['chatUserId'],
+          'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
+          'chatUserName': chatUserInfo['chatUserName'],
+          'unRead':0
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(chatUserInfo['chatUserId'])
+            .collection('chatRooms')
+            .doc(chatRoomId)
+            .set({
+          'chatRoomType': '1on1',
+          'chatRoomPath': '1on1/chatRooms/$chatRoomId',
+          'chatUserId': _user.uid,
+          'chatUserImageUrl': userSelfData['image_url'],
+          'chatUserName': userSelfData['username'],
+          'unRead':0
+        });
+        await FirebaseFirestore.instance
+            .collection('chats')
+            .doc('1on1/chatRooms/$chatRoomId')
+            // .doc(chatRoomId)
+            .set({
+          // 'chatBegin': false,
+          // 'chatFinished': false,
+          'chatRoomId': chatRoomId,
+          'chatRoomPath': '1on1/chatRooms/$chatRoomId',
+          'chatRoomType': '1on1',
+          'chatUserId': chatUserInfo['chatUserId'],
+          'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
+          'chatUserName': chatUserInfo['chatUserName'],
+          'userSelfId': _user.uid,
+          'userSelfImageUrl': userSelfData['image_url'],
+          'userSelfName': userSelfData['username'],
+        });
+        Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
+          'chatRoomId': chatRoomId,
+          'chatRoomPath': '1on1/chatRooms/$chatRoomId',
+          'chatRoomType': '1on1',
+          'chatUserId': chatUserInfo['chatUserId'],
+          'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
+          'chatUserName': chatUserInfo['chatUserName'],
+          'userSelfId': _user.uid,
+          'userSelfImageUrl': userSelfData['image_url'],
+          'userSelfName': userSelfData['username'],
+          // 'chatUserImageUrl':userData[index]['image_url'],
+        });
+        // print(chatRoomsnapshots1.docs[0].data());
       }
-      final String chatRoomId = DateTime.now().toString();
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user.uid)
-          .collection('chatRooms')
-          .doc(chatRoomId)
-          .set({
-        'chatRoomType': '1on1',
-        'chatRoomPath': '1on1/chatRooms/$chatRoomId',
-        'chatUserId': chatUserInfo['chatUserId'],
-        'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
-        'chatUserName': chatUserInfo['chatUserName'],
-      });
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(chatUserInfo['chatUserId'])
-          .collection('chatRooms')
-          .doc(chatRoomId)
-          .set({
-        'chatRoomType': '1on1',
-        'chatRoomPath': '1on1/chatRooms/$chatRoomId',
-        'chatUserId': _user.uid,
-        'chatUserImageUrl': userSelfData['image_url'],
-        'chatUserName': userSelfData['username'],
-      });
-      Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
-        'chatRoomId': chatRoomId,
-        'chatRoomPath': '1on1/chatRooms/$chatRoomId',
-        'chatRoomType': '1on1',
-        'chatUserId': chatUserInfo['chatUserId'],
-        'chatUserImageUrl': chatUserInfo['chatUserImageUrl'],
-        'chatUserName': chatUserInfo['chatUserName'],
-        'userSelfId': _user.uid,
-        'userSelfImageUrl': userSelfData['image_url'],
-        'userSelfName': userSelfData['username'],
-        // 'chatUserImageUrl':userData[index]['image_url'],
-      });
-      // print(chatRoomsnapshots1.docs[0].data());
-
     } catch (e) {
       print(e);
     }
@@ -159,14 +178,14 @@ class ChatRoomController {
         .collection('users')
         .doc(advisorInfo.docs[0].id)
         .collection('chatRooms')
-        .doc(chatRoomId)
+        .doc('$docId/$chatRoomId')
         .set({
       'chatRoomType': 'withGuest',
       'chatRoomPath': 'withGuest/$docId/$chatRoomId',
       'chatUserId': _user.uid,
       'chatUserImageUrl': guestInfo['image_url'],
       'chatUserName': guestInfo['username'],
-      'chatFinished':false,
+      'chatFinished': false,
       'createdAt': now
     });
     await FirebaseFirestore.instance
@@ -213,5 +232,19 @@ class ChatRoomController {
 
     //
     // });
+  }
+
+  Future<void> chatFinish(String chatRoomPath, String userName) async {
+    final DateTime now = DateTime.now();
+    final Map<String, dynamic> systemMessage = {
+      'message': '$userName has finished chat.',
+      'createdAt': now,
+      'sendUserName': 'system',
+    };
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatRoomPath)
+        .collection('chatMessages')
+        .add(systemMessage);
   }
 }
