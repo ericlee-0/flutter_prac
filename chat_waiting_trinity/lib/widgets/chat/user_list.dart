@@ -4,7 +4,8 @@ import '../../pages/chat/user_profile_page.dart';
 
 class UserList extends StatelessWidget {
   final String userId;
-  UserList(this.userId);
+  final Future<QuerySnapshot> listData;
+  UserList({this.userId, this.listData,Key key}): super(key:key);
   //  Future<Map<String,dynamic>> _getMyData() async {
   //    final docRef = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   //    return docRef.data();
@@ -12,11 +13,12 @@ class UserList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: FirebaseFirestore.instance
-            .collection('users')
-            // .where('username',isEqualTo:'guest')
-            .orderBy('username', descending: true)
-            .get(),
+        // future: FirebaseFirestore.instance
+        //     .collection('users')
+        //     // .where('username',isEqualTo:'guest')
+        //     .orderBy('username', descending: true)
+        //     .get(),
+        future: listData,
         builder: (ctx, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(

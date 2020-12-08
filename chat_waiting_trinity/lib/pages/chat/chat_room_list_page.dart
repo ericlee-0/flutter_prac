@@ -16,7 +16,6 @@ import '../../widgets/chat/guest_chat_list.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 
-
 class ChatRoomListPage extends StatefulWidget {
   static const routeName = '/chat-room-list';
   @override
@@ -26,6 +25,7 @@ class ChatRoomListPage extends StatefulWidget {
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   int _currentBottomNavigationIndex = 1;
   final _user = FirebaseAuth.instance.currentUser;
+  int _newChatRoomCount=0;
   // var _guestChatList = false;
   @override
   void initState() {
@@ -79,33 +79,45 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
 
   Widget _badge(int value) {
     FlutterAppBadger.updateBadgeCount(value);
-    return (value == 0)? SizedBox.shrink() :Container(
-      padding: EdgeInsets.all(2.0),
-      // color: Theme.of(context).accentColor,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        color: Colors.red,
-      ),
-      constraints: BoxConstraints(
-        minWidth: 16,
-        minHeight: 16,
-      ),
-      child: Text(
-        value.toString(),
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-        ),
-      ),
-    );
+    return (value == 0)
+        ? SizedBox.shrink()
+        : Container(
+            padding: EdgeInsets.all(2.0),
+            // color: Theme.of(context).accentColor,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.red,
+            ),
+            constraints: BoxConstraints(
+              minWidth: 16,
+              minHeight: 16,
+            ),
+            child: Text(
+              value.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+              ),
+            ),
+          );
   }
 
+int _badgeControll(int formerValue,int newValue,){
+
+  if(formerValue == newValue){
+    return formerValue;
+  }
+  return newValue;
+
+
+
+}
   Widget _bodyController() {
     if (_currentBottomNavigationIndex == 0) {
-      return UserList(_user.uid);
+      // return UserList(_user.uid, );
     } else if (_currentBottomNavigationIndex == 2) {
-      return GuestChatList(_user.uid);
+      // return GuestChatList(_user.uid);
     } else {
       return StreamBuilder(
         // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
@@ -131,6 +143,7 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
             itemBuilder: (ctx, index) {
               print('unread No :${chatRoomListData[index]['unRead']}');
               final unread = chatRoomListData[index]['unRead'];
+              _newChatRoomCount = _badgeControll(_newChatRoomCount, unread);
               return ListTile(
                 // title:Text('chats chatData'),
                 key: ValueKey(chatRoomListData[index].documentID),
@@ -244,18 +257,29 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
       ),
       body: _bodyController(),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items:  <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.people,
-              color: Colors.grey,
-            ),
+            icon: Stack(children: [
+              Icon(
+                Icons.people,
+                color: Colors.grey,
+              ),
+              
+            ]),
             label: 'Users',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.chat_bubble,
-              color: Colors.grey,
+            icon: Stack(
+                          children: [Icon(
+                Icons.chat_bubble,
+                color: Colors.grey,
+              ),
+              Positioned(
+                top:0,
+                right:0,
+                child:_badge(_newChatRoomCount),
+              )
+              ]
             ),
             label: 'Chats',
           ),

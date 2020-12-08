@@ -152,7 +152,9 @@ class ChatRoomController {
     final now = DateTime.now();
     final String chatRoomId = now.toString();
     final String docId = DateFormat('yyyy/MM/dd').format(now);
-    final guestInfo = await FirebaseFirestore.instance
+print('chatwithguestbegin');
+    try{
+final guestInfo = await FirebaseFirestore.instance
         .collection('users')
         .doc(_user.uid)
         .get();
@@ -176,9 +178,9 @@ class ChatRoomController {
     });
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(advisorInfo.docs[0].id)
-        .collection('chatRooms')
-        .doc('$docId/$chatRoomId')
+        .doc('${advisorInfo.docs[0].id}/$docId/$chatRoomId')
+        // .collection('chatRooms')
+        // .doc('$docId/$chatRoomId')
         .set({
       'chatRoomType': 'withGuest',
       'chatRoomPath': 'withGuest/$docId/$chatRoomId',
@@ -219,19 +221,11 @@ class ChatRoomController {
 
       // 'chatUserImageUrl':userData[index]['image_url'],
     };
-    // Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: {
-    //   'chatRoomId': chatRoomId,
-    //   'chatRoomPath': 'withGuest/$docId/$chatRoomId',
-    //   'chatRoomType': 'withGuest',
-    //   'chatUserId': advisorInfo.docs[0].id,
-    //   'chatUserImageUrl': advisorInfo.docs[0]['image_url'],
-    //   'chatUserName': advisorInfo.docs[0]['username'],
-    //   'userSelfId': _user.uid,
-    //   'userSelfImageUrl': guestInfo['image_url'],
-    //   'userSelfName': guestInfo['username'],
-
-    //
-    // });
+    }catch(e){
+      print(e);
+    }
+    return {'error':true};
+   
   }
 
   Future<void> chatFinish(String chatRoomPath, String userName) async {

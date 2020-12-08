@@ -17,7 +17,39 @@ class _GuestChatPageState extends State<GuestChatPage> {
 
   String _statusMessage = 'Waiting for  chat with Advisor....';
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await showDialog<bool>(
+          context: context,
+          builder: (context) => new AlertDialog(
+                title: Text('Confirm'),
+                content: Text('Do you want to chat with advisor?'),
+                actions: [
+                  FlatButton(
+                      child: Text('Yes'),
+                      // onPressed: () => Navigator.pop(c, true),
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                        setState(() {
+                        _isBegin = true;
+                        });
+
+                        // Navigator.popAndPushNamed(context, '/home');
+                      }),
+                  FlatButton(
+                    child: Text('No'),
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
+                ],
+              ));
+    });
+  }
+
   Future<void> _guestController() async {
+    print('created guest room');
     final chatRoomData = await ChatRoomController.instance.chatWithGuest();
     print('created guest chat room');
     FirebaseFirestore.instance
@@ -35,60 +67,61 @@ class _GuestChatPageState extends State<GuestChatPage> {
     // return Text(_statusMessage);
   }
 
-  Future<void> _showConfirmDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(''),
-          content: Text('Do you want to chat with advisor?'),
-          actions: [
-            FlatButton(
-                child: Text('Yes'),
-                // onPressed: () => Navigator.pop(c, true),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _isBegin = true;
-                  });
+  // Future<bool> _showConfirmDialog() async {
+  //   return showDialog<bool>(
+  //     context: context,
+  //     barrierDismissible: true, // user must tap button!
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text(''),
+  //         content: Text('Do you want to chat with advisor?'),
+  //         actions: [
+  //           FlatButton(
+  //               child: Text('Yes'),
+  //               // onPressed: () => Navigator.pop(c, true),
+  //               onPressed: () {
+  //                 Navigator.pop(context, true);
+  //                 setState(() {
+  //                   _isBegin = true;
+  //                 });
 
-                  // Navigator.popAndPushNamed(context, '/home');
-                }),
-            FlatButton(
-              child: Text('No'),
-              onPressed: () => Navigator.pop(context, false),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //                 // Navigator.popAndPushNamed(context, '/home');
+  //               }),
+  //           FlatButton(
+  //             child: Text('No'),
+  //             onPressed: () => Navigator.pop(context, false),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    // await _getPath();
-    // if (_isBegin)
-    //   Navigator.pushNamed(context, ChatRoomPage.routeName,
-    //       arguments: _chatRoomData);
     if (_isBegin) {
       _guestController();
     }
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(),
-        body: _isBegin
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    Text(_statusMessage),
-                  ],
-                ),
-              )
-            : _showConfirmDialog(),
-      ),
+          appBar: AppBar(),
+          body: _isBegin
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      Text(_statusMessage),
+                    ],
+                  ),
+                )
+              : Center(
+                  child: Text('waiting'),
+                )
+          // () {
+          //     _showConfirmDialog();
+          //   },
+          ),
       onWillPop: () => showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(

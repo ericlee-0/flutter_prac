@@ -155,11 +155,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       // print('args ${args['userSelfId']} ${args['chatRoomId']} ');
                       await ChatRoomController.instance.chatFinish(
                           args['chatRoomPath'], args['userSelfName']);
+                          String roomId = args['chatRoomPath'].substring(10,args['chatRoomPath'].length);
+                          // print(roomId);
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(args['userSelfId'])
-                          .collection('chatRooms')
-                          .doc(args['chatRoomId'])
+                          .doc('${args['userSelfId']}/$roomId')
+                          // .collection(args['chatRoom'])
+                          // .doc(args['chatRoomId'])
                           .update({'chatFinished': true});
                       Navigator.of(context).pop();
                       // Navigator.of(context).pop();

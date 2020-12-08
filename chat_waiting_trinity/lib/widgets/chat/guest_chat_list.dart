@@ -5,7 +5,9 @@ import '../../controllers/chat_room_controller.dart';
 
 class GuestChatList extends StatefulWidget {
   final String advisorId;
-  GuestChatList(this.advisorId);
+  // GuestChatList(this.advisorId);
+  final Stream<QuerySnapshot> listData;
+  GuestChatList({this.advisorId, this.listData, Key key}) : super(key: key);
 
   @override
   _GuestChatListState createState() => _GuestChatListState();
@@ -35,17 +37,17 @@ class _GuestChatListState extends State<GuestChatList> {
     // print('roundup time $roundUpTime');
     return StreamBuilder(
       // stream: FirebaseFirestore.instance.collection('chats').doc('1on1').collection('chatRooms').doc('2020-11-03 10:45:50.374778').collection('chatMessages').snapshots(),
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.advisorId)
-          .collection(docId)
-          // .doc(docId)
-          // .where('chatRoomType', isEqualTo: 'withGuest')
-          // .where('createdAt', isGreaterThan: roundUpTime)
-          .orderBy('createdAt')
-          // .orderBy('lastMessageCreatedAt', descending: true)
-          .snapshots(),
-
+      // stream: FirebaseFirestore.instance
+      //     .collection('users')
+      //     .doc(widget.advisorId)
+      //     .collection(docId)
+      //     // .doc(docId)
+      //     // .where('chatRoomType', isEqualTo: 'withGuest')
+      //     // .where('createdAt', isGreaterThan: roundUpTime)
+      //     .orderBy('createdAt')
+      //     // .orderBy('lastMessageCreatedAt', descending: true)
+      //     .snapshots(),
+stream: widget.listData,
       builder: (ctx, snapshot) {
         // print('user : ${}');
         if (snapshot.connectionState == ConnectionState.waiting) {

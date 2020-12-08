@@ -1,4 +1,6 @@
 // import 'dart:html';
+import 'package:chat_waiting_trinity/controllers/chatNaviController.dart';
+
 import './pages/waiting/waiting_time_page.dart';
 import 'package:flutter/foundation.dart';
 
@@ -146,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-Future<void> _showExitDialog() async {
+  Future<void> _showExitDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -172,6 +174,7 @@ Future<void> _showExitDialog() async {
       },
     );
   }
+
   Widget _mainPage() {
     print('main page');
     if (_selectedPage == SelectPage.waiting) {
@@ -201,24 +204,30 @@ Future<void> _showExitDialog() async {
               );
             }
             if (userSnapshot.hasData) {
-              // print(user.uid);
-             return FirebaseAuth.instance.currentUser.uid == 'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'?  GuestChatPage() : ChatRoomListPage();
-            // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
+              // print('id:${FirebaseAuth.instance.currentUser.uid}');
+              return FirebaseAuth.instance.currentUser.uid ==
+                      'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
+                  ? GuestChatPage()
+                  : ChatNavicontroller();
+                  // : ChatRoomListPage();
+              // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
             }
             return AuthPage();
           });
     }
     return Scaffold(
       appBar: AppBar(
-        title: kIsWeb ? Text('Join Waiting') : Text('Current Waiting List'),
-        actions: [
-          ( kIsWeb == true || (FirebaseAuth.instance.currentUser != null && FirebaseAuth.instance.currentUser.uid == 'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'))
-              ? IconButton(
-                  icon: Icon(Icons.exit_to_app),
-                  onPressed: () => _showExitDialog()):IconButton(
-                  icon: Icon(Icons.login),
-                  onPressed: () {}) ]
-      ),
+          title: kIsWeb ? Text('Join Waiting') : Text('Current Waiting List'),
+          actions: [
+            (kIsWeb == true ||
+                    (FirebaseAuth.instance.currentUser != null &&
+                        FirebaseAuth.instance.currentUser.uid ==
+                            'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'))
+                ? IconButton(
+                    icon: Icon(Icons.exit_to_app),
+                    onPressed: () => _showExitDialog())
+                : IconButton(icon: Icon(Icons.login), onPressed: () {})
+          ]),
       drawer: kIsWeb ? null : WaitingListDrawer(_selectListOption),
       body: Container(
           child: kIsWeb ? WaitingTimePage() : WaitingList(_selectList)),
