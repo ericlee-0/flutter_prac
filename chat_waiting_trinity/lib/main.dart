@@ -1,5 +1,5 @@
 // import 'dart:html';
-import 'package:chat_waiting_trinity/controllers/chatNaviController.dart';
+import './controllers/chatNaviController.dart';
 
 import './pages/waiting/waiting_time_page.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 import './pages/chat/chat_room_list_page.dart';
 import './pages/chat/auth_page.dart';
@@ -23,6 +25,7 @@ import './providers/auth.dart';
 import './pages/waiting/join_waiting_page.dart';
 import './widgets/waiting/waiting_list_drawer.dart';
 import './pages/chat/guest_chat_page.dart';
+import './controllers/sms_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -140,6 +143,37 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
     _selectedPage = SelectPage.home;
+    final fbm = FirebaseMessaging();
+    fbm.requestNotificationPermissions();
+    fbm.configure(
+      onMessage: (msg) {
+        print('received mes onMessage :$msg');
+        // print('${msg['notification']}');
+        // print('${msg['data']['phone']}');
+        if(Auth.instance.userId =='M0clGRrBRMQSfQykuyA72WwHLgG2'){
+
+          //
+          SmsController.instance.sendSMS(msg['data']['phone'], 'Hello ${msg['notification']['body']}, Your reservation number is ${msg['data']['ConfirmNo']}. Thank you! See you soon.');
+        }
+        return;
+      },
+      onLaunch: (msg) {
+        print('received mes onLaunch :$msg');
+        return;
+      },
+      onResume: (msg) {
+        print('received mes onResume :$msg');
+        return;
+      },
+      //  onBackgroundMessage: (msg) {
+      //   print(msg);
+      //   return;
+      // }
+    );
+    if (Auth.instance.userId != null) {
+      fbm.subscribeToTopic(Auth.instance.userId);
+    }
+     
   }
 
   void _selectListOption(String selected) {
@@ -209,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
                   ? GuestChatPage()
                   : ChatNavicontroller();
-                  // : ChatRoomListPage();
+              // : ChatRoomListPage();
               // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
             }
             return AuthPage();

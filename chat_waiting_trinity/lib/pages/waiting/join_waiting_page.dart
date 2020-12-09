@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/join_waiting_controller.dart';
-// import '../../controllers/sms_controller.dart';
+import '../../controllers/sms_controller.dart';
+// import 'package:flutter_sms/flutter_sms.dart';
+// import 'package:telephony/telephony.dart';
 
 class JoinWaitingPage extends StatefulWidget {
   @override
@@ -30,6 +32,63 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
   // DateTime _selectedDate;
   // DateTime _selectedTime;
   var _reservationNumber = 1;
+
+  // final Telephony telephony = Telephony.instance;
+  // final SmsSendStatusListener listener = (SendStatus status) {
+  //   // Handle the status
+  //   print(status);
+  // };
+
+  Future<void> _showConfirmDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Please Confirm Your Reservation',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(15),
+                child: Card(
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Name : $_name'),
+                        Text('Number of people : $_people'),
+                        Text('Phone# : $_phone'),
+                        Text('Reserve At : $_reserveAt'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              RaisedButton(
+                child: Text('Confirm'),
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  // telephony.sendSms(
+                  //     to: "16478587567",
+                  //     message: "May the force be with you!",
+                  //     statusListener: listener);
+                   
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -115,41 +174,6 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     return passed;
   }
 
-  // Future<void> _reserveDatePicker() async {
-  //   try {
-  //     final selectedDate = await showDatePicker(
-  //         context: context,
-  //         initialDate: DateTime.now(),
-  //         firstDate: DateTime.now(),
-  //         lastDate: DateTime.now().add(
-  //           Duration(days: 100),
-  //         ));
-  //     // setState(() {
-  //     //   _reserveDate = DateFormat('yyyy/MM/dd').format(selectedDate);
-  //     // });
-  //     _reserveDateController.text = DateFormat('yyyy/MM/dd').format(selectedDate);
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
-  // Future<void> _reserveTimePicker() async {
-  //   try {
-  //     final selectedTime = await showTimePicker(
-  //       context: context,
-  //       initialTime: TimeOfDay.now(),
-  //     );
-  //     // setState(() {
-  //     //   _reserveTime = selectedTime.toString();
-  //     // });
-  //     print(selectedTime);
-  //     _reserveTimeController.text = selectedTime.format(context);
-  //     // selectedTime
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
   Future<void> _reserveAtPicker() async {
     try {
       final selectedDate = await showDatePicker(
@@ -165,18 +189,8 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
       );
       DateTime resultTime = DateTime(selectedDate.year, selectedDate.month,
           selectedDate.day, selectedTime.hour, selectedTime.minute);
-      // DateTime roundUpTime =
-      //     resultTime.add(Duration(minutes: (5 - resultTime.minute % 5)));
-      // print('rounduptime $roundUpTime');
-      // setState(() {
-      //   _reserveAt = DateTime(selectedDate.year, selectedDate.month,
-      //       selectedDate.day, selectedTime.hour, selectedTime.minute);
 
-      // _reserveAtController.text = DateFormat('yyyy/MM/dd HH:mm').format(roundUpTime);;
       _reserveAtController.text = _roundUpTime(resultTime);
-
-      // });
-      // print(_reserveAt);
     } catch (e) {
       print(e);
     }
@@ -195,7 +209,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
 
   Future<void> _makeReservation() async {
     final isValid = _formKey.currentState.validate();
-    
+
     final DateTime now = DateTime.now();
     if (isValid) {
       _formKey.currentState.save();
@@ -214,7 +228,6 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
         setState(() {
           _isLoading = true;
         });
-        
 
         final docSnap = await FirebaseFirestore.instance
             .collection('waiting')
@@ -298,7 +311,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
           'reservationNumber': _reservationNumber,
           'waitingStatus': _waitingStatus
         });
-        
+
         print(result.path);
         if (_waitingStatus == 'pending' && isToday) {
           final diff = _reserveAt.difference(now);
@@ -310,7 +323,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
             JoinWaitingController.instance.pendingToWaiting(result.path);
           });
         }
-         setState(() {
+        setState(() {
           _isLoading = false;
           _hasDone = true;
         });
@@ -328,264 +341,235 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
     }
   }
 
-  Future<void> _showConfirmDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Please Confirm Your Reservation',
-            textAlign: TextAlign.center,
+  Widget _finished() {
+      // 
+    
+    return Center(
+        child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Reservation Number : $_reservationNumber',
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(15),
-                child: Card(
-                  child: Container(
-                    child:Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Name : $_name'),
-                        Text('Number of people : $_people'),
-                        Text('Phone# : $_phone'),
-                        Text('Reserve At : $_reserveAt'),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              RaisedButton(
-                child: Text('Confirm'),
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+          RaisedButton(
+            child: Text('Back to Home'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/home');
+            },
+          )
+        ],
+      ),
+    ));
   }
 
-Widget _finished(){
-  // SmsController.instance.sendSms(_phone, 'Hello $_name, Your reservation number is $_reservationNumber. Thank you! See you soon.');
-  return Center(child: Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('Reservation Number : $_reservationNumber',),
-        RaisedButton(child:Text('Back to Home'),onPressed: (){
-          Navigator.of(context).pushNamed('/home');
-        },)
-      ],
-    ),
-  ));
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Join Wainting List'),
       ),
-      body: _isLoading? Center(child: CircularProgressIndicator()) :_hasDone? _finished(): InkWell(
-        splashColor: Colors.transparent,
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
-        child: Card(
-          margin: EdgeInsets.all(20),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // if (!_isSignIn) UserImagePicker(_pickedImage),
-                    TextFormField(
-                      key: ValueKey('guest_name'),
-                      // autocorrect: false,
-                      textCapitalization: TextCapitalization.words,
-                      enableSuggestions: false,
-                      validator: (value) {
-                        if (value.isEmpty || value.length < 2) {
-                          return 'Prease name at least 2 characters';
-                        }
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _hasDone
+              ? _finished()
+              : InkWell(
+                  splashColor: Colors.transparent,
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
+                  child: Card(
+                    margin: EdgeInsets.all(20),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // if (!_isSignIn) UserImagePicker(_pickedImage),
+                              TextFormField(
+                                key: ValueKey('guest_name'),
+                                // autocorrect: false,
+                                textCapitalization: TextCapitalization.words,
+                                enableSuggestions: false,
+                                validator: (value) {
+                                  if (value.isEmpty || value.length < 2) {
+                                    return 'Prease name at least 2 characters';
+                                  }
 
-                        return null;
-                      },
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                      ),
-                      onSaved: (value) {
-                        _name = value;
-                      },
-                    ),
+                                  return null;
+                                },
+                                keyboardType: TextInputType.text,
+                                decoration: InputDecoration(
+                                  labelText: 'Name',
+                                ),
+                                onSaved: (value) {
+                                  _name = value;
+                                },
+                              ),
 
-                    TextFormField(
-                      key: ValueKey('guest_phone'),
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value.isEmpty || value.length != 10) {
-                          return 'phone must be 10 digits long.';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(labelText: 'phone'),
-                      // obscureText: true,
-                      onSaved: (value) {
-                        _phone = '+1' + value;
-                      },
-                    ),
+                              TextFormField(
+                                key: ValueKey('guest_phone'),
+                                keyboardType: TextInputType.phone,
+                                validator: (value) {
+                                  if (value.isEmpty || value.length != 10) {
+                                    return 'phone must be 10 digits long.';
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(labelText: 'phone'),
+                                // obscureText: true,
+                                onSaved: (value) {
+                                  _phone = '+1' + value;
+                                },
+                              ),
 
-                    TextFormField(
-                      key: ValueKey('guest_people'),
-                      initialValue: '0',
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (int.parse(value) < 1) {
-                          return 'Please choose number of people.';
-                        }
-                        if (int.parse(value) > 10) {
-                          return 'more than 10 people need to contact to the restaurant.';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(labelText: 'People'),
-                      // obscureText: true,
-                      onSaved: (value) {
-                        _people = value;
-                      },
-                    ),
+                              TextFormField(
+                                key: ValueKey('guest_people'),
+                                initialValue: '0',
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (int.parse(value) < 1) {
+                                    return 'Please choose number of people.';
+                                  }
+                                  if (int.parse(value) > 10) {
+                                    return 'more than 10 people need to contact to the restaurant.';
+                                  }
+                                  return null;
+                                },
+                                decoration:
+                                    InputDecoration(labelText: 'People'),
+                                // obscureText: true,
+                                onSaved: (value) {
+                                  _people = value;
+                                },
+                              ),
 
-                    TextFormField(
-                      key: ValueKey('guest_ReserveAt'),
-                      // initialValue: DateTime.now().toString(),
-                      controller: _reserveAtController,
-                      validator: (value) {
-                        if (value.isEmpty || !_timePassed(value)) {
-                          return 'Please pick a time for the reservation.';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'reserveAt',
-                        suffixIcon: IconButton(
-                          onPressed: () => _reserveAtController.clear(),
-                          icon: Icon(Icons.clear),
+                              TextFormField(
+                                key: ValueKey('guest_ReserveAt'),
+                                // initialValue: DateTime.now().toString(),
+                                controller: _reserveAtController,
+                                validator: (value) {
+                                  if (value.isEmpty || !_timePassed(value)) {
+                                    return 'Please pick a time for the reservation.';
+                                  }
+                                  return null;
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'reserveAt',
+                                  suffixIcon: IconButton(
+                                    onPressed: () =>
+                                        _reserveAtController.clear(),
+                                    icon: Icon(Icons.clear),
+                                  ),
+                                ),
+                                // obscureText: true,
+                                onSaved: (value) {
+                                  // _reserveAt =
+                                  //     DateFormat('yyyy/MM/dd HH:mm').parse(value);
+                                  // JoinWaitingController.instance.getStatus(_reserveAt).then((String value) { _waitingStatus = value; });
+                                },
+                                onTap: _showMyDialog,
+                              ),
+
+                              // TextFormField(
+                              //   key: ValueKey('guest_Reserve_Date'),
+                              //   // initialValue:
+                              //   //     DateFormat('yyyy/MM/dd').format(DateTime.now()),
+                              //   controller: _reserveDateController,
+                              //   validator: (value) {
+                              //     if (value.isEmpty) {
+                              //       return 'Please pick a time for the reservation.';
+                              //     }
+                              //     return null;
+                              //   },
+                              //   decoration: InputDecoration(
+                              //     labelText: 'reserveDate',
+                              //     // suffixIcon: IconButton(
+                              //     //   onPressed: () => _reserveAtController.clear(),
+                              //     //   icon: Icon(Icons.clear),
+                              //     // ),
+                              //   ),
+                              //   // obscureText: true,
+                              //   onSaved: (value) {
+                              //     // setState(() {
+                              //     _reserveDate = value;
+                              //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
+                              //     // });
+                              //   },
+                              //   onTap: _reserveDatePicker,
+                              // ),
+                              // TextFormField(
+                              //   key: ValueKey('guest_Reserve_Time'),
+                              //   // initialValue:
+                              //   //     DateFormat('HH:mm').format(DateTime.now()),
+                              //   controller: _reserveTimeController,
+                              //   validator: (value) {
+                              //     if (value.isEmpty) {
+                              //       return 'Please pick a time for the reservation.';
+                              //     }
+                              //     return null;
+                              //   },
+                              //   decoration: InputDecoration(
+                              //     labelText: 'reserveTime',
+                              //     // suffixIcon: IconButton(
+                              //     //   onPressed: () => _reserveAtController.clear(),
+                              //     //   icon: Icon(Icons.clear),
+                              //     // ),
+                              //   ),
+                              //   // obscureText: true,
+                              //   onSaved: (value) {
+                              //     // setState(() {
+                              //     _reserveTime = value;
+                              //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
+                              //     // });
+                              //   },
+                              //   onTap: _reserveTimePicker,
+                              // ),
+
+                              SizedBox(height: 12),
+                              if (_isLoading) CircularProgressIndicator(),
+                              if (!_isLoading)
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    RaisedButton(
+                                      child: Text('Reserve'),
+                                      onPressed: _makeReservation,
+                                    ),
+                                    FlatButton(
+                                      child: Text('Back to List'),
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pushNamed('/home');
+                                      },
+                                    )
+                                  ],
+                                ),
+                              // if (!widget.isLoading)
+                              //   FlatButton(
+                              //     textColor: Theme.of(context).primaryColor,
+                              //     onPressed: () {
+                              //       setState(() {
+                              //         _isSignIn = !_isSignIn;
+                              //       });
+                              //     },
+                              //     child: Text(_isSignIn
+                              //         ? 'Creat new account'
+                              //         : 'I already have an account'),
+                              //   ),
+                              // SizedBox(height: 20),
+                            ],
+                          ),
                         ),
                       ),
-                      // obscureText: true,
-                      onSaved: (value) {
-                        // _reserveAt =
-                        //     DateFormat('yyyy/MM/dd HH:mm').parse(value);
-                        // JoinWaitingController.instance.getStatus(_reserveAt).then((String value) { _waitingStatus = value; });
-                      },
-                      onTap: _showMyDialog,
                     ),
-
-                    // TextFormField(
-                    //   key: ValueKey('guest_Reserve_Date'),
-                    //   // initialValue:
-                    //   //     DateFormat('yyyy/MM/dd').format(DateTime.now()),
-                    //   controller: _reserveDateController,
-                    //   validator: (value) {
-                    //     if (value.isEmpty) {
-                    //       return 'Please pick a time for the reservation.';
-                    //     }
-                    //     return null;
-                    //   },
-                    //   decoration: InputDecoration(
-                    //     labelText: 'reserveDate',
-                    //     // suffixIcon: IconButton(
-                    //     //   onPressed: () => _reserveAtController.clear(),
-                    //     //   icon: Icon(Icons.clear),
-                    //     // ),
-                    //   ),
-                    //   // obscureText: true,
-                    //   onSaved: (value) {
-                    //     // setState(() {
-                    //     _reserveDate = value;
-                    //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
-                    //     // });
-                    //   },
-                    //   onTap: _reserveDatePicker,
-                    // ),
-                    // TextFormField(
-                    //   key: ValueKey('guest_Reserve_Time'),
-                    //   // initialValue:
-                    //   //     DateFormat('HH:mm').format(DateTime.now()),
-                    //   controller: _reserveTimeController,
-                    //   validator: (value) {
-                    //     if (value.isEmpty) {
-                    //       return 'Please pick a time for the reservation.';
-                    //     }
-                    //     return null;
-                    //   },
-                    //   decoration: InputDecoration(
-                    //     labelText: 'reserveTime',
-                    //     // suffixIcon: IconButton(
-                    //     //   onPressed: () => _reserveAtController.clear(),
-                    //     //   icon: Icon(Icons.clear),
-                    //     // ),
-                    //   ),
-                    //   // obscureText: true,
-                    //   onSaved: (value) {
-                    //     // setState(() {
-                    //     _reserveTime = value;
-                    //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
-                    //     // });
-                    //   },
-                    //   onTap: _reserveTimePicker,
-                    // ),
-
-                    SizedBox(height: 12),
-                    if (_isLoading) CircularProgressIndicator(),
-                    if (!_isLoading)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          RaisedButton(
-                            child: Text('Reserve'),
-                            onPressed: _makeReservation,
-                          ),
-                          FlatButton(
-                            child: Text('Back to List'),
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('/home');
-                            },
-                          )
-                        ],
-                      ),
-                    // if (!widget.isLoading)
-                    //   FlatButton(
-                    //     textColor: Theme.of(context).primaryColor,
-                    //     onPressed: () {
-                    //       setState(() {
-                    //         _isSignIn = !_isSignIn;
-                    //       });
-                    //     },
-                    //     child: Text(_isSignIn
-                    //         ? 'Creat new account'
-                    //         : 'I already have an account'),
-                    //   ),
-                    // SizedBox(height: 20),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

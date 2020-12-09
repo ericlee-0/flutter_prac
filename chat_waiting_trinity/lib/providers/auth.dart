@@ -9,7 +9,7 @@ class Auth with ChangeNotifier {
       FirebaseAuth.instance.authStateChanges();
 
   dynamic get userId {
-    print(user);
+    // print(user);
     // print(firebaseAuthState.forEach((element) {print(element);}));
     return user.uid;
   }
