@@ -101,15 +101,24 @@ class JoinWaitingController {
       print(e);
     }
   }
- // get stream waiting documents and return the totla number
+
+  // get stream waiting documents and return the totla number
   int getWaitingCount() {
     final now = DateTime.now();
     final docId = DateFormat('yyyy/MM/dd').format(now);
-    int count=0;
+    int count = 0;
     Stream<QuerySnapshot> docSnap;
     try {
-      docSnap = FirebaseFirestore.instance.collection('waiting').doc(docId).collection('list').where('waitingStatus',isEqualTo: 'waiting').snapshots();
-      docSnap.map((event) { count = event.docs.length;print(event.docs.length);}).toList();
+      docSnap = FirebaseFirestore.instance
+          .collection('waiting')
+          .doc(docId)
+          .collection('list')
+          .where('waitingStatus', isEqualTo: 'waiting')
+          .snapshots();
+      docSnap.map((event) {
+        count = event.docs.length;
+        print(event.docs.length);
+      }).toList();
     } catch (e) {
       print(e);
     }

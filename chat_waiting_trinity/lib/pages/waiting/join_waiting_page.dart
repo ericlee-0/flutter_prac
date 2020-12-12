@@ -475,60 +475,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                                 onTap: _showMyDialog,
                               ),
 
-                              // TextFormField(
-                              //   key: ValueKey('guest_Reserve_Date'),
-                              //   // initialValue:
-                              //   //     DateFormat('yyyy/MM/dd').format(DateTime.now()),
-                              //   controller: _reserveDateController,
-                              //   validator: (value) {
-                              //     if (value.isEmpty) {
-                              //       return 'Please pick a time for the reservation.';
-                              //     }
-                              //     return null;
-                              //   },
-                              //   decoration: InputDecoration(
-                              //     labelText: 'reserveDate',
-                              //     // suffixIcon: IconButton(
-                              //     //   onPressed: () => _reserveAtController.clear(),
-                              //     //   icon: Icon(Icons.clear),
-                              //     // ),
-                              //   ),
-                              //   // obscureText: true,
-                              //   onSaved: (value) {
-                              //     // setState(() {
-                              //     _reserveDate = value;
-                              //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
-                              //     // });
-                              //   },
-                              //   onTap: _reserveDatePicker,
-                              // ),
-                              // TextFormField(
-                              //   key: ValueKey('guest_Reserve_Time'),
-                              //   // initialValue:
-                              //   //     DateFormat('HH:mm').format(DateTime.now()),
-                              //   controller: _reserveTimeController,
-                              //   validator: (value) {
-                              //     if (value.isEmpty) {
-                              //       return 'Please pick a time for the reservation.';
-                              //     }
-                              //     return null;
-                              //   },
-                              //   decoration: InputDecoration(
-                              //     labelText: 'reserveTime',
-                              //     // suffixIcon: IconButton(
-                              //     //   onPressed: () => _reserveAtController.clear(),
-                              //     //   icon: Icon(Icons.clear),
-                              //     // ),
-                              //   ),
-                              //   // obscureText: true,
-                              //   onSaved: (value) {
-                              //     // setState(() {
-                              //     _reserveTime = value;
-                              //     // DateFormat("yyyy-MM-dd hh:mm:ss").parse(value);
-                              //     // });
-                              //   },
-                              //   onTap: _reserveTimePicker,
-                              // ),
+                              
 
                               SizedBox(height: 12),
                               if (_isLoading) CircularProgressIndicator(),
@@ -550,19 +497,7 @@ class _JoinWaitingPageState extends State<JoinWaitingPage> {
                                     )
                                   ],
                                 ),
-                              // if (!widget.isLoading)
-                              //   FlatButton(
-                              //     textColor: Theme.of(context).primaryColor,
-                              //     onPressed: () {
-                              //       setState(() {
-                              //         _isSignIn = !_isSignIn;
-                              //       });
-                              //     },
-                              //     child: Text(_isSignIn
-                              //         ? 'Creat new account'
-                              //         : 'I already have an account'),
-                              //   ),
-                              // SizedBox(height: 20),
+                              
                             ],
                           ),
                         ),

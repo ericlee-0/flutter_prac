@@ -4,10 +4,8 @@
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
-
     The path provided below has to start and end with a slash "/" in order for
     it to work correctly.
-
     Fore more details:
     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
   -->
@@ -28,116 +26,44 @@
 
   <title>chat_waiting_trinity</title>
   <link rel="manifest" href="manifest.json">
-  <style>
-    #app-container {
-      height: 640px;
-      width: 480px;
-      background-color: grey;
-      margin: 0 auto;
-      border: none;
-    }
-    /* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  padding-bottom: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #fefefe;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 480px;
-  height:800px;
-}
-
-/* The Close Button */
-.close {
-  color: #aaaaaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
-  </style>
-
 </head>
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
-  
- 
-<h1>This is my website!</h1>
-<!-- Trigger/Open The Modal -->
-<button id="myBtn">Open Waiting List</button>
-<!-- The Modal -->
-<div id="myModal" class="modal">
-
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <flutter-app width="480px" height="640px"></flutter-app>
-  </div>
-
-</div>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('flutter-first-frame', function () {
-      navigator.serviceWorker.register('flutter_service_worker.js');
-    });
-  }
-</script>
-
-<script src="flutter_app.js" type="application/javascript"></script>
-
-<script>
-  // Get the modal
-  var modal = document.getElementById("myModal");
-  
-  // Get the button that opens the modal
-  var btn = document.getElementById("myBtn");
-  
-  // Get the <span> element that closes the modal
-  var span = document.getElementsByClassName("close")[0];
-  
-  // When the user clicks the button, open the modal 
-  btn.onclick = function() {
-    modal.style.display = "block";
-  }
-  
-  // When the user clicks on <span> (x), close the modal
-  span.onclick = function() {
-    modal.style.display = "none";
-  }
-  
-  // When the user clicks anywhere outside of the modal, close it
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
     }
-  }
   </script>
-<footer>
-  <span>Here is my footer!</span>
-</footer>
+     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-app.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-auth.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-storage.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-firestore.js"></script>
+     
+     <!-- TODO: Add SDKs for Firebase products that you want to use
+          https://firebase.google.com/docs/web/setup#available-libraries -->
+     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-analytics.js"></script>
+     
+     <script>
+       // Your web app's Firebase configuration
+       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+       var firebaseConfig = {
+         apiKey: "AIzaSyB1C1R4sGF9SlylT2vhTETn_SlPLqj8W5w",
+         authDomain: "chat-waiting-trinity.firebaseapp.com",
+         databaseURL: "https://chat-waiting-trinity.firebaseio.com",
+         projectId: "chat-waiting-trinity",
+         storageBucket: "chat-waiting-trinity.appspot.com",
+         messagingSenderId: "368032595776",
+         appId: "1:368032595776:web:2327e906578ec6ae9b44a5",
+         measurementId: "G-26JSGNFEN9"
+       };
+       // Initialize Firebase
+       firebase.initializeApp(firebaseConfig);
+       firebase.analytics();
+    </script> 
+  <script src="main.dart.js" type="application/javascript"></script>
 </body>
 </html>

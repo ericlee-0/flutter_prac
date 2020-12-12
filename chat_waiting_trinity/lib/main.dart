@@ -27,6 +27,9 @@ import './widgets/waiting/waiting_list_drawer.dart';
 import './pages/chat/guest_chat_page.dart';
 import './controllers/sms_controller.dart';
 
+
+import './pages/web/web_home.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -81,7 +84,7 @@ class _MyAppState extends State<MyApp> {
               )),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MyHomePage(),
+        home: kIsWeb ? WebHome():MyHomePage(),
         // StreamBuilder(
         //     stream: Auth.instance.authState,
         //     // stream: FirebaseAuth.instance.authStateChanges(),
