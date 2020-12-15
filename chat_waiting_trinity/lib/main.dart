@@ -1,4 +1,6 @@
 // import 'dart:html';
+import './pages/web/web_home_view.dart';
+
 import './controllers/chatNaviController.dart';
 
 import './pages/waiting/waiting_time_page.dart';
@@ -72,6 +74,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Chat_Wainting_Trinity',
         theme: ThemeData(
+          textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Open Sans'),
           primarySwatch: Colors.blue,
           backgroundColor: Colors.green,
           accentColor: Colors.deepPurple,
@@ -84,7 +87,7 @@ class _MyAppState extends State<MyApp> {
               )),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: kIsWeb ? WebHome():MyHomePage(),
+        home: kIsWeb ? WebHomeView():MyHomePage(),
         // StreamBuilder(
         //     stream: Auth.instance.authState,
         //     // stream: FirebaseAuth.instance.authStateChanges(),
