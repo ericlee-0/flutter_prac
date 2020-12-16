@@ -1,5 +1,8 @@
 // import 'dart:html';
-import './pages/web/web_home_view.dart';
+import './locator.dart';
+import './pages/web/web_layout_template.dart';
+
+import 'pages/web/view/web_home_view.dart';
 
 import './controllers/chatNaviController.dart';
 
@@ -21,7 +24,7 @@ import './pages/chat/auth_page.dart';
 import './pages/chat/user_profile_edit_page.dart';
 // import './pages/chat/user_list_page.dart';
 // import './widgets/chat/user_profile_image_picker.dart';
-import 'pages/chat/chat_room_page.dart';
+import './pages/chat/chat_room_page.dart';
 import './pages/chat/user_profile_page.dart';
 import './providers/auth.dart';
 import './pages/waiting/join_waiting_page.dart';
@@ -29,12 +32,14 @@ import './widgets/waiting/waiting_list_drawer.dart';
 import './pages/chat/guest_chat_page.dart';
 import './controllers/sms_controller.dart';
 
-
 import './pages/web/web_home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  if (kIsWeb) {
+    setupLocator();
+  }
   runApp(MyApp());
 }
 
@@ -87,7 +92,7 @@ class _MyAppState extends State<MyApp> {
               )),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: kIsWeb ? WebHomeView():MyHomePage(),
+        home: kIsWeb ? WebLayoutTemplate() : MyHomePage(),
         // StreamBuilder(
         //     stream: Auth.instance.authState,
         //     // stream: FirebaseAuth.instance.authStateChanges(),
@@ -156,10 +161,10 @@ class _MyHomePageState extends State<MyHomePage> {
         print('received mes onMessage :$msg');
         // print('${msg['notification']}');
         // print('${msg['data']['phone']}');
-        if(Auth.instance.userId =='M0clGRrBRMQSfQykuyA72WwHLgG2'){
-
+        if (Auth.instance.userId == 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
           //
-          SmsController.instance.sendSMS(msg['data']['phone'], 'Hello ${msg['notification']['body']}, Your reservation number is ${msg['data']['ConfirmNo']}. Thank you! See you soon.');
+          SmsController.instance.sendSMS(msg['data']['phone'],
+              'Hello ${msg['notification']['body']}, Your reservation number is ${msg['data']['ConfirmNo']}. Thank you! See you soon.');
         }
         return;
       },
@@ -179,7 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (Auth.instance.userId != null) {
       fbm.subscribeToTopic(Auth.instance.userId);
     }
-     
   }
 
   void _selectListOption(String selected) {

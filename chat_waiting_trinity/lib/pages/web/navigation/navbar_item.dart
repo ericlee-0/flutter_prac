@@ -5,6 +5,7 @@ class NavBarItem extends StatelessWidget {
   NavBarItem(this.title);
   @override
   Widget build(BuildContext context) {
+    
     return Text(
       title,
       style: TextStyle(fontSize: 18),
