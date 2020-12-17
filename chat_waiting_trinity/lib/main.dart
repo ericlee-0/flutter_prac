@@ -39,6 +39,7 @@ void main() async {
   await Firebase.initializeApp();
   if (kIsWeb) {
     setupLocator();
+    
   }
   runApp(MyApp());
 }

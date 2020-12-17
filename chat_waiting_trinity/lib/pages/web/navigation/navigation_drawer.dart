@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './navigation_drawer_header.dart';
 import './drawer_item.dart';
+import '../route/route_names.dart';
 
 class NavigationDrawer extends StatelessWidget {
   @override
@@ -13,9 +14,9 @@ class NavigationDrawer extends StatelessWidget {
       child: Column(
         children: [
           NavigationDrawerHeader(),
-          DrawerItem('Waiting', Icons.list_alt),
-          DrawerItem('Chat', Icons.chat),
-          DrawerItem('About', Icons.help)
+          DrawerItem('Waiting', Icons.list_alt, WaitingRoute),
+          DrawerItem('Chat', Icons.chat, ChatRoute),
+          DrawerItem('About', Icons.help, AboutRoute)
         ]
       ),
     );

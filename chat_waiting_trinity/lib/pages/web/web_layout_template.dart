@@ -16,7 +16,6 @@ import './centered_view/centered_view.dart';
 import './route/router.dart';
 
 class WebLayoutTemplate extends StatelessWidget {
- 
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
@@ -24,22 +23,19 @@ class WebLayoutTemplate extends StatelessWidget {
         drawer: sizingInformation.deviceScreenType == DeviceScreenType.mobile
             ? NavigationDrawer()
             : null,
-        backgroundColor: Colors.blue[200],
+        backgroundColor: Colors.blue[100],
         body: CenteredView(
           child: Column(
             children: [
               NavigationBar(),
               Expanded(
-                // child: Text('Home'),
-                child: 
-                // WebHomeView()
+                child:
                  Navigator(
                   key: locator<NavigationService>().navigatorKey,
                   onGenerateRoute: generateRoute,
                   initialRoute: HomeRoute,
                 ),
               ),
-              
             ],
           ),
         ),

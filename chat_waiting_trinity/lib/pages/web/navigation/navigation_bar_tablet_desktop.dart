@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './navbar_item.dart';
 import './navbar_logo.dart';
+import '../route/route_names.dart';
 
 class NavigationBarTabletDesktop extends StatelessWidget {
   @override
@@ -14,15 +15,15 @@ class NavigationBarTabletDesktop extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              NavBarItem('Waiting'),
+              NavBarItem('Waiting',WaitingRoute),
               SizedBox(
                 width: 40,
               ),
-              NavBarItem('Chat'),
+              NavBarItem('Chat',ChatRoute),
               SizedBox(
                 width: 40,
               ),
-              NavBarItem('About'),
+              NavBarItem('About',AboutRoute),
               SizedBox(
                 width: 40,
               ),
