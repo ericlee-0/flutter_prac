@@ -1,4 +1,8 @@
 // import 'dart:html';
+import 'package:chat_waiting_trinity/pages/web/navigation/navigation_service.dart';
+import 'package:chat_waiting_trinity/pages/web/route/route_names.dart';
+import './pages/web/route/router.dart';
+
 import './locator.dart';
 import './pages/web/web_layout_template.dart';
 
@@ -39,7 +43,6 @@ void main() async {
   await Firebase.initializeApp();
   if (kIsWeb) {
     setupLocator();
-    
   }
   runApp(MyApp());
 }
@@ -68,6 +71,23 @@ class _MyAppState extends State<MyApp> {
     return user.uid;
   }
 
+  ThemeData _theme() {
+    return ThemeData(
+      textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Open Sans'),
+      primarySwatch: Colors.blue,
+      backgroundColor: Colors.green,
+      accentColor: Colors.deepPurple,
+      accentColorBrightness: Brightness.dark,
+      buttonTheme: ButtonTheme.of(context).copyWith(
+          buttonColor: Colors.pink,
+          textTheme: ButtonTextTheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          )),
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -77,51 +97,32 @@ class _MyAppState extends State<MyApp> {
         ),
         // StreamProvider<User>.value(value: FirebaseAuth.instance.authStateChanges()),
       ],
-      child: MaterialApp(
-        title: 'Chat_Wainting_Trinity',
-        theme: ThemeData(
-          textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Open Sans'),
-          primarySwatch: Colors.blue,
-          backgroundColor: Colors.green,
-          accentColor: Colors.deepPurple,
-          accentColorBrightness: Brightness.dark,
-          buttonTheme: ButtonTheme.of(context).copyWith(
-              buttonColor: Colors.pink,
-              textTheme: ButtonTextTheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              )),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: kIsWeb ? WebLayoutTemplate() : MyHomePage(),
-        // StreamBuilder(
-        //     stream: Auth.instance.authState,
-        //     // stream: FirebaseAuth.instance.authStateChanges(),
-        //     builder: (ctx, userSnapshot) {
-        //       if (userSnapshot.connectionState == ConnectionState.waiting) {
-        //         return Center(
-        //           child: CircularProgressIndicator(),
-        //         );
-        //       }
-        //       if (userSnapshot.hasData) {
-        //         // print(user.uid);
-        //         return ChatRoomListPage();
-        //       }
-        //       return AuthPage();
-        //     }),
-        routes: {
-          '/home': (ctx) => MyHomePage(),
-          UserProfileEditPage.routeName: (ctx) =>
-              UserProfileEditPage(Auth.instance.userId),
-          // UserListPage.routeName: (ctx) => UserListPage(),
-          ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
-          ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
-          UserProfilePage.routeName: (ctx) => UserProfilePage(),
-          GuestChatPage.routeName: (ctx) => GuestChatPage(),
-          // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
-          // WaitingListPage.routeName: (ctx) => WaitingListPage()
-        },
-      ),
+      child: kIsWeb
+          ? MaterialApp(
+              title: 'Chat_Wainting_Trinity',
+              theme: _theme(),
+              builder: (context, child) => WebLayoutTemplate(child),
+              navigatorKey: locator<NavigationService>().navigatorKey,
+              onGenerateRoute: generateRoute,
+              initialRoute: HomeRoute,
+            )
+          : MaterialApp(
+              title: 'Chat_Wainting_Trinity',
+              theme: _theme(),
+              home: MyHomePage(),
+              routes: {
+                '/home': (ctx) => MyHomePage(),
+                UserProfileEditPage.routeName: (ctx) =>
+                    UserProfileEditPage(Auth.instance.userId),
+                // UserListPage.routeName: (ctx) => UserListPage(),
+                ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
+                ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+                UserProfilePage.routeName: (ctx) => UserProfilePage(),
+                GuestChatPage.routeName: (ctx) => GuestChatPage(),
+                // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+                // WaitingListPage.routeName: (ctx) => WaitingListPage()
+              },
+            ),
     );
   }
 }

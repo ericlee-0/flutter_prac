@@ -7,7 +7,7 @@ class NavBarLogo extends StatelessWidget {
             height: 80,
             width: 150,
             child: Image.asset(
-              'assets/images/trinity_logo_paradise.png',
+              'assets/images/logo_150_113.png',
               
             ),
           );

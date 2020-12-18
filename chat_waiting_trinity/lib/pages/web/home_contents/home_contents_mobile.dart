@@ -5,17 +5,19 @@ import 'package:flutter/material.dart';
 class HomeContentsMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Function dummy;
     return SingleChildScrollView(
           child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          WebDetail(),
-          SizedBox(height: 100,),
-          CallToAction('Join Waiting'),
-          SizedBox(height: 20,),
-          CallToAction(' Onlie Chat '),
-        ],
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            WebDetail(),
+            SizedBox(height: 100,),
+            CallToAction('Join Waiting',dummy),
+            SizedBox(height: 20,),
+            CallToAction(' Onlie Chat ',dummy),
+          ],
+      
       ),
     );
   }
