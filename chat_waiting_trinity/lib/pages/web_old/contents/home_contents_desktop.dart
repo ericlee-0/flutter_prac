@@ -1,3 +1,4 @@
+import 'package:chat_waiting_trinity/pages/web_old/route/route_names.dart';
 import 'package:flutter/material.dart';
 import '../web_detail.dart';
 import '../call_to_action/call_to_action.dart';
@@ -19,11 +20,9 @@ class HomeContentsDesktop extends StatelessWidget {
                     child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CallToAction('Join Waiting',dummy),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    CallToAction('   Chating    ', endDrawer),
+                    CallToAction('Join Waiting',dummy,WaitingRoute),
+                   
+                    // CallToAction('   Chating    ', endDrawer, ChatRoute),
                   ],
                 ))
               ],

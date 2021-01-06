@@ -16,20 +16,24 @@ class NavigationBarTabletDesktop extends StatelessWidget {
         children: [
           NavBarLogo(),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             children: [
+              NavBarItem('Home',HomeRoute),
+              SizedBox(
+                width: 25,
+              ),
               NavBarItem('Waiting',WaitingRoute),
               SizedBox(
-                width: 40,
+                width: 25,
               ),
               // NavBarItem('Chat',ChatRoute),
               NavBarItemChat('Chat',endFn),
               SizedBox(
-                width: 40,
+                width: 25,
               ),
               NavBarItem('About',AboutRoute),
               SizedBox(
-                width: 40,
+                width: 25,
               ),
             ],
           ),

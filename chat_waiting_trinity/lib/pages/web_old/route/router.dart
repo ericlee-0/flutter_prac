@@ -5,6 +5,7 @@ import '../view/web_waiting_view.dart';
 import '../view/web_about_view.dart';
 import '../view/web_chat_view.dart';
 
+
 Route<dynamic> generateRoute(RouteSettings settings) {
   Function dummy;
   print('settings: $settings');

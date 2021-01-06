@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import '../home_contents/home_contents_desktop.dart';
-import '../home_contents/home_contents_mobile.dart';
+import '../contents/home_contents_desktop.dart';
+import '../contents/home_contents_mobile.dart';
 import './orientation_layout.dart';
 
 class WebHomeView extends StatelessWidget {

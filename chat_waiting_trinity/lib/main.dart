@@ -1,12 +1,12 @@
 // import 'dart:html';
-import 'package:chat_waiting_trinity/pages/web/navigation/navigation_service.dart';
-import 'package:chat_waiting_trinity/pages/web/route/route_names.dart';
-import './pages/web/route/router.dart';
+// import 'package:chat_waiting_trinity/pages/web/navigation/navigation_service.dart';
+// import 'package:chat_waiting_trinity/pages/web/route/route_names.dart';
+// import './pages/web/route/router.dart';
 
 import './locator.dart';
-import './pages/web/web_layout_template.dart';
+// import './pages/web/web_layout_template.dart';
 
-import 'pages/web/view/web_home_view.dart';
+// import 'pages/web/view/web_home_view.dart';
 
 import './controllers/chatNaviController.dart';
 
@@ -36,7 +36,7 @@ import './widgets/waiting/waiting_list_drawer.dart';
 import './pages/chat/guest_chat_page.dart';
 import './controllers/sms_controller.dart';
 
-import './pages/web/web_home.dart';
+import 'pages/web/web_home_nav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -100,11 +100,9 @@ class _MyAppState extends State<MyApp> {
       child: kIsWeb
           ? MaterialApp(
               title: 'Chat_Wainting_Trinity',
+              debugShowCheckedModeBanner: false,
               theme: _theme(),
-              builder: (context, child) => WebLayoutTemplate(child),
-              navigatorKey: locator<NavigationService>().navigatorKey,
-              onGenerateRoute: generateRoute,
-              initialRoute: HomeRoute,
+              home: WebHomeNav(),
             )
           : MaterialApp(
               title: 'Chat_Wainting_Trinity',

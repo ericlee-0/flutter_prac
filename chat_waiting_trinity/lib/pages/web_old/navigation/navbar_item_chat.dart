@@ -12,6 +12,7 @@ class NavBarItemChat extends StatelessWidget {
     
     return GestureDetector(
       onTap: (){
+        print('no fn?');
         // locator<NavigationService>().navigateTo(navigationPath);
         fn();
 

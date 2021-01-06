@@ -233,12 +233,17 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     backgroundColor: Theme.of(context).primaryColor,
+  //     body: AuthForm(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
+  //         _signInWithPhoneWithOTP, _isLoading),
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      body: AuthForm(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
-          _signInWithPhoneWithOTP, _isLoading),
-    );
+    return AuthForm(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
+          _signInWithPhoneWithOTP, _isLoading);
   }
 }
