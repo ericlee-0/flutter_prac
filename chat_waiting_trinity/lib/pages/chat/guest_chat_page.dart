@@ -14,6 +14,7 @@ class GuestChatPage extends StatefulWidget {
 
 class _GuestChatPageState extends State<GuestChatPage> {
   bool _isBegin = false;
+  bool _isWaiting = false;
 
   String _statusMessage = 'Waiting for  chat with Advisor....';
 
@@ -21,31 +22,31 @@ class _GuestChatPageState extends State<GuestChatPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await showDialog<bool>(
-          context: context,
-          builder: (context) => new AlertDialog(
-                title: Text('Confirm'),
-                content: Text('Do you want to chat with advisor?'),
-                actions: [
-                  FlatButton(
-                      child: Text('Yes'),
-                      // onPressed: () => Navigator.pop(c, true),
-                      onPressed: () {
-                        Navigator.pop(context, true);
-                        setState(() {
-                        _isBegin = true;
-                        });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    //   await showDialog<bool>(
+    //       context: context,
+    //       builder: (context) => new AlertDialog(
+    //             title: Text('Confirm'),
+    //             content: Text('Do you want to chat with advisor?'),
+    //             actions: [
+    //               FlatButton(
+    //                   child: Text('Yes'),
+    //                   // onPressed: () => Navigator.pop(c, true),
+    //                   onPressed: () {
+    //                     Navigator.pop(context, true);
+    //                     setState(() {
+    //                       _isBegin = true;
+    //                     });
 
-                        // Navigator.popAndPushNamed(context, '/home');
-                      }),
-                  FlatButton(
-                    child: Text('No'),
-                    onPressed: () => Navigator.pop(context, false),
-                  ),
-                ],
-              ));
-    });
+    //                     // Navigator.popAndPushNamed(context, '/home');
+    //                   }),
+    //               FlatButton(
+    //                 child: Text('No'),
+    //                 onPressed: () => Navigator.pop(context, false),
+    //               ),
+    //             ],
+    //           ));
+    // });
   }
 
   Future<void> _guestController() async {
@@ -59,9 +60,10 @@ class _GuestChatPageState extends State<GuestChatPage> {
         .listen((event) {
       if (event.data()['chatBegin'] == true) {
         _isBegin = false;
-        Navigator.pushNamedAndRemoveUntil(
-            context, ChatRoomPage.routeName, ModalRoute.withName('/home'),
-            arguments: chatRoomData);
+        // Navigator.pushNamedAndRemoveUntil(
+        //     context, ChatRoomPage.routeName, ModalRoute.withName('/home'),
+        //     arguments: chatRoomData);
+        Navigator.pushNamed(context, ChatRoomPage.routeName, arguments: chatRoomData);
       }
     });
     // return Text(_statusMessage);
@@ -104,19 +106,30 @@ class _GuestChatPageState extends State<GuestChatPage> {
     }
     return WillPopScope(
       child: Scaffold(
-          appBar: AppBar(),
-          body: _isBegin
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      Text(_statusMessage),
-                    ],
-                  ),
-                )
+          appBar: AppBar(
+            title: Text('Chat with Agent'),
+          ),
+          body: _isWaiting
+              ? _isBegin
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          Text(_statusMessage),
+                        ],
+                      ),
+                    )
+                  : Center(
+                      child: Text('waiting'),
+                    )
               : Center(
-                  child: Text('waiting'),
+                  child: RaisedButton(
+                      child: Text('Request'),
+                      onPressed: () => setState(() {
+                            _isWaiting = true;
+                            _isBegin = true;
+                          })),
                 )
           // () {
           //     _showConfirmDialog();

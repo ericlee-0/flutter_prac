@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (ctx) => Auth(),
         ),
-        // StreamProvider<User>.value(value: FirebaseAuth.instance.authStateChanges()),
+        StreamProvider<User>.value(value: FirebaseAuth.instance.authStateChanges()),
       ],
       child: kIsWeb
           ? MaterialApp(
@@ -103,6 +103,11 @@ class _MyAppState extends State<MyApp> {
               debugShowCheckedModeBanner: false,
               theme: _theme(),
               home: WebHomeNav(),
+              routes: {
+                '/home': (ctx) => WebHomeNav(),
+                GuestChatPage.routeName: (ctx) => GuestChatPage(),
+                ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+              },
             )
           : MaterialApp(
               title: 'Chat_Wainting_Trinity',
