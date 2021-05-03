@@ -16,17 +16,17 @@ class WebHomeNav extends StatefulWidget {
 class _WebHomeNavState extends State<WebHomeNav> {
   final List<Widget> _screens = [
     WebHome(),
-    Scaffold(),
-    Scaffold(),
-    Scaffold(),
-    Scaffold(),
+    WebContact(),
+    WebLocation(),
+    WebMenu(),
+    WebBusiness(),
   ];
   List<Widget> _screensMobile = [
     WebHome(),
-    Scaffold(),
-    Scaffold(),
-    Scaffold(),
-    Scaffold(),
+    WebContact(),
+    WebLocation(),
+    WebMenu(),
+    WebBusiness(),
     Scaffold(
         // body: Container(child: Text('button'),alignment: Alignment.center),
         ),
@@ -118,27 +118,33 @@ class _WebHomeNavState extends State<WebHomeNav> {
                 preferredSize: Size(screenSize.width * 0.5, 100.0))
             : null,
         body: !Responsive.isMobile(context)
-            ? Row(
-                children: [
-                  Container(
-                    width: screenSize.width * 0.65,
-                    child: IndexedStack(
-                      // sizing: StackFit.loose,
-                      index: _selectedIndex,
-                      children: _screens,
-                    ),
-                  ),
-                  SizedBox(width: screenSize.width * 0.05),
-                  Container(
-                    width: screenSize.width * 0.3,
-                    child: (user == null)
-                        ? ButtonGradiant(
-                            title: 'chat with agent', onTap: showMyDialog)
-                        : GuestChatPage(),
-                    alignment: Alignment.center,
-                  )
-                ],
+            ? IndexedStack(
+                // sizing: StackFit.loose,
+                index: _selectedIndex,
+                children: _screens,
               )
+            //below part will be use it for chat container activemode
+            // ? Row(
+            //     children: [
+            //       Container(
+            //         width: screenSize.width * 0.65,
+            //         child: IndexedStack(
+            //           // sizing: StackFit.loose,
+            //           index: _selectedIndex,
+            //           children: _screens,
+            //         ),
+            //       ),
+            //       SizedBox(width: screenSize.width * 0.05),
+            //       Container(
+            //         width: screenSize.width * 0.3,
+            //         child: (user == null)
+            //             ? ButtonGradiant(
+            //                 title: 'chat with agent', onTap: showMyDialog)
+            //             : GuestChatPage(),
+            //         alignment: Alignment.center,
+            //       )
+            //     ],
+            //   )
             : IndexedStack(
                 index: _selectedIndex,
                 children: _screensMobile,
