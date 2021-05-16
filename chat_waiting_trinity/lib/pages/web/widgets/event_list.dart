@@ -1,9 +1,37 @@
-import 'package:chat_waiting_trinity/pages/web/widgets/profile_avatar.dart';
 import 'package:flutter/material.dart';
 
-class PostContainer extends StatelessWidget {
+class EventList extends StatelessWidget {
+  final List<dynamic> item;
+
+  const EventList({Key key, this.item}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.width >= 1200 ? 600 : 400,
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+          // scrollDirection: Axis.horizontal,
+          itemCount: item.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: _Card(item: item[index]),
+            );
+          }),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const _Card({Key key, this.item}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    final cardWidth = MediaQuery.of(context).size.width >= 1200 ? 330.0 : 200.0;
+
     return Container(
       // width: MediaQuery.of(context).size.width / 2,
       margin: const EdgeInsets.symmetric(vertical: 5.0),
@@ -16,17 +44,16 @@ class PostContainer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PostHeader(),
+                _PostHeader(item: item),
                 const SizedBox(height: 4.0),
-                Text(
-                    'event descirption- this event is blabalbaldkdkfjdleifjdlifekdjfjlslsdkjf'),
+                Text(item['detail']),
                 _PostStats()
               ],
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
-            child: Image.asset('assets/images/event.jpeg'),
+            child: Image.asset(item['image']),
           ),
         ],
       ),
@@ -35,18 +62,25 @@ class PostContainer extends StatelessWidget {
 }
 
 class _PostHeader extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const _PostHeader({Key key, this.item}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ProfileAvatar(imageUrl: ''),
+        CircleAvatar(
+          radius: 23.0,
+          backgroundColor: Colors.blue[200],
+          child: Text(item['type']),
+        ),
         const SizedBox(width: 8.0),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'event creator',
+                item['creator'],
                 style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12.0,

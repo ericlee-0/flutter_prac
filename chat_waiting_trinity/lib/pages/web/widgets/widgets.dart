@@ -9,3 +9,8 @@ export 'responsive.dart';
 export 'custom_app_bar.dart';
 export 'web_chat_container.dart';
 export 'web_chat_drawer.dart';
+export 'slide_list.dart';
+export 'event_list.dart';
+export 'order_online.dart';
+export 'main_title.dart';
+export 'chat_container_web.dart';

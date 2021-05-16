@@ -10,6 +10,39 @@ class _WebHomeState extends State<WebHome> {
   final TrackingScrollController _trackingScrollController =
       TrackingScrollController();
 
+  var scrollInt;
+  bool chatOpen;
+  bool reservationOpen;
+  @override
+  void initState() {
+    super.initState();
+    // _scrollController = ScrollController();
+    _trackingScrollController.addListener(changeSelector);
+    chatOpen = false;
+    reservationOpen = false;
+    setState(() {
+      scrollInt = 0;
+    });
+  }
+
+  changeSelector() {
+    var scrollValue = _trackingScrollController.offset.round();
+    var scrollIntValue = 0;
+
+    if (scrollIntValue < 8) scrollIntValue = (scrollValue / 30).floor();
+
+    setState(() {
+      scrollInt = scrollIntValue;
+    });
+  }
+
+  openReservation() {
+    print('reservation clicked');
+    setState(() {
+      reservationOpen = !reservationOpen;
+    });
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -17,14 +50,68 @@ class _WebHomeState extends State<WebHome> {
     super.dispose();
   }
 
+  List eventListItems = [
+    {
+      'type': 'E',
+      'creator': 'Gyubee Dundas',
+      'image': 'assets/images/event.jpeg',
+      'detail':
+          'this event is created by duddas haha so i have no idear other location and contents is not decided yet. we will figure it out sooner or later',
+    }
+  ];
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(), // on tap -> unfocus
       child: Scaffold(
+        floatingActionButton: ElevatedButton.icon(
+            onPressed: () => setState(() {
+                  chatOpen = !chatOpen;
+                }),
+            icon: Icon(Icons.chat_bubble_outline),
+            label: chatOpen ? Text('Close chat') : Text('Open chat')),
         body: Responsive(
           mobile: _HomeMobile(scrollController: _trackingScrollController),
-          desktop: _HomeDesktop(scrollController: _trackingScrollController),
+          desktop: Stack(
+            children: [
+              _HomeDesktop(
+                scrollController: _trackingScrollController,
+                eventListItems: eventListItems,
+                scrollInt: scrollInt,
+                openReservationFn: openReservation,
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: AnimatedContainer(
+                    width: reservationOpen ? 400.0 : 0.0,
+                    height: reservationOpen ? 600.0 : 0.0,
+                    color: reservationOpen ? Colors.blue[100] : Colors.white,
+                    alignment: reservationOpen
+                        ? Alignment.bottomRight
+                        : AlignmentDirectional.topEnd,
+                    duration: Duration(seconds: 2),
+                    curve: Curves.fastOutSlowIn,
+                    child:
+                        reservationOpen ? Icon(Icons.add) : SizedBox.shrink()),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
+                alignment: Alignment.bottomRight,
+                child: AnimatedContainer(
+                    width: chatOpen ? 400.0 : 0.0,
+                    height: chatOpen ? 600.0 : 0.0,
+                    color: chatOpen ? Colors.grey[100] : Colors.white,
+                    alignment: chatOpen
+                        ? Alignment.bottomRight
+                        : AlignmentDirectional.topEnd,
+                    duration: Duration(seconds: 2),
+                    curve: Curves.fastOutSlowIn,
+                    child:
+                        chatOpen ? Icon(Icons.chat_bubble) : SizedBox.shrink()),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -105,99 +192,116 @@ class _HomeMobile extends StatelessWidget {
 
 class _HomeDesktop extends StatelessWidget {
   final TrackingScrollController scrollController;
+  final List<dynamic> eventListItems;
+  final int scrollInt;
+  final Function openReservationFn;
 
-  const _HomeDesktop({Key key, this.scrollController}) : super(key: key);
+  const _HomeDesktop(
+      {Key key,
+      this.scrollController,
+      this.eventListItems,
+      this.scrollInt,
+      this.openReservationFn})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return
-    //  Row(
-    //   children: [
-    //     Flexible(
-    //       flex: 2,
-    //       child: Container(color: Colors.orange),
-    //     ),
-    //     const Spacer(),
-        Container(
-            width: 600.0,
-            // color: Colors.yellow,
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                // SliverAppBar(
-                //   brightness: Brightness.light,
-                //   backgroundColor: Colors.white,
-                //   title: SizedBox(
-                //     height: 80,
-                //     width: 150,
-                //     child: Image.asset(
-                //       'assets/images/logo_150_113.png',
-                //     ),
-                //   ),
-                //   //  Text(
-                //   //   'chat_wait',
-                //   //   style: const TextStyle(
-                //   //       color: Colors.blue,
-                //   //       fontSize: 28.0,
-                //   //       fontWeight: FontWeight.bold),
-                //   // ),
-                //   centerTitle: false,
-                //   floating: true,
-                //   actions: [
-                //     CircleButton(
-                //         icon: Icons.home,
-                //         iconSize: 30.0,
-                //         onPressed: () => print('Home')),
-                //     CircleButton(
-                //         icon: Icons.message_rounded,
-                //         iconSize: 30.0,
-                //         onPressed: () => print('message')),
-                //     CircleButton(
-                //         icon: Icons.timelapse,
-                //         iconSize: 30.0,
-                //         onPressed: () => print('waiting'))
-                //   ],
-                // ),
-                SliverToBoxAdapter(
-                  child: CreatePostContainer(waitTime: 10),
+    return Container(
+        child: CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        MainTitle(
+          scrollInt: scrollInt,
+        ),
+        SliverToBoxAdapter(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Spacer(),
+            Flexible(
+              flex: 9,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/store_location.png',
+                      fit: BoxFit.fill,
+                    ),
+                    Stories(item: Text('list of Menu items')),
+                    EventList(item: eventListItems)
+                  ],
                 ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
-                  sliver: SliverToBoxAdapter(
-                    child: Rooms(waitingPeople: Text('list of waiting people')),
+              ),
+            ),
+            // const Spacer(),
+            Flexible(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        child: OutlinedButton(
+                          child: Text(
+                            'Reservation',
+                            style: TextStyle(
+                                // color: Colors.red[400],
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            primary: Colors.white,
+                            backgroundColor: Colors.blue[600],
+                            shadowColor: Colors.red,
+                            elevation: 10,
+                          ),
+                          onPressed: () {
+                            openReservationFn();
+                          },
+                        ),
+                      ),
+                      CreatePostContainer(waitTime: 10),
+                      Rooms(waitingPeople: Text('list of waiting people')),
+                      OrderOnline(),
+                    ],
                   ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
-                  sliver: SliverToBoxAdapter(
-                    child: Stories(item: Text('list of Menu items')),
-                  ),
-                ),
-                SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    //here will be event container. using as listview
-                    //final Post post = posts[index];
-                    return PostContainer();
-                  },
-                  childCount: 5,
-                ))
-              ],
-            )
-            )
-            // ,
-        // const Spacer(),
-        // Flexible(
-        //   flex: 2,
-        //   child: Align(
-        //     alignment: Alignment.centerRight,
-        //     child: Padding(
-        //       padding: const EdgeInsets.all(12.0),
-        //       child: WebChatContainer(),
-        //     ),
+                )),
+            const Spacer(),
+          ],
+        )),
+        // SliverList(
+        //     delegate: SliverChildBuilderDelegate(
+        //   (context, index) {
+        //     //here will be event container. using as listview
+        //     //final Post post = posts[index];
+        //     return PostContainer();
+        //   },
+        //   childCount: 2,
+        // )),
+        SliverToBoxAdapter(
+          child: Container(
+            height: 100,
+            color: Colors.grey[350],
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(0, 20.0, 0, 0),
+            child: Text(
+              'Copyright © 2021 Trinity Inc. All rights reserved.  Privacy Policy Terms of Use | Sales and Refunds | Site Map ',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        // SliverToBoxAdapter(
+        //   child: CreatePostContainer(waitTime: 10),
+        // ),
+        // SliverPadding(
+        //   padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
+        //   sliver: SliverToBoxAdapter(
+        //     child: Rooms(waitingPeople: Text('list of waiting people')),
         //   ),
         // ),
-      // ],
-    // )
-    ;
+      ],
+    ));
   }
 }

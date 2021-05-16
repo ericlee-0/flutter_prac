@@ -76,21 +76,44 @@ class __MenuDesktopState extends State<_MenuDesktop> {
   var selectedSlide;
   var scrollInt;
 
-  List allSlides = [
+  List allMenuItiems = [
     {
-      'widget': 'assets/images/web_menu_1.jpeg',
-      'selected': false,
-      'text': 'Menu'
+      'group': 'A',
+      'image': 'assets/images/400_600.png',
+      'name': 'lunch',
+      'description': 'lunch',
     },
+    {
+      'group': 'A',
+      'image': 'assets/images/400_600.png',
+      'name': 'dinner',
+      'description': 'dinner',
+    },
+    {
+      'group': 'D',
+      'image': 'assets/images/400_600.png',
+      'name': 'drinks',
+      'description': 'drinks',
+    },
+    {
+      'group': 'A',
+      'image': 'assets/images/400_600.png',
+      'name': 'deserts',
+      'description': 'deserts',
+    },
+  ];
+
+  List allSlides = [
+    {'widget': 'assets/images/menu.jpeg', 'selected': false, 'text': 'Menu'},
     {
       'widget': 'assets/images/web_menu_2.jpeg',
       'selected': false,
-      'text': 'Dinner'
+      'text': 'Main Dishes'
     },
     {
       'widget': 'assets/images/web_menu_3.jpeg',
       'selected': false,
-      'text': 'Lunch'
+      'text': 'Deserts'
     },
     {
       'widget': 'assets/images/web_menu_1.jpeg',
@@ -107,7 +130,7 @@ class __MenuDesktopState extends State<_MenuDesktop> {
     {'image': 'assets/images/web_menu_2.jpeg'},
     {'image': 'assets/images/web_menu_2.jpeg'},
     {'image': 'assets/images/web_menu_3.jpeg'},
-    {'image': 'assets/images/web_menu_3.jpeg'},
+    {'image': 'assets/images/400_600.png'},
   ];
 
   @override
@@ -115,6 +138,7 @@ class __MenuDesktopState extends State<_MenuDesktop> {
     super.initState();
     // _scrollController = ScrollController();
     widget.scrollController.addListener(changeSelector);
+
     setState(() {
       scrollInt = 0;
       selectedSlide = allSlides[0];
@@ -130,26 +154,9 @@ class __MenuDesktopState extends State<_MenuDesktop> {
 
     var scrollValue = widget.scrollController.offset.round();
     var slideValue = 0;
-    var scrollIntValue;
-    if (scrollValue <= 150)
-      scrollIntValue = 0;
-    else if (scrollValue < 180)
-      scrollIntValue = 1;
-    else if (scrollValue < 210)
-      scrollIntValue = 2;
-    else if (scrollValue < 240)
-      scrollIntValue = 3;
-    else if (scrollValue < 270)
-      scrollIntValue = 4;
-    else if (scrollValue < 300)
-      scrollIntValue = 5;
-    else if (scrollValue < 330)
-      scrollIntValue = 6;
-    else {
-      scrollIntValue = 7;
-      slideValue = 1;
-    }
+    var scrollIntValue = 0;
 
+    if (scrollIntValue < 8) scrollIntValue = (scrollValue / 30).floor();
     // var slideValue = (scrollValue / divisor).round();
     print('scrollvalue ; $scrollValue');
     print('slidevalue ; $slideValue');
@@ -161,7 +168,7 @@ class __MenuDesktopState extends State<_MenuDesktop> {
       scrollInt = scrollIntValue;
       // allSlides[currentSlide]['selected'] = false;
       // selectedSlide = allSlides[slideValue];
-      selectedSlide['selected'] = true;
+      // selectedSlide['selected'] = true;
     });
   }
 
@@ -171,34 +178,25 @@ class __MenuDesktopState extends State<_MenuDesktop> {
       child: CustomScrollView(
         controller: widget.scrollController,
         slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              height: 200,
-              width: double.infinity,
-              // color: Colors.white,
-              padding: EdgeInsets.fromLTRB(0, 100.0, 0, 0),
-              child: Text(
-                'Menu',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          SliverToBoxAdapter(child: menuTitle()),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
+            sliver: SliverToBoxAdapter(
+              child: SlideList(item: allMenuItiems),
             ),
           ),
           // SliverToBoxAdapter(child: imagefit()),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                //here will be event container. using as listview
-                //final Post post = posts[index];
+          // SliverList(
+          //   delegate: SliverChildBuilderDelegate(
+          //     (context, index) {
+          //       //here will be event container. using as listview
+          //       //final Post post = posts[index];
 
-                return imagefit2(allSlides[index]);
-              },
-              childCount: allSlides.length,
-            ),
-          ),
+          //       return menuTitle();
+          //     },
+          //     childCount: allSlides.length,
+          //   ),
+          // ),
           // SliverList(
           //   delegate: SliverChildBuilderDelegate(
           //     (context, index) {
@@ -221,6 +219,7 @@ class __MenuDesktopState extends State<_MenuDesktop> {
               childCount: allSlides2.length,
             ),
           ),
+
           SliverToBoxAdapter(
             child: Container(
               height: 100,
@@ -259,54 +258,53 @@ class __MenuDesktopState extends State<_MenuDesktop> {
     );
   }
 
-  Widget imagefit2(slide) {
+  Widget menuTitle() {
     // var scrollValue = widget.scrollController.offset.round();
 
     print('scrollInt : $scrollInt');
 
     return scrollInt < 7
         ? Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            // padding: EdgeInsets.all(0 + (index + 1) * 50),
-            decoration: BoxDecoration(
-              color: Colors.green[100],
-              // border: Border.all(width: index * 3),
-              image: DecorationImage(
-                scale: 0.3 + (scrollInt * 0.1),
-                // fit: BoxFit.fill,
-                // image: AssetImage('assets/images/web_menu_1.jpeg'),
-                image: AssetImage(slide['widget']),
+            // height: MediaQuery.of(context).size.height,
+            // width: MediaQuery.of(context).size.width >= 1200
+            //     ? 1200
+            //     : MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  0 + scrollInt * 20, 0, 0 + scrollInt * 20, 30),
+              child: Image.asset(
+                'assets/images/main_image.png',
+                fit: BoxFit.fill,
               ),
             ),
           )
-        : Center(
+        : Container(
+            // height: MediaQuery.of(context).size.height,
+            // width: MediaQuery.of(context).size.width >= 1200
+            //     ? 1200
+            //     : MediaQuery.of(context).size.width,
             child: Stack(
+              alignment: Alignment.bottomCenter,
               children: <Widget>[
-                Container(
-                  alignment: Alignment.center,
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Colors.green[100],
-                    // border: Border.all(width: index * 3),
-                    image: DecorationImage(
-                      scale: 1,
-                      // fit: BoxFit.fill,
-                      // image: AssetImage('assets/images/web_menu_1.jpeg'),
-                      image: AssetImage(slide['widget']),
-                    ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(140, 0, 140, 30),
+                  child: Image.asset(
+                    'assets/images/main_image.png',
+                    fit: BoxFit.fill,
+                    color: Color.fromRGBO(255, 255, 255, 0.5),
+                    colorBlendMode: BlendMode.modulate,
                   ),
                 ),
-                Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      slide['text'],
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22.0),
-                    )),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 150),
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 55.0),
+                  ),
+                ),
               ],
             ),
           );
