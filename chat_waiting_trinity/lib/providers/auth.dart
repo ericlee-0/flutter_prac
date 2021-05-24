@@ -8,9 +8,8 @@ class Auth with ChangeNotifier {
   final Stream<User> firebaseAuthState =
       FirebaseAuth.instance.authStateChanges();
 
-
   dynamic get userId {
-    // print(user);
+    print(user);
     // print(firebaseAuthState.forEach((element) {print(element);}));
     return user.uid;
   }
@@ -21,7 +20,7 @@ class Auth with ChangeNotifier {
   }
 
   Stream<User> get authUser {
-     FirebaseAuth.instance.authStateChanges();
+    FirebaseAuth.instance.authStateChanges();
     // final stateChange = FirebaseAuth.instance.authStateChanges();
     return firebaseAuthState;
   }

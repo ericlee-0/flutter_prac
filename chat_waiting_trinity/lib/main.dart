@@ -68,6 +68,7 @@ class _MyAppState extends State<MyApp> {
     // setState(() {
     //   _userId = user.uid;
     // });
+
     return user.uid;
   }
 
@@ -91,42 +92,46 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (ctx) => Auth(),
-        ),
-        StreamProvider<User>.value(value: FirebaseAuth.instance.authStateChanges()),
-      ],
-      child: kIsWeb
-          ? MaterialApp(
-              title: 'Chat_Wainting_Trinity',
-              debugShowCheckedModeBanner: false,
-              theme: _theme(),
-              home: WebHomeNav(),
-              routes: {
-                '/home': (ctx) => WebHomeNav(),
-                GuestChatPage.routeName: (ctx) => GuestChatPage(),
-                ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
-              },
-            )
-          : MaterialApp(
-              title: 'Chat_Wainting_Trinity',
-              theme: _theme(),
-              home: MyHomePage(),
-              routes: {
-                '/home': (ctx) => MyHomePage(),
-                UserProfileEditPage.routeName: (ctx) =>
-                    UserProfileEditPage(Auth.instance.userId),
-                // UserListPage.routeName: (ctx) => UserListPage(),
-                ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
-                ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
-                UserProfilePage.routeName: (ctx) => UserProfilePage(),
-                GuestChatPage.routeName: (ctx) => GuestChatPage(),
-                // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
-                // WaitingListPage.routeName: (ctx) => WaitingListPage()
-              },
-            ),
-    );
+        providers: [
+          ChangeNotifierProvider(
+            create: (ctx) => Auth(),
+          ),
+          StreamProvider<User>.value(
+              value: FirebaseAuth.instance.authStateChanges()),
+        ],
+        child:
+            //  kIsWeb
+            //     ?
+            MaterialApp(
+          title: 'Chat_Wainting_Trinity',
+          debugShowCheckedModeBanner: false,
+          theme: _theme(),
+          home: WebHomeNav(),
+          routes: {
+            '/home': (ctx) => WebHomeNav(),
+            GuestChatPage.routeName: (ctx) => GuestChatPage(),
+            ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+          },
+        )
+        // :
+        // MaterialApp(
+        //     title: 'Chat_Wainting_Trinity',
+        //     theme: _theme(),
+        //     home: MyHomePage(),
+        //     routes: {
+        //       '/home': (ctx) => MyHomePage(),
+        //       UserProfileEditPage.routeName: (ctx) =>
+        //           UserProfileEditPage(Auth.instance.userId),
+        //       // UserListPage.routeName: (ctx) => UserListPage(),
+        //       ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
+        //       ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+        //       UserProfilePage.routeName: (ctx) => UserProfilePage(),
+        //       GuestChatPage.routeName: (ctx) => GuestChatPage(),
+        //       // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+        //       // WaitingListPage.routeName: (ctx) => WaitingListPage()
+        //     },
+        //   ),
+        );
   }
 }
 
@@ -228,8 +233,8 @@ class _MyHomePageState extends State<MyHomePage> {
     print('main page');
     if (_selectedPage == SelectPage.waiting) {
       return StreamBuilder(
-          stream: Auth.instance.authState,
-          // stream: FirebaseAuth.instance.authStateChanges(),
+          // stream: Auth.instance.authState,
+          stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -244,8 +249,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     if (_selectedPage == SelectPage.chat) {
       return StreamBuilder(
-          stream: Auth.instance.authState,
-          // stream: FirebaseAuth.instance.authStateChanges(),
+          // stream: Auth.instance.authState,
+          stream: FirebaseAuth.instance.authStateChanges(),
           builder: (ctx, userSnapshot) {
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -254,6 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             if (userSnapshot.hasData) {
               // print('id:${FirebaseAuth.instance.currentUser.uid}');
+              print('errorchekc');
               return FirebaseAuth.instance.currentUser.uid ==
                       'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
                   ? GuestChatPage()

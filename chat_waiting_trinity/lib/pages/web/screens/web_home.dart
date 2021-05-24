@@ -1,7 +1,26 @@
 import '../widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../../pages/chat/auth_page.dart';
+import '../../waiting/join_waiting_page.dart';
+import '../../chat/guest_chat_page.dart';
+import '../../../controllers/chatNaviController.dart';
+import '../../waiting/waiting_time_page.dart';
+import './../../waiting/add_reservation_page.dart';
+import '../../waiting/stepper_test.dart';
+
 class WebHome extends StatefulWidget {
+  final Function toChatFn;
+  final Function toReservationFn;
+
+  const WebHome({
+    Key key,
+    this.toChatFn,
+    this.toReservationFn,
+  }) : super(key: key);
+
   @override
   _WebHomeState createState() => _WebHomeState();
 }
@@ -66,13 +85,26 @@ class _WebHomeState extends State<WebHome> {
       onTap: () => FocusScope.of(context).unfocus(), // on tap -> unfocus
       child: Scaffold(
         floatingActionButton: ElevatedButton.icon(
-            onPressed: () => setState(() {
+            onPressed: () {
+              if (MediaQuery.of(context).size.width <= 800)
+                widget.toChatFn();
+              else
+                setState(() {
                   chatOpen = !chatOpen;
-                }),
+                });
+            },
+            // setState(() {
+            //   chatOpen = !chatOpen;
+            // }),
             icon: Icon(Icons.chat_bubble_outline),
             label: chatOpen ? Text('Close chat') : Text('Open chat')),
         body: Responsive(
-          mobile: _HomeMobile(scrollController: _trackingScrollController),
+          mobile: _HomeMobile(
+            scrollController: _trackingScrollController,
+            eventListItems: eventListItems,
+            scrollInt: scrollInt,
+            reserveFn: widget.toReservationFn,
+          ),
           desktop: Stack(
             children: [
               _HomeDesktop(
@@ -87,13 +119,33 @@ class _WebHomeState extends State<WebHome> {
                     width: reservationOpen ? 400.0 : 0.0,
                     height: reservationOpen ? 600.0 : 0.0,
                     color: reservationOpen ? Colors.blue[100] : Colors.white,
-                    alignment: reservationOpen
-                        ? Alignment.bottomRight
-                        : AlignmentDirectional.topEnd,
+                    // alignment: reservationOpen
+                    //     ? Alignment.bottomRight
+                    //     : AlignmentDirectional.topEnd,
                     duration: Duration(seconds: 2),
                     curve: Curves.fastOutSlowIn,
-                    child:
-                        reservationOpen ? Icon(Icons.add) : SizedBox.shrink()),
+                    child: reservationOpen
+                        ? StreamBuilder(
+                            stream:
+                                //  Auth.instance.authState,
+                                FirebaseAuth.instance.authStateChanges(),
+                            builder: (ctx, userSnapshot) {
+                              if (userSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (userSnapshot.hasData) {
+                                // return JoinWaitingPage();
+                                // return AddReservationPage();
+                                return StepperTest(
+                                  closeReservationFn: openReservation,
+                                );
+                              }
+                              return AuthPage();
+                            })
+                        : SizedBox.shrink()),
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
@@ -107,8 +159,28 @@ class _WebHomeState extends State<WebHome> {
                         : AlignmentDirectional.topEnd,
                     duration: Duration(seconds: 2),
                     curve: Curves.fastOutSlowIn,
-                    child:
-                        chatOpen ? Icon(Icons.chat_bubble) : SizedBox.shrink()),
+                    child: chatOpen
+                        ? StreamBuilder(
+                            stream: FirebaseAuth.instance.authStateChanges(),
+                            builder: (ctx, userSnapshot) {
+                              if (userSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (userSnapshot.hasData) {
+                                // print('id:${FirebaseAuth.instance.currentUser.uid}');
+                                return FirebaseAuth.instance.currentUser.uid ==
+                                        'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
+                                    ? GuestChatPage()
+                                    : ChatNavicontroller();
+                                // : ChatRoomListPage();
+                                // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
+                              }
+                              return AuthPage();
+                            })
+                        : SizedBox.shrink()),
               )
             ],
           ),
@@ -120,8 +192,17 @@ class _WebHomeState extends State<WebHome> {
 
 class _HomeMobile extends StatelessWidget {
   final TrackingScrollController scrollController;
+  final List<dynamic> eventListItems;
+  final int scrollInt;
+  final Function reserveFn;
 
-  const _HomeMobile({Key key, this.scrollController}) : super(key: key);
+  const _HomeMobile(
+      {Key key,
+      this.scrollController,
+      this.eventListItems,
+      this.scrollInt,
+      this.reserveFn})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -162,29 +243,85 @@ class _HomeMobile extends StatelessWidget {
           ],
         ),
         SliverToBoxAdapter(
-          child: CreatePostContainer(waitTime: 10),
+          child: Image.asset(
+            'assets/images/main_image.png',
+            fit: BoxFit.fill,
+          ),
         ),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
-          sliver: SliverToBoxAdapter(
-            child: Rooms(waitingPeople: Text('list of waiting people')),
+        // MainTitle(
+        //   scrollInt: scrollInt,
+        // ),
+        SliverToBoxAdapter(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
+            child: OutlinedButton(
+              child: Text(
+                'Reservation',
+                style: TextStyle(
+                    // color: Colors.red[400],
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.blue[600],
+                shadowColor: Colors.red,
+                elevation: 10,
+              ),
+              onPressed: () {
+                reserveFn();
+              },
+            ),
           ),
         ),
         SliverPadding(
           padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
           sliver: SliverToBoxAdapter(
-            child: Stories(item: Text('list of Menu items')),
+              child: Column(
+            children: [
+              // CreatePostContainer(waitTime: 10),
+              WaitingTimePage(),
+              Rooms(waitingPeople: Text('list of waiting people')),
+              OrderOnline(),
+            ],
+          )),
+        ),
+        SliverToBoxAdapter(
+          child: Stories(item: Text('list of Menu items')),
+        ),
+        SliverToBoxAdapter(
+          child: Image.asset(
+            'assets/images/store_location.png',
+            fit: BoxFit.fill,
           ),
         ),
+        // SliverPadding(
+        //   padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
+        //   sliver: SliverToBoxAdapter(
+        //     child: EventList(item: eventListItems),
+        //   ),
+        // ),
         SliverList(
             delegate: SliverChildBuilderDelegate(
           (context, index) {
             //here will be event container. using as listview
             //final Post post = posts[index];
-            return PostContainer();
+            return PostContainer(item: eventListItems[index]);
           },
-          childCount: 5,
-        ))
+          childCount: eventListItems.length,
+        )),
+        SliverToBoxAdapter(
+          child: Container(
+            height: 50,
+            color: Colors.grey[350],
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(0, 20.0, 0, 0),
+            child: Text(
+              'Copyright © 2021 Trinity Inc. All rights reserved.  Privacy Policy Terms of Use | Sales and Refunds | Site Map ',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -262,7 +399,8 @@ class _HomeDesktop extends StatelessWidget {
                           },
                         ),
                       ),
-                      CreatePostContainer(waitTime: 10),
+                      // CreatePostContainer(waitTime: 10),
+                      WaitingTimePage(),
                       Rooms(waitingPeople: Text('list of waiting people')),
                       OrderOnline(),
                     ],

@@ -1,5 +1,4 @@
-import 'package:chat_waiting_trinity/pages/chat/guest_chat_page.dart';
-import 'package:chat_waiting_trinity/pages/web/widgets/button_gradiant.dart';
+import 'package:chat_waiting_trinity/pages/waiting/stepper_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +6,11 @@ import './screens/screens.dart';
 import './widgets/widgets.dart';
 import '../chat/auth_page_web.dart';
 import 'package:flutter/material.dart';
+
+import '../../pages/chat/auth_page.dart';
+import '../waiting/join_waiting_page.dart';
+import '../chat/guest_chat_page.dart';
+import '../../controllers/chatNaviController.dart';
 
 class WebHomeNav extends StatefulWidget {
   @override
@@ -21,16 +25,16 @@ class _WebHomeNavState extends State<WebHomeNav> {
     WebMenu(),
     WebBusiness(),
   ];
-  List<Widget> _screensMobile = [
-    WebHome(),
-    WebContact(),
-    WebLocation(),
-    WebMenu(),
-    WebBusiness(),
-    Scaffold(
-        // body: Container(child: Text('button'),alignment: Alignment.center),
-        ),
-  ];
+  // List<Widget> _screensMobile = [
+  //   WebHome(),
+  //   WebContact(),
+  //   WebLocation(),
+  //   WebMenu(),
+  //   WebBusiness(),
+  //   Scaffold(
+  //       // body: Container(child: Text('button'),alignment: Alignment.center),
+  //       ),
+  // ];
   final List<IconData> _icons = const [
     Icons.home,
     Icons.contact_phone,
@@ -41,7 +45,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
   final List<IconData> _iconsMobile = const [
     Icons.home,
     Icons.contact_phone,
-    Icons.location_on,
+    Icons.add,
     Icons.restaurant_menu,
     Icons.add_business,
     Icons.chat
@@ -54,6 +58,18 @@ class _WebHomeNavState extends State<WebHomeNav> {
     // TODO: implement initState
     super.initState();
     // _screensMobile =
+  }
+
+  void moveToReservation() {
+    setState(() {
+      _selectedIndex = 2;
+    });
+  }
+
+  void moveToChat() {
+    setState(() {
+      _selectedIndex = 5;
+    });
   }
 
   Future showMyDialog(BuildContext context) {
@@ -147,7 +163,60 @@ class _WebHomeNavState extends State<WebHomeNav> {
             //   )
             : IndexedStack(
                 index: _selectedIndex,
-                children: _screensMobile,
+                // children: _screensMobile,
+                children: [
+                  WebHome(
+                    toChatFn: moveToChat,
+                    toReservationFn: moveToReservation,
+                  ),
+                  WebContact(),
+                  Scaffold(
+                    body: Container(
+                      child: StreamBuilder(
+                          stream:
+                              //  Auth.instance.authState,
+                              FirebaseAuth.instance.authStateChanges(),
+                          builder: (ctx, userSnapshot) {
+                            if (userSnapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (userSnapshot.hasData) {
+                              // return JoinWaitingPage();
+                              return StepperTest();
+                            }
+                            return AuthPage();
+                          }),
+                    ),
+                  ),
+                  WebMenu(),
+                  WebBusiness(),
+                  Scaffold(
+                    body: Container(
+                        child: StreamBuilder(
+                            stream: FirebaseAuth.instance.authStateChanges(),
+                            builder: (ctx, userSnapshot) {
+                              if (userSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (userSnapshot.hasData) {
+                                // print('id:${FirebaseAuth.instance.currentUser.uid}');
+                                return FirebaseAuth.instance.currentUser.uid ==
+                                        'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
+                                    ? GuestChatPage()
+                                    : ChatNavicontroller();
+                                // : ChatRoomListPage();
+                                // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
+                              }
+                              return AuthPage();
+                            })),
+                  ),
+                ],
               ),
         endDrawer: WebChatDrawer(),
         bottomNavigationBar: Responsive.isMobile(context)

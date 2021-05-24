@@ -1,0 +1,764 @@
+import 'package:chat_waiting_trinity/widgets/waiting/confirm_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../controllers/join_form_controller.dart';
+import '../../controllers/join_waiting_controller.dart';
+
+class StepperTest extends StatefulWidget {
+  final Function closeReservationFn;
+
+  const StepperTest({Key key, this.closeReservationFn}) : super(key: key);
+  @override
+  _StepperTestState createState() => _StepperTestState();
+}
+
+enum Department {
+  treasury,
+  state,
+}
+
+List<dynamic> answer = [0, 0, 0, 0];
+Map<String, dynamic> answers = {
+  'Number': 0,
+  'Time': DateTime.now(),
+  'Name': '',
+  'Phone': '',
+  // 'isWaiting': true,
+};
+List<GlobalKey<FormState>> formKeys = [
+  GlobalKey<FormState>(),
+  GlobalKey<FormState>(),
+  GlobalKey<FormState>(),
+];
+
+class _StepperTestState extends State<StepperTest> {
+  int _currentStep = 0;
+  var _selectedReserveTime;
+  String _waitingStatus;
+  bool _isWaiting = true;
+  bool _isLoading = false;
+  var _reservationNumber;
+  bool _hasDone = false;
+
+  TextEditingController _reserveAtController = TextEditingController();
+  TextEditingController _dateOnController = TextEditingController();
+  TextEditingController _timeAtController = TextEditingController();
+  Map<int, List<TextFormField>> step1Index = {};
+  List<TextFormField> step1;
+  List<TextFormField> step1_1;
+  // List<TextFormField> step3;
+
+  List<TextFormField> step0 = [
+    TextFormField(
+      key: ValueKey('guest_people'),
+      initialValue: '0',
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        if (int.parse(value) < 1) {
+          return 'Please choose number of people.';
+        } else if (int.parse(value) < 6) {
+          //need to go to waiting
+          print('toWaiting working?');
+          // answer[0] = int.parse(value);
+          answers['Number'] = int.parse(value);
+
+          return null;
+        } else if (int.parse(value) > 20) {
+          return 'more than 10 people need to contact to the restaurant.';
+        }
+        // answer[0] = int.parse(value);
+        answers['Number'] = int.parse(value);
+        return null;
+      },
+      decoration: InputDecoration(labelText: 'People'),
+      // obscureText: true,
+      onSaved: (value) {
+        // _people = value;
+      },
+    ),
+  ];
+
+  @override
+  void initState() {
+    step1Index = {
+      0: [
+        TextFormField(
+          key: ValueKey('guest_ReserveAt'),
+          // initialValue: DateTime.now().toString(),
+          controller: _reserveAtController,
+          validator: (value) {
+            if (value.isEmpty ||
+                !JoinFormController.instance.timePassed(value)) {
+              return 'Please pick a time for the reservation.';
+            }
+            // answer[1] = value;
+            // answers['Time'] = value;
+            return null;
+          },
+          decoration: InputDecoration(
+            labelText: 'reserveAt',
+            suffixIcon: IconButton(
+              onPressed: () => _reserveAtController.clear(),
+              icon: Icon(Icons.clear),
+            ),
+          ),
+          // obscureText: true,
+          onSaved: (value) {},
+          onTap: _showMyDialog,
+        ),
+      ],
+      1: [
+        TextFormField(
+          key: ValueKey('DateOn'),
+          // initialValue: DateTime.now().toString(),
+          controller: _dateOnController,
+          validator: (value) {
+            if (value.isEmpty) {
+              return 'Please pick a date for the reservation.';
+            }
+            // answer[1] = value;
+            // answers['Time'] = value;
+            return null;
+          },
+          decoration: InputDecoration(
+            labelText: 'Date On',
+            suffixIcon: IconButton(
+              onPressed: () => _dateOnController.clear(),
+              icon: Icon(Icons.clear),
+            ),
+          ),
+          // obscureText: true,
+          onSaved: (value) {},
+          onTap: _showDialogDate,
+        ),
+        TextFormField(
+          key: ValueKey('TimeAt'),
+          // initialValue: DateTime.now().toString(),
+          controller: _timeAtController,
+          validator: (value) {
+            if (value.isEmpty) {
+              //need to check timepassed?
+              return 'Please pick a time for the reservation.';
+            }
+            // answer[1] = answer[1] + ' ' + value;
+            // answers['Time'] = answers['Time'] + ' ' + value;
+            return null;
+          },
+          decoration: InputDecoration(
+            labelText: 'Time At',
+            suffixIcon: IconButton(
+              onPressed: () => _timeAtController.clear(),
+              icon: Icon(Icons.clear),
+            ),
+          ),
+          // obscureText: true,
+          onSaved: (value) {},
+          onTap: _showDialogTime,
+        ),
+      ],
+    };
+    step1 = step1Index['0'];
+    step1_1 = step1Index['1'];
+
+    super.initState();
+  }
+
+  List<TextFormField> step3 = [
+    TextFormField(
+      key: ValueKey('guest_name'),
+      // autocorrect: false,
+      textCapitalization: TextCapitalization.words,
+      enableSuggestions: false,
+      validator: (value) {
+        if (value.isEmpty || value.length < 2) {
+          return 'Prease name at least 2 characters';
+        }
+        // answer[2] = value;
+        answers['Name'] = value;
+        return null;
+      },
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(
+        labelText: 'Name',
+      ),
+      onSaved: (value) {
+        // _name = value;
+      },
+    ),
+    TextFormField(
+      key: ValueKey('guest_phone'),
+      keyboardType: TextInputType.phone,
+      validator: (value) {
+        if (value.isEmpty || value.length != 10) {
+          return 'phone must be 10 digits long.';
+        }
+        // answer[3] = value;
+        answers['Phone'] = value;
+        return null;
+      },
+      decoration: InputDecoration(labelText: 'phone'),
+      // obscureText: true,
+      onSaved: (value) {
+        // _phone = '+1' + value;
+      },
+    ),
+  ];
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Choose Reservation Time',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                child: Text('Now'),
+                onPressed: () {
+                  setState(() {
+                    _selectedReserveTime = SelectTime.nowPick;
+                    _waitingStatus =
+                        JoinWaitingController.instance.defaultStatus;
+                  });
+                  print(_selectedReserveTime);
+
+                  _reserveAtController.text =
+                      JoinFormController.instance.roundUpTime(DateTime.now());
+
+                  answers['Time'] = DateFormat("yyyy/MM/dd hh:mm")
+                      .parse(_reserveAtController.text);
+                  // });
+                  Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: Text('Later'),
+                onPressed: () {
+                  setState(() {
+                    _selectedReserveTime = SelectTime.userPick;
+                  });
+                  print(_selectedReserveTime);
+
+                  Navigator.of(context).pop();
+                  JoinFormController.instance
+                      .reserveAtPicker(context)
+                      .then((String result) {
+                    _reserveAtController.text = result;
+                    answers['Time'] =
+                        DateFormat("yyyy/MM/dd hh:mm").parse(result);
+                  });
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showDialogDate() async {
+    try {
+      final selectedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(
+            Duration(days: 100),
+          ));
+
+      DateTime resultTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+      );
+      // answers['Time'] = resultTime;
+      _dateOnController.text = DateFormat('yyyy/MM/dd').format(resultTime);
+      //  = _roundUpTime(resultTime);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> _showDialogTime() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Choose Reservation Time',
+            textAlign: TextAlign.center,
+          ),
+          content: _dateOnController.text == null
+              ? ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Okay'))
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      child: Text('5:00 PM'),
+                      onPressed: () {
+                        setState(() {
+                          _selectedReserveTime = SelectTime.pick5pm;
+                          // _waitingStatus =
+                          //     JoinWaitingController.instance.defaultStatus;
+                        });
+                        print(_selectedReserveTime);
+// new DateTime( , time.minute, time.second, time.millisecond, time.microsecond);
+// answers['Time'].toString();
+                        answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
+                            .parse(_dateOnController.text + ' 17:00');
+                        _timeAtController.text = ' 17:00 ';
+                        _isWaiting = false;
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    ElevatedButton(
+                      child: Text('7:00 PM'),
+                      onPressed: () {
+                        setState(() {
+                          _selectedReserveTime = SelectTime.pick7pm;
+                        });
+                        print(_selectedReserveTime);
+                        answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
+                            .parse(_dateOnController.text + ' 19:00');
+                        _timeAtController.text = '7:00 PM';
+                        _isWaiting = false;
+                        Navigator.of(context).pop();
+                        // _reserveAtPicker();
+                      },
+                    ),
+                    ElevatedButton(
+                      child: Text('Other Time to Join Waiting List'),
+                      onPressed: () {
+                        setState(() {
+                          _selectedReserveTime = SelectTime.userPick;
+                        });
+                        _isWaiting = true;
+                        print(_selectedReserveTime);
+
+                        Navigator.of(context).pop();
+                        JoinFormController.instance
+                            .timeAtPicker(context)
+                            .then((String result) {
+                          _timeAtController.text = result;
+                          answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
+                              .parse(_dateOnController.text + ' ' + result);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+        );
+      },
+    );
+  }
+
+  Future<void> _callConfirm() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true, // user must tap button!
+        builder: (BuildContext context) {
+          return ConfirmDialog(
+            answers: answers,
+            isWaiting: _isWaiting,
+            doAfterConfirmFn: (bool result) {
+              if (result) {
+                setState(() {
+                  _isLoading = true;
+                });
+                _makeReseravtion();
+              }
+            },
+          );
+        });
+  }
+
+  // afterConfirm() {}
+
+  Future<void> _makeReseravtion() async {
+    print('makeReservationFN run...');
+    _reservationNumber =
+        await JoinWaitingController.instance.makeReservation(answers);
+
+    print(
+      'Reservation Number : $_reservationNumber',
+    );
+    if (_reservationNumber is int) {
+      setState(() {
+        _isLoading = false;
+        _hasDone = true;
+      });
+    } else
+      setState(() {
+        _isLoading = false;
+      });
+  }
+
+  Widget _finished() {
+    //
+
+    return Center(
+        child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Reservation Number : $_reservationNumber',
+          ),
+          ElevatedButton(
+            child: Text('Close'),
+            onPressed: () {
+              // Navigator.of(context).pushNamed('/home');
+              widget.closeReservationFn();
+            },
+          )
+        ],
+      ),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(), // on tap -> unfocus
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.grey),
+          backgroundColor: Colors.white,
+          elevation: 2,
+          title: Text("Reservation".toUpperCase(),
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 17,
+              )),
+        ),
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _hasDone
+                ? _finished()
+                : Theme(
+                    data: ThemeData(primaryColor: Colors.indigoAccent),
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                      return Stepper(
+                        type: StepperType.vertical,
+                        currentStep: _currentStep,
+                        onStepTapped: (int step) =>
+                            setState(() => _currentStep = step),
+                        onStepContinue: _currentStep < 2
+                            ? () => setState(() => _currentStep += 1)
+                            : () {
+                                // _showConfirmDialog();
+                                // _confirmTest();
+                                _callConfirm();
+                              },
+                        onStepCancel: _currentStep > 0
+                            ? () => setState(() => _currentStep -= 1)
+                            : null,
+                        controlsBuilder: (BuildContext context,
+                                {VoidCallback onStepContinue,
+                                VoidCallback onStepCancel}) =>
+                            Container(
+                          height: 70,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              _currentStep == 0
+                                  ? Text("")
+                                  : ElevatedButton(
+                                      onPressed: onStepCancel,
+                                      //  color:Colors.grey,
+                                      // textTheme: ButtonTextTheme.normal,
+                                      child: Row(children: <Widget>[
+                                        const Icon(Icons.chevron_left),
+                                        Text("PREV")
+                                      ]),
+                                    ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  bool isValid = formKeys[_currentStep]
+                                      .currentState
+                                      .validate();
+                                  print('current step : $_currentStep');
+                                  if (isValid) onStepContinue();
+                                },
+                                // textColor: Colors.white,
+                                // color: Colors.indigoAccent,
+                                // textTheme: ButtonTextTheme.normal,
+                                child: Row(children: <Widget>[
+                                  _currentStep >= 2
+                                      ? Icon(Icons.done)
+                                      : Icon(Icons.chevron_right),
+                                  _currentStep >= 2
+                                      ? Text("DONE")
+                                      : Text("NEXT")
+                                ]),
+                              ),
+                            ],
+                          ),
+                        ),
+                        steps: <Step>[
+                          Step(
+                            title: Text(
+                              "Guests",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            content: Column(
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8.0, bottom: 10),
+                                      child: Text(
+                                        "How many guests?:",
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SelectableCard(options: step0, step: 0),
+                                // ...step0,
+                              ],
+                            ),
+                            isActive: _currentStep >= 0,
+                            state: _currentStep >= 0
+                                ? StepState.complete
+                                : StepState.disabled,
+                          ),
+                          Step(
+                            title: Text(
+                              "Time",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            content: Column(
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8.0, bottom: 10),
+                                      child: Text(
+                                        "Reserve At?",
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SelectableCard(
+                                    options: choiceNextStep(), step: 1)
+                                // ...choiceNextStep()
+                              ],
+                            ),
+                            isActive: _currentStep >= 1,
+                            state: _currentStep >= 1
+                                ? StepState.complete
+                                : StepState.disabled,
+                          ),
+                          Step(
+                            title: Text(
+                              "Guest Info",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            content: SelectableCard(options: step3, step: 2),
+                            // content: step3[0],
+                            isActive: _currentStep >= 2,
+                            state: _currentStep >= 3
+                                ? StepState.complete
+                                : StepState.disabled,
+                          ),
+                          // Step(
+                          //   title: Text(
+                          //     "Confirm before Add",
+                          //     style: TextStyle(
+                          //       fontSize: 15,
+                          //       color: Colors.grey[600],
+                          //     ),
+                          //   ),
+                          //   content: SelectableCard(options: step4, step: 3),
+                          //   // content: step3[0],
+                          //   isActive: _currentStep >= 2,
+                          //   state:
+                          //       _currentStep >= 3 ? StepState.complete : StepState.disabled,
+                          // ),
+                        ],
+                      );
+                    }),
+                  ),
+      ),
+    );
+  }
+
+  List<TextFormField> choiceNextStep() {
+    if (answers['Number'] < 6) return step1Index[0];
+
+    return step1Index[1];
+
+    /*if (answer[0] == 0) {
+      return step1;
+    } else {
+      return step1_1;
+    }*/
+  }
+}
+// class SelectableInLineCard extends StatefulWidget {
+//   final List<TextFormField> options;
+
+//   SelectableInLineCard({@required this.options});
+
+//   @override
+//   _SelectableInLineCardState createState() => _SelectableInLineCardState();
+// }
+
+// class _SelectableInLineCardState extends State<SelectableInLineCard> {
+//   List<TextFormField> sampleData ;
+
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     sampleData = widget.options;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GridView.builder(
+//       shrinkWrap: true,
+//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//         crossAxisCount: 1,
+//         childAspectRatio: MediaQuery.of(context).size.width /
+//             (MediaQuery.of(context).size.height / 12),
+//       ),
+//       itemCount: sampleData.length,
+//       itemBuilder: (context, index) {
+//         return Card(
+//           shape: sampleData[index].isSelected
+//               ? RoundedRectangleBorder(
+//                   side: BorderSide(color: Colors.indigoAccent, width: 2.0),
+//                   borderRadius: BorderRadius.circular(4.0))
+//               : RoundedRectangleBorder(
+//                   side: BorderSide(color: Colors.grey[200], width: 2.0),
+//                   borderRadius: BorderRadius.circular(4.0)),
+//           color: Colors.white,
+//           elevation: 0,
+//           child: InkWell(
+//             splashColor: Colors.transparent,
+//             highlightColor: Colors.transparent,
+//             onTap: () {
+//               setState(() {
+//                 sampleData.forEach((element) => element.isSelected = false);
+//                 sampleData[index].isSelected = true;
+
+//                 //print(sampleData[index].time);
+//               });
+//             },
+//             child: GridTile(
+//               child: FlatButton(
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: <Widget>[
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.start,
+//                       children: <Widget>[
+//                         Text(
+//                           sampleData[index].time,
+//                           style: TextStyle(
+//                             fontSize: 15,
+//                             color: sampleData[index].isSelected
+//                                 ? Colors.indigoAccent
+//                                 : Colors.grey[500],
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }
+
+class SelectableCard extends StatelessWidget {
+  final List<TextFormField> options;
+  final int step;
+  SelectableCard({@required this.options, @required this.step});
+
+  @override
+  Widget build(BuildContext context) {
+    // sampleData = widget.options;
+    // print(sampleData.toString());
+    // return GridView.builder(
+    //   shrinkWrap: true,
+    //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    //     crossAxisCount: 2,
+    //     childAspectRatio: MediaQuery.of(context).size.width /
+    //         (MediaQuery.of(context).size.height / 2.5),
+    //   ),
+    //   itemCount: sampleData.length,
+    //   itemBuilder: (context, index) {
+    // return Card(
+    //   shape:
+    //  sampleData[index].isSelected ?
+    //  RoundedRectangleBorder(
+    //     side: BorderSide(color: Colors.indigoAccent, width: 2.0),
+    //     borderRadius: BorderRadius.circular(4.0))
+    // :
+    //     RoundedRectangleBorder(
+    //         side: BorderSide(color: Colors.grey[200], width: 2.0),
+    //         borderRadius: BorderRadius.circular(4.0)),
+    // color: Colors.white,
+    // elevation: 0,
+    // child: InkWell(
+    //   splashColor: Colors.transparent,
+    //   highlightColor: Colors.transparent,
+    //   onTap: () {
+    // setState(() {
+    // sampleData.forEach((element) => element.isSelected = false);
+    // sampleData[index].isSelected = true;
+    // print('step ${widget.step}');
+    // print('index ${index}');
+    // answer[widget.step] = index;
+    // print(answer[widget.step]);
+    // });
+    // },
+    // child: GridTile(
+    // child:
+    return Form(
+        key: formKeys[step],
+        child: Column(
+          children: [...options],
+        ));
+    //   ),
+    // ),
+    // },
+    // );
+  }
+}

@@ -8,14 +8,13 @@ class UserCard extends StatelessWidget {
       onTap: () {},
       child: Row(
         children: [
-          ProfileAvatar(imageUrl: 'null'),
+          ProfileAvatar(name: 'null'),
           const SizedBox(width: 6.0),
           Text(
-              'username',
-              style: const TextStyle(fontSize: 16.0),
-              overflow: TextOverflow.ellipsis,
-            ),
-        
+            'username',
+            style: const TextStyle(fontSize: 16.0),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
