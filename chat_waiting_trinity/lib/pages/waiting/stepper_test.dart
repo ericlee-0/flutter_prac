@@ -1,4 +1,6 @@
+import 'package:chat_waiting_trinity/widgets/waiting/cancel_dialog.dart';
 import 'package:chat_waiting_trinity/widgets/waiting/confirm_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/join_form_controller.dart';
@@ -6,8 +8,10 @@ import '../../controllers/join_waiting_controller.dart';
 
 class StepperTest extends StatefulWidget {
   final Function closeReservationFn;
+  final String userId;
 
-  const StepperTest({Key key, this.closeReservationFn}) : super(key: key);
+  const StepperTest({Key key, this.closeReservationFn, this.userId})
+      : super(key: key);
   @override
   _StepperTestState createState() => _StepperTestState();
 }
@@ -87,9 +91,9 @@ class _StepperTestState extends State<StepperTest> {
           // initialValue: DateTime.now().toString(),
           controller: _reserveAtController,
           validator: (value) {
-            if (value.isEmpty ||
-                !JoinFormController.instance.timePassed(value)) {
-              return 'Please pick a time for the reservation.';
+            if (value.isEmpty) return 'Please pick a time for the reservation.';
+            if (!JoinFormController.instance.timePassed(value)) {
+              return 'Please pick a time properly';
             }
             // answer[1] = value;
             // answers['Time'] = value;
@@ -207,7 +211,7 @@ class _StepperTestState extends State<StepperTest> {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text(
             'Choose Reservation Time',
@@ -237,20 +241,22 @@ class _StepperTestState extends State<StepperTest> {
               ),
               ElevatedButton(
                 child: Text('Later'),
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     _selectedReserveTime = SelectTime.userPick;
                   });
                   print(_selectedReserveTime);
+                  Navigator.of(dialogContext).pop();
+                  _reserveAtController.text = await JoinFormController.instance
+                      .reserveAtPicker(context);
+                  answers['Time'] = DateFormat("yyyy/MM/dd hh:mm")
+                      .parse(_reserveAtController.text);
+                  // JoinFormController.instance
+                  //     .reserveAtPicker(context)
+                  //     .then((String result) {
+                  //   _reserveAtController.text = result;
 
-                  Navigator.of(context).pop();
-                  JoinFormController.instance
-                      .reserveAtPicker(context)
-                      .then((String result) {
-                    _reserveAtController.text = result;
-                    answers['Time'] =
-                        DateFormat("yyyy/MM/dd hh:mm").parse(result);
-                  });
+                  // });
                 },
               ),
             ],
@@ -361,6 +367,28 @@ class _StepperTestState extends State<StepperTest> {
     );
   }
 
+  Future<void> _checkDualReservation() async {
+    print('checkdualreservationFn process..');
+    var result = await JoinWaitingController.instance
+        .searchListById(widget.userId, answers['Time']);
+
+    return result.length == 0
+        ? _callConfirm()
+        : showDialog<void>(
+            context: context,
+            barrierDismissible: true, // user must tap button!
+            builder: (BuildContext context) {
+              return CancelDialog(
+                result: result,
+                doAfterConfirmFn: (bool result) {
+                  if (result) {
+                    _callConfirm();
+                  }
+                },
+              );
+            });
+  }
+
   Future<void> _callConfirm() async {
     return showDialog<void>(
         context: context,
@@ -385,8 +413,8 @@ class _StepperTestState extends State<StepperTest> {
 
   Future<void> _makeReseravtion() async {
     print('makeReservationFN run...');
-    _reservationNumber =
-        await JoinWaitingController.instance.makeReservation(answers);
+    _reservationNumber = await JoinWaitingController.instance
+        .makeReservation(answers, widget.userId);
 
     print(
       'Reservation Number : $_reservationNumber',
@@ -459,7 +487,8 @@ class _StepperTestState extends State<StepperTest> {
                             : () {
                                 // _showConfirmDialog();
                                 // _confirmTest();
-                                _callConfirm();
+                                _checkDualReservation();
+                                // _callConfirm();
                               },
                         onStepCancel: _currentStep > 0
                             ? () => setState(() => _currentStep -= 1)

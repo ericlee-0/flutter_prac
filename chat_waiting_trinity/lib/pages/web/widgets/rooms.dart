@@ -55,7 +55,7 @@ class Rooms extends StatelessWidget {
                 return Center(child: CircularProgressIndicator());
               }
 
-              if (snapshot.data.documents.length == 0) {
+              if (snapshot.data.docs.length == 0) {
                 print('no data');
                 return Center(
                   child: OutlinedButton(
@@ -67,7 +67,7 @@ class Rooms extends StatelessWidget {
                       child: Text('+ Join')),
                 );
               }
-              final docdata = snapshot.data.documents;
+              final docdata = snapshot.data.docs;
               print(docdata.length);
 
               return Container(
@@ -79,7 +79,7 @@ class Rooms extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 4.0),
                     scrollDirection: Axis.horizontal,
-                    itemCount: snapshot.data.documents.length,
+                    itemCount: docdata.length,
                     itemBuilder: (BuildContext context, int index) {
                       if (index == 0) {
                         return Padding(
@@ -94,16 +94,14 @@ class Rooms extends StatelessWidget {
                                   ),
                                   child: Text('+ Join')),
                               SizedBox(width: 5),
-                              ProfileAvatar(
-                                  name: snapshot.data.documents[index]['name']),
+                              ProfileAvatar(name: docdata[index]['name']),
                             ],
                           ),
                         );
                       }
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ProfileAvatar(
-                            name: snapshot.data.documents[index]['name']),
+                        child: ProfileAvatar(name: docdata[index]['name']),
                       );
                     }),
               );

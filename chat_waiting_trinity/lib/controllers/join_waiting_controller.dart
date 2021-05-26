@@ -3,7 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 
-enum SelectWaitngStatus { pending, waiting, checkedIn, done }
+enum SelectWaitngStatus {
+  pending,
+  waiting,
+  checkedIn,
+  done,
+  tableReady,
+  cnaceled
+}
 
 class JoinWaitingController {
   static JoinWaitingController get instance => JoinWaitingController();
@@ -24,7 +31,10 @@ class JoinWaitingController {
         .get();
     print('get statsu diff minute${diff.inMinutes}');
     final currentWaitngTime = docRef.data()['currentWaitingTime'];
-    if (diff.inMinutes < (currentWaitngTime)) {
+    if (diff.inMinutes < 10 && currentWaitngTime == 0) {
+      return SelectWaitngStatus.tableReady.toString().split('.').last;
+    }
+    if (diff.inMinutes < currentWaitngTime) {
       return SelectWaitngStatus.waiting.toString().split('.').last;
     }
     return SelectWaitngStatus.pending.toString().split('.').last;
@@ -65,9 +75,9 @@ class JoinWaitingController {
     final docId = DateFormat('yyyy/MM/dd').format(now);
     // final docRefTime =
     //     await FirebaseFirestore.instance.collection('waiting').doc(docId).get();
-    final currentWaitngTime = currentWaitingTime;
+    // final currentWaitngTime = currentWaitingTime;
     // docRefTime.data()['currentWaitingTime'];
-    print('currentwaitingtime pendingch $currentWaitngTime');
+    print('currentwaitingtime pendingch $currentWaitingTime');
     final docRef = await FirebaseFirestore.instance
         .collection('waiting')
         .doc(docId)
@@ -80,7 +90,11 @@ class JoinWaitingController {
       // print(' map e reserveAt${e['reserveAt']}');
       final DateTime rev = e['reserveAt'].toDate();
       final diff = rev.difference(now);
-      if (diff.inMinutes < currentWaitngTime) {
+      if (diff.inMinutes < 10 && currentWaitingTime == 0) {
+        await FirebaseFirestore.instance
+            .doc(e.reference.path)
+            .update({'waitingStatus': 'tableReady'});
+      } else if (diff.inMinutes < currentWaitingTime) {
         print(e.reference.path);
         await FirebaseFirestore.instance
             .doc(e.reference.path)
@@ -126,7 +140,49 @@ class JoinWaitingController {
     return count;
   }
 
-  Future<dynamic> makeReservation(answers) async {
+//to check if multiple reservation exists
+  Future<dynamic> searchListById(String userId, DateTime time) async {
+    final docId = DateFormat("yyyy/MM/dd").format(time);
+    var docSnap;
+    var myResult = [];
+
+    try {
+      docSnap = await FirebaseFirestore.instance
+          .collection('waiting')
+          .doc(docId)
+          .collection('list')
+          .where('creator', isEqualTo: userId)
+          // .where('waitingStatus', notEqualTo: 'pending')
+          .get();
+
+      if (docSnap.docs.length == 0) {
+        print('searchlistbyid docs length is 0...');
+        return null;
+      } else {
+        // myResult = docSnap.docs.map((e) {
+
+        //   if (e['waitingStatus'] == 'waiting' ||
+        //       e['waitingStatus'] == 'pending' ||
+        //       e['waitingStatus'] == 'tableReady') {
+        //     print(e['reservationNumber']);
+        //     return (e);
+        //   }
+
+        // }).toList();
+
+        docSnap.docs.forEach((e) {
+          if (e['waitingStatus'] == 'waiting' ||
+              e['waitingStatus'] == 'pending' ||
+              e['waitingStatus'] == 'tableReady') myResult.add(e);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+    return myResult;
+  }
+
+  Future<dynamic> makeReservation(answers, userId) async {
     // final isValid = true
     // = docSnap.docs.length + 1;
     int _reservationNumber = 1;
@@ -224,6 +280,7 @@ class JoinWaitingController {
           .doc(docId)
           .collection('list')
           .add({
+        'creator': userId,
         'createdAt': now,
         'name': answers['Name'],
         'people': answers['Number'],

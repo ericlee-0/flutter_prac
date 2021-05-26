@@ -8,7 +8,8 @@ class WaitingTimePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print(docId);
+    print('docId : $docId');
+    print('streamId : $streamId');
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -29,25 +30,18 @@ class WaitingTimePage extends StatelessWidget {
                 .where('docId', isEqualTo: docId)
                 .snapshots(),
             builder: (ctx, snapshot) {
-              // print(snapshot.data.documents[0]);
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-
-              if (snapshot.data.documents.length == 0) {
-                print('no data');
+              if (!snapshot.hasData ||
+                  snapshot.hasError ||
+                  snapshot.data.docs.length == 0) {
                 return Center(child: Text(' 0 '));
               }
-
-              final docdata = snapshot.data.documents;
-              print(docdata.length);
-
-              return Center(
-                  child: Text(' ${docdata[0]['currentWaitingTime']} '));
-              // return Text(snapshot.data.documents[0]['currentWaitingTime']);
+              // print(snapshot.data.toString());
+              // print(
+              // 'document: ${snapshot.data.docs[0].get('currentWaitingTime')}');
+              // if()
+              // print(snapshot.data.docs.length);
+              return Text(
+                  ' ${snapshot.data.docs[0].get('currentWaitingTime')} ');
             },
           ),
           Text(' min..'),

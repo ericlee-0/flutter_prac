@@ -164,36 +164,36 @@ class _MyHomePageState extends State<MyHomePage> {
     // TODO: implement initState
     super.initState();
     _selectedPage = SelectPage.home;
-    final fbm = FirebaseMessaging();
-    fbm.requestNotificationPermissions();
-    fbm.configure(
-      onMessage: (msg) {
-        print('received mes onMessage :$msg');
-        // print('${msg['notification']}');
-        // print('${msg['data']['phone']}');
-        if (Auth.instance.userId == 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
-          //
-          SmsController.instance.sendSMS(msg['data']['phone'],
-              'Hello ${msg['notification']['body']}, Your reservation number is ${msg['data']['ConfirmNo']}. Thank you! See you soon.');
-        }
-        return;
-      },
-      onLaunch: (msg) {
-        print('received mes onLaunch :$msg');
-        return;
-      },
-      onResume: (msg) {
-        print('received mes onResume :$msg');
-        return;
-      },
-      //  onBackgroundMessage: (msg) {
-      //   print(msg);
-      //   return;
-      // }
-    );
-    if (Auth.instance.userId != null) {
-      fbm.subscribeToTopic(Auth.instance.userId);
-    }
+    // final fbm = FirebaseMessaging.instance;
+    // fbm.requestNotificationPermissions();
+    // fbm.configure(
+    // onMessage: (msg) {
+    //   print('received mes onMessage :$msg');
+    //   // print('${msg['notification']}');
+    //   // print('${msg['data']['phone']}');
+    //   if (Auth.instance.userId == 'M0clGRrBRMQSfQykuyA72WwHLgG2') {
+    //     //
+    //     SmsController.instance.sendSMS(msg['data']['phone'],
+    //         'Hello ${msg['notification']['body']}, Your reservation number is ${msg['data']['ConfirmNo']}. Thank you! See you soon.');
+    //   }
+    //   return;
+    // },
+    // onLaunch: (msg) {
+    //   print('received mes onLaunch :$msg');
+    //   return;
+    // },
+    // onResume: (msg) {
+    //   print('received mes onResume :$msg');
+    //   return;
+    // },
+    //  onBackgroundMessage: (msg) {
+    //   print(msg);
+    //   return;
+    // }
+    // );
+    // if (Auth.instance.userId != null) {
+    //   fbm.subscribeToTopic(Auth.instance.userId);
+    // }
   }
 
   void _selectListOption(String selected) {

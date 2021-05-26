@@ -59,7 +59,8 @@ class _UserProfileEditPageState extends State<UserProfileEditPage> {
               .child(widget.userId + '.jpg'); //filename
 
           // print(ref.path);
-          await ref.putFile(_userImageFile).onComplete;
+          // await ref.putFile(_userImageFile).onComplete;
+          await ref.putFile(_userImageFile);
 
           // print('before get url');
           url = await ref.getDownloadURL();

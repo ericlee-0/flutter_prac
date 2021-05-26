@@ -140,8 +140,9 @@ class _WebHomeState extends State<WebHome> {
                                 // return JoinWaitingPage();
                                 // return AddReservationPage();
                                 return StepperTest(
-                                  closeReservationFn: openReservation,
-                                );
+                                    closeReservationFn: openReservation,
+                                    userId:
+                                        FirebaseAuth.instance.currentUser.uid);
                               }
                               return AuthPage();
                             })

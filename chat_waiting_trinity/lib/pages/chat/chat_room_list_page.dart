@@ -25,34 +25,34 @@ class ChatRoomListPage extends StatefulWidget {
 class _ChatRoomListPageState extends State<ChatRoomListPage> {
   int _currentBottomNavigationIndex = 1;
   final _user = FirebaseAuth.instance.currentUser;
-  int _newChatRoomCount=0;
+  int _newChatRoomCount = 0;
   // var _guestChatList = false;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    final fbm = FirebaseMessaging();
-    fbm.requestNotificationPermissions();
-    fbm.configure(
-      onMessage: (msg) {
-        print(msg);
-        return;
-      },
-      onLaunch: (msg) {
-        print(msg);
-        return;
-      },
-      onResume: (msg) {
-        print(msg);
-        return;
-      },
-      //  onBackgroundMessage: (msg) {
-      //   print(msg);
-      //   return;
-      // }
-    );
+    //   final fbm = FirebaseMessaging();
+    //   fbm.requestNotificationPermissions();
+    //   fbm.configure(
+    //     onMessage: (msg) {
+    //       print(msg);
+    //       return;
+    //     },
+    //     onLaunch: (msg) {
+    //       print(msg);
+    //       return;
+    //     },
+    //     onResume: (msg) {
+    //       print(msg);
+    //       return;
+    //     },
+    //     //  onBackgroundMessage: (msg) {
+    //     //   print(msg);
+    //     //   return;
+    //     // }
+    //   );
 
-    fbm.subscribeToTopic(_user.uid);
+    //   fbm.subscribeToTopic(_user.uid);
   }
 
   void _bottomNavigation(int index) {
@@ -103,16 +103,16 @@ class _ChatRoomListPageState extends State<ChatRoomListPage> {
           );
   }
 
-int _badgeControll(int formerValue,int newValue,){
-
-  if(formerValue == newValue){
-    return formerValue;
+  int _badgeControll(
+    int formerValue,
+    int newValue,
+  ) {
+    if (formerValue == newValue) {
+      return formerValue;
+    }
+    return newValue;
   }
-  return newValue;
 
-
-
-}
   Widget _bodyController() {
     if (_currentBottomNavigationIndex == 0) {
       // return UserList(_user.uid, );
@@ -257,30 +257,28 @@ int _badgeControll(int formerValue,int newValue,){
       ),
       body: _bodyController(),
       bottomNavigationBar: BottomNavigationBar(
-        items:  <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Stack(children: [
               Icon(
                 Icons.people,
                 color: Colors.grey,
               ),
-              
             ]),
             label: 'Users',
           ),
           BottomNavigationBarItem(
-            icon: Stack(
-                          children: [Icon(
+            icon: Stack(children: [
+              Icon(
                 Icons.chat_bubble,
                 color: Colors.grey,
               ),
               Positioned(
-                top:0,
-                right:0,
-                child:_badge(_newChatRoomCount),
+                top: 0,
+                right: 0,
+                child: _badge(_newChatRoomCount),
               )
-              ]
-            ),
+            ]),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
