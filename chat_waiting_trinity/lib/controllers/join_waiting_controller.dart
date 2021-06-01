@@ -69,6 +69,21 @@ class JoinWaitingController {
     // return 'updatedstatus...';
   }
 
+  Future<void> setWaitingTime(int value) async {
+    final now = DateTime.now();
+    final docId = DateFormat('yyyy/MM/dd').format(now);
+    try {
+      await FirebaseFirestore.instance.collection('waiting').doc(docId).update({
+        // 'waitingStatus': FieldValue.arrayUnion([selectedStatus])
+        'currentWaitingTime': FieldValue.increment(value)
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    // return 'updatedstatus...';
+  }
+
   Future<void> pendingCheck(int currentWaitingTime) async {
     print('pendingCheck');
     final now = DateTime.now();
@@ -287,7 +302,9 @@ class JoinWaitingController {
         'phone': answers['Phone'],
         'reserveAt': answers['Time'],
         'reservationNumber': _reservationNumber,
-        'waitingStatus': _waitingStatus
+        'waitingStatus': _waitingStatus,
+        'hashtags': [],
+        'messages': []
       });
 
       print(result.path);

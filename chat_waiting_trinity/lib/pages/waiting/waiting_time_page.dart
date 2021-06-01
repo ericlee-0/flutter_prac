@@ -29,13 +29,21 @@ class WaitingTimePage extends StatelessWidget {
                 .collection('waiting/$streamId')
                 .where('docId', isEqualTo: docId)
                 .snapshots(),
+            // stream: JoinWaitingController.instance.getCurrentWaitingTime(),
             builder: (ctx, snapshot) {
               if (!snapshot.hasData ||
                   snapshot.hasError ||
                   snapshot.data.docs.length == 0) {
+                FirebaseFirestore.instance
+                    .collection('waiting')
+                    .doc(docId)
+                    .set({'currentWaitingTime': 0, 'docId': docId});
                 return Center(child: Text(' 0 '));
               }
-              // print(snapshot.data.toString());
+              // print(snapshot.data['docId']);
+              // print(snapshot.data.data().length);
+              // print(snapshot.data.exists);
+              // print(snapshot.data.data()['currentWaitingTime']);
               // print(
               // 'document: ${snapshot.data.docs[0].get('currentWaitingTime')}');
               // if()

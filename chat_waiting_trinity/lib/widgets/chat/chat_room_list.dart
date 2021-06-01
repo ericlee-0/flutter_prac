@@ -24,7 +24,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
             child: CircularProgressIndicator(),
           );
         }
-        final chatRoomListData = snapshot.data.documents;
+        final chatRoomListData = snapshot.data.docs;
         // print('streambuilder: ${chatRoomListData}');
         return ListView.builder(
           shrinkWrap: true,
@@ -35,7 +35,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
             // _newChatRoomCount = _badgeControll(_newChatRoomCount, unread);
             return ListTile(
               // title:Text('chats chatData'),
-              key: ValueKey(chatRoomListData[index].documentID),
+              key: ValueKey(chatRoomListData[index].id),
               title: Text(chatRoomListData[index]['chatUserName']),
               subtitle: Text(chatRoomListData[index]['lastMessage']),
               leading: CircleAvatar(
@@ -58,7 +58,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
                 // print(chatRoomListData[index].data());
                 ChatRoomController.instance.chatContinue(context, {
                   ...chatRoomListData[index].data(),
-                  'chatRoomId': chatRoomListData[index].documentID
+                  'chatRoomId': chatRoomListData[index].id
                 });
                 // print(chatData[index].documentID);
               },

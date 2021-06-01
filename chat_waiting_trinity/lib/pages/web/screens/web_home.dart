@@ -49,10 +49,10 @@ class _WebHomeState extends State<WebHome> {
     var scrollIntValue = 0;
 
     if (scrollIntValue < 8) scrollIntValue = (scrollValue / 30).floor();
-
-    setState(() {
-      scrollInt = scrollIntValue;
-    });
+    if (scrollIntValue < 8)
+      setState(() {
+        scrollInt = scrollIntValue;
+      });
   }
 
   openReservation() {
@@ -122,7 +122,7 @@ class _WebHomeState extends State<WebHome> {
                     // alignment: reservationOpen
                     //     ? Alignment.bottomRight
                     //     : AlignmentDirectional.topEnd,
-                    duration: Duration(seconds: 2),
+                    duration: Duration(seconds: 1),
                     curve: Curves.fastOutSlowIn,
                     child: reservationOpen
                         ? StreamBuilder(
@@ -158,7 +158,7 @@ class _WebHomeState extends State<WebHome> {
                     alignment: chatOpen
                         ? Alignment.bottomRight
                         : AlignmentDirectional.topEnd,
-                    duration: Duration(seconds: 2),
+                    duration: Duration(seconds: 1),
                     curve: Curves.fastOutSlowIn,
                     child: chatOpen
                         ? StreamBuilder(

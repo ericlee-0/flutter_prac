@@ -1,6 +1,6 @@
 import 'package:chat_waiting_trinity/widgets/waiting/cancel_dialog.dart';
 import 'package:chat_waiting_trinity/widgets/waiting/confirm_dialog.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/join_form_controller.dart';
@@ -16,12 +16,7 @@ class StepperTest extends StatefulWidget {
   _StepperTestState createState() => _StepperTestState();
 }
 
-enum Department {
-  treasury,
-  state,
-}
-
-List<dynamic> answer = [0, 0, 0, 0];
+// List<dynamic> answer = [0, 0, 0, 0];
 Map<String, dynamic> answers = {
   'Number': 0,
   'Time': DateTime.now(),
@@ -38,7 +33,7 @@ List<GlobalKey<FormState>> formKeys = [
 class _StepperTestState extends State<StepperTest> {
   int _currentStep = 0;
   var _selectedReserveTime;
-  String _waitingStatus;
+  // String _waitingStatus;
   bool _isWaiting = true;
   bool _isLoading = false;
   var _reservationNumber;
@@ -63,14 +58,14 @@ class _StepperTestState extends State<StepperTest> {
         } else if (int.parse(value) < 6) {
           //need to go to waiting
           print('toWaiting working?');
-          // answer[0] = int.parse(value);
+
           answers['Number'] = int.parse(value);
 
           return null;
         } else if (int.parse(value) > 20) {
           return 'more than 10 people need to contact to the restaurant.';
         }
-        // answer[0] = int.parse(value);
+
         answers['Number'] = int.parse(value);
         return null;
       },
@@ -95,8 +90,7 @@ class _StepperTestState extends State<StepperTest> {
             if (!JoinFormController.instance.timePassed(value)) {
               return 'Please pick a time properly';
             }
-            // answer[1] = value;
-            // answers['Time'] = value;
+
             return null;
           },
           decoration: InputDecoration(
@@ -120,8 +114,7 @@ class _StepperTestState extends State<StepperTest> {
             if (value.isEmpty) {
               return 'Please pick a date for the reservation.';
             }
-            // answer[1] = value;
-            // answers['Time'] = value;
+
             return null;
           },
           decoration: InputDecoration(
@@ -141,11 +134,13 @@ class _StepperTestState extends State<StepperTest> {
           controller: _timeAtController,
           validator: (value) {
             if (value.isEmpty) {
-              //need to check timepassed?
               return 'Please pick a time for the reservation.';
             }
-            // answer[1] = answer[1] + ' ' + value;
-            // answers['Time'] = answers['Time'] + ' ' + value;
+            if (!JoinFormController.instance
+                .timePassed(answers['Time'].toString())) {
+              return 'Please pick a time properly';
+            }
+
             return null;
           },
           decoration: InputDecoration(
@@ -177,7 +172,7 @@ class _StepperTestState extends State<StepperTest> {
         if (value.isEmpty || value.length < 2) {
           return 'Prease name at least 2 characters';
         }
-        // answer[2] = value;
+
         answers['Name'] = value;
         return null;
       },
@@ -196,7 +191,7 @@ class _StepperTestState extends State<StepperTest> {
         if (value.isEmpty || value.length != 10) {
           return 'phone must be 10 digits long.';
         }
-        // answer[3] = value;
+
         answers['Phone'] = value;
         return null;
       },
@@ -223,12 +218,12 @@ class _StepperTestState extends State<StepperTest> {
               ElevatedButton(
                 child: Text('Now'),
                 onPressed: () {
-                  setState(() {
-                    _selectedReserveTime = SelectTime.nowPick;
-                    _waitingStatus =
-                        JoinWaitingController.instance.defaultStatus;
-                  });
-                  print(_selectedReserveTime);
+                  // setState(() {
+                  //   _selectedReserveTime = SelectTime.nowPick;
+                  //   _waitingStatus =
+                  //       JoinWaitingController.instance.defaultStatus;
+                  // });
+                  // print(_selectedReserveTime);
 
                   _reserveAtController.text =
                       JoinFormController.instance.roundUpTime(DateTime.now());
@@ -242,21 +237,15 @@ class _StepperTestState extends State<StepperTest> {
               ElevatedButton(
                 child: Text('Later'),
                 onPressed: () async {
-                  setState(() {
-                    _selectedReserveTime = SelectTime.userPick;
-                  });
-                  print(_selectedReserveTime);
+                  // setState(() {
+                  //   _selectedReserveTime = SelectTime.userPick;
+                  // });
+                  // print(_selectedReserveTime);
                   Navigator.of(dialogContext).pop();
                   _reserveAtController.text = await JoinFormController.instance
                       .reserveAtPicker(context);
                   answers['Time'] = DateFormat("yyyy/MM/dd hh:mm")
                       .parse(_reserveAtController.text);
-                  // JoinFormController.instance
-                  //     .reserveAtPicker(context)
-                  //     .then((String result) {
-                  //   _reserveAtController.text = result;
-
-                  // });
                 },
               ),
             ],
@@ -281,9 +270,10 @@ class _StepperTestState extends State<StepperTest> {
         selectedDate.month,
         selectedDate.day,
       );
-      // answers['Time'] = resultTime;
+
       _dateOnController.text = DateFormat('yyyy/MM/dd').format(resultTime);
       //  = _roundUpTime(resultTime);
+      print('date: ${_dateOnController.text}');
     } catch (e) {
       print(e);
     }
@@ -309,16 +299,14 @@ class _StepperTestState extends State<StepperTest> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ElevatedButton(
-                      child: Text('5:00 PM'),
+                      child: Text('17:00'),
                       onPressed: () {
-                        setState(() {
-                          _selectedReserveTime = SelectTime.pick5pm;
-                          // _waitingStatus =
-                          //     JoinWaitingController.instance.defaultStatus;
-                        });
-                        print(_selectedReserveTime);
-// new DateTime( , time.minute, time.second, time.millisecond, time.microsecond);
-// answers['Time'].toString();
+                        // setState(() {
+                        //   _selectedReserveTime = SelectTime.pick5pm;
+
+                        // });
+                        // print(_selectedReserveTime);
+
                         answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
                             .parse(_dateOnController.text + ' 17:00');
                         _timeAtController.text = ' 17:00 ';
@@ -327,15 +315,15 @@ class _StepperTestState extends State<StepperTest> {
                       },
                     ),
                     ElevatedButton(
-                      child: Text('7:00 PM'),
+                      child: Text('19:00'),
                       onPressed: () {
-                        setState(() {
-                          _selectedReserveTime = SelectTime.pick7pm;
-                        });
-                        print(_selectedReserveTime);
+                        // setState(() {
+                        //   _selectedReserveTime = SelectTime.pick7pm;
+                        // });
+                        // print(_selectedReserveTime);
                         answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
                             .parse(_dateOnController.text + ' 19:00');
-                        _timeAtController.text = '7:00 PM';
+                        _timeAtController.text = '19:00';
                         _isWaiting = false;
                         Navigator.of(context).pop();
                         // _reserveAtPicker();
@@ -354,9 +342,15 @@ class _StepperTestState extends State<StepperTest> {
                         JoinFormController.instance
                             .timeAtPicker(context)
                             .then((String result) {
+                          String temp = _dateOnController.text + ' ' + result;
+                          print('temp: $temp');
+                          answers['Time'] = DateFormat(
+                            'yyyy/MM/dd HH:mm',
+                          ).parse(temp);
+
                           _timeAtController.text = result;
-                          answers['Time'] = DateFormat('yyyy/MM/dd hh:mm')
-                              .parse(_dateOnController.text + ' ' + result);
+
+                          print('answerTime :${answers['Time']}');
                         });
                       },
                     ),
@@ -371,22 +365,26 @@ class _StepperTestState extends State<StepperTest> {
     print('checkdualreservationFn process..');
     var result = await JoinWaitingController.instance
         .searchListById(widget.userId, answers['Time']);
+    if (widget.userId == 'M0clGRrBRMQSfQykuyA72WwHLgG2')
+      return _callConfirm(); //advisor can dual book
 
-    return result.length == 0
+    return result == null
         ? _callConfirm()
-        : showDialog<void>(
-            context: context,
-            barrierDismissible: true, // user must tap button!
-            builder: (BuildContext context) {
-              return CancelDialog(
-                result: result,
-                doAfterConfirmFn: (bool result) {
-                  if (result) {
-                    _callConfirm();
-                  }
-                },
-              );
-            });
+        : result.length == 0
+            ? _callConfirm()
+            : showDialog<void>(
+                context: context,
+                barrierDismissible: true, // user must tap button!
+                builder: (BuildContext context) {
+                  return CancelDialog(
+                    result: result,
+                    doAfterConfirmFn: (bool result) {
+                      if (result) {
+                        _callConfirm();
+                      }
+                    },
+                  );
+                });
   }
 
   Future<void> _callConfirm() async {
@@ -621,20 +619,6 @@ class _StepperTestState extends State<StepperTest> {
                                 ? StepState.complete
                                 : StepState.disabled,
                           ),
-                          // Step(
-                          //   title: Text(
-                          //     "Confirm before Add",
-                          //     style: TextStyle(
-                          //       fontSize: 15,
-                          //       color: Colors.grey[600],
-                          //     ),
-                          //   ),
-                          //   content: SelectableCard(options: step4, step: 3),
-                          //   // content: step3[0],
-                          //   isActive: _currentStep >= 2,
-                          //   state:
-                          //       _currentStep >= 3 ? StepState.complete : StepState.disabled,
-                          // ),
                         ],
                       );
                     }),
@@ -647,93 +631,8 @@ class _StepperTestState extends State<StepperTest> {
     if (answers['Number'] < 6) return step1Index[0];
 
     return step1Index[1];
-
-    /*if (answer[0] == 0) {
-      return step1;
-    } else {
-      return step1_1;
-    }*/
   }
 }
-// class SelectableInLineCard extends StatefulWidget {
-//   final List<TextFormField> options;
-
-//   SelectableInLineCard({@required this.options});
-
-//   @override
-//   _SelectableInLineCardState createState() => _SelectableInLineCardState();
-// }
-
-// class _SelectableInLineCardState extends State<SelectableInLineCard> {
-//   List<TextFormField> sampleData ;
-
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
-//     sampleData = widget.options;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GridView.builder(
-//       shrinkWrap: true,
-//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//         crossAxisCount: 1,
-//         childAspectRatio: MediaQuery.of(context).size.width /
-//             (MediaQuery.of(context).size.height / 12),
-//       ),
-//       itemCount: sampleData.length,
-//       itemBuilder: (context, index) {
-//         return Card(
-//           shape: sampleData[index].isSelected
-//               ? RoundedRectangleBorder(
-//                   side: BorderSide(color: Colors.indigoAccent, width: 2.0),
-//                   borderRadius: BorderRadius.circular(4.0))
-//               : RoundedRectangleBorder(
-//                   side: BorderSide(color: Colors.grey[200], width: 2.0),
-//                   borderRadius: BorderRadius.circular(4.0)),
-//           color: Colors.white,
-//           elevation: 0,
-//           child: InkWell(
-//             splashColor: Colors.transparent,
-//             highlightColor: Colors.transparent,
-//             onTap: () {
-//               setState(() {
-//                 sampleData.forEach((element) => element.isSelected = false);
-//                 sampleData[index].isSelected = true;
-
-//                 //print(sampleData[index].time);
-//               });
-//             },
-//             child: GridTile(
-//               child: FlatButton(
-//                 child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: <Widget>[
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.start,
-//                       children: <Widget>[
-//                         Text(
-//                           sampleData[index].time,
-//                           style: TextStyle(
-//                             fontSize: 15,
-//                             color: sampleData[index].isSelected
-//                                 ? Colors.indigoAccent
-//                                 : Colors.grey[500],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
 
 class SelectableCard extends StatelessWidget {
   final List<TextFormField> options;
@@ -742,52 +641,10 @@ class SelectableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // sampleData = widget.options;
-    // print(sampleData.toString());
-    // return GridView.builder(
-    //   shrinkWrap: true,
-    //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-    //     crossAxisCount: 2,
-    //     childAspectRatio: MediaQuery.of(context).size.width /
-    //         (MediaQuery.of(context).size.height / 2.5),
-    //   ),
-    //   itemCount: sampleData.length,
-    //   itemBuilder: (context, index) {
-    // return Card(
-    //   shape:
-    //  sampleData[index].isSelected ?
-    //  RoundedRectangleBorder(
-    //     side: BorderSide(color: Colors.indigoAccent, width: 2.0),
-    //     borderRadius: BorderRadius.circular(4.0))
-    // :
-    //     RoundedRectangleBorder(
-    //         side: BorderSide(color: Colors.grey[200], width: 2.0),
-    //         borderRadius: BorderRadius.circular(4.0)),
-    // color: Colors.white,
-    // elevation: 0,
-    // child: InkWell(
-    //   splashColor: Colors.transparent,
-    //   highlightColor: Colors.transparent,
-    //   onTap: () {
-    // setState(() {
-    // sampleData.forEach((element) => element.isSelected = false);
-    // sampleData[index].isSelected = true;
-    // print('step ${widget.step}');
-    // print('index ${index}');
-    // answer[widget.step] = index;
-    // print(answer[widget.step]);
-    // });
-    // },
-    // child: GridTile(
-    // child:
     return Form(
         key: formKeys[step],
         child: Column(
           children: [...options],
         ));
-    //   ),
-    // ),
-    // },
-    // );
   }
 }

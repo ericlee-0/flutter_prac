@@ -2,17 +2,25 @@ import 'package:chat_waiting_trinity/pages/web/widgets/widgets.dart';
 import './user_card.dart';
 import './custom_tab_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomAppBar extends StatelessWidget {
   final List<IconData> icons;
   final int selectedIndex;
   final Function(int) onTap;
+  final bool isAdvisor;
+  final Function login;
+  final Function openConsole;
+  // final Function()
 
   const CustomAppBar(
       {Key key,
       @required this.icons,
       @required this.selectedIndex,
-      @required this.onTap})
+      @required this.onTap,
+      @required this.isAdvisor,
+      @required this.login,
+      @required this.openConsole})
       : super(key: key);
 
   @override
@@ -42,7 +50,7 @@ class CustomAppBar extends StatelessWidget {
           ),
           Container(
             height: double.infinity,
-            width: 600.0,
+            width: 200.0,
             child: CustomTabBar(
                 icons: icons,
                 selectedIndex: selectedIndex,
@@ -53,8 +61,37 @@ class CustomAppBar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                UserCard(),
-                
+                FirebaseAuth.instance.currentUser == null
+                    ? ElevatedButton.icon(
+                        onPressed: () {
+                          //AuthPage
+                          print('login page need to run');
+                          login(context);
+                        },
+                        icon: Icon(Icons.login),
+                        label: Text('Login'))
+                    : UserCard(),
+                isAdvisor
+                    ? OutlinedButton(
+                        child: Text(
+                          'Reservation',
+                          style: TextStyle(
+                              // color: Colors.red[400],
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          primary: Colors.white,
+                          backgroundColor: Colors.greenAccent[600],
+                          shadowColor: Colors.red[200],
+                          elevation: 10,
+                        ),
+                        onPressed: () {
+                          print('to console..');
+                          openConsole();
+                        },
+                      )
+                    : SizedBox.shrink(),
                 Responsive.isDesktop(context)
                     ? Container(
                         child: Row(

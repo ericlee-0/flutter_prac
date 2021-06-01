@@ -7,14 +7,37 @@ class JoinFormController {
   static JoinFormController get instance => JoinFormController();
 
   bool timePassed(String pickedTime) {
+    print('pickedTime :$pickedTime');
     final DateTime now = DateTime.now();
-    final DateTime picked = DateFormat('yyyy/MM/dd HH:mm').parse(pickedTime);
+    DateTime picked;
+    try {
+      picked = DateFormat('yyyy/MM/dd HH:mm').parse(pickedTime);
+    } catch (e) {
+      picked = DateFormat('yyyy-MM-dd HH:mm').parse(pickedTime);
+    }
+
     print('picked: $picked');
+
+    final DateTime openHourBefore = DateFormat('Hm').parse('11:55');
+    print('openhourbefore: $openHourBefore');
+    final DateTime openHourAfter = DateFormat('Hm').parse('22:00');
+    print('openhourafter : $openHourAfter');
+    final DateTime pickedHour =
+        DateFormat('Hm').parse(DateFormat('HH:mm').format(picked));
+
+    print('pickedHour: $pickedHour');
+
     // final nowformatted = DateFormat('yyyy/MM/dd HH:mm').format(now);
     final earlier = now.subtract(const Duration(minutes: 5));
     // final earlierFormatted = DateFormat('yyyy/MM/dd HH:mm').format(now);
     // print(pickedTime);
-    final passed = earlier.isBefore(picked);
+    bool passed = false;
+    if (earlier.isBefore(picked) &&
+        openHourBefore.isBefore(pickedHour) &&
+        openHourAfter.isAfter(pickedHour)) {
+      passed = true;
+    }
+
     // print(pickedTime);
     print('earllier: $earlier');
     print(passed);

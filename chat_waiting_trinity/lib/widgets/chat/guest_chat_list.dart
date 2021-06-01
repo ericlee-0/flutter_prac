@@ -24,9 +24,7 @@ class _GuestChatListState extends State<GuestChatList> {
     today = DateTime.now();
     // roundUpTime = today.subtract(Duration(hours: today.hour ));
     docId = DateFormat('yyyy/MM/dd').format(today);
-
   }
-
 
   // final DateTime today = DateTime.now();
 
@@ -47,7 +45,7 @@ class _GuestChatListState extends State<GuestChatList> {
       //     .orderBy('createdAt')
       //     // .orderBy('lastMessageCreatedAt', descending: true)
       //     .snapshots(),
-stream: widget.listData,
+      stream: widget.listData,
       builder: (ctx, snapshot) {
         // print('user : ${}');
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -55,19 +53,19 @@ stream: widget.listData,
             child: CircularProgressIndicator(),
           );
         }
-        final chatRoomListData = snapshot.data.documents;
+        final chatRoomListData = snapshot.data.docs;
         // print('streambuilder: ${chatRoomListData.length}');
         return ListView.builder(
           shrinkWrap: true,
           itemCount: chatRoomListData.length,
           itemBuilder: (ctx, index) => ListTile(
             // title:Text('chats chatData'),
-            key: ValueKey(chatRoomListData[index].documentID),
+            key: ValueKey(chatRoomListData[index].id),
             title: Text(chatRoomListData[index]['chatUserName']),
             subtitle: Column(
               children: [
                 // DateTime.parse(chatRoomListData[index].documentID.toString());
-                Text(chatRoomListData[index].documentID.substring(5,16)),
+                Text(chatRoomListData[index].id.substring(5, 16)),
                 // Text(DateFormat('yyyy/MM/dd HH:mm').format(
                 //     chatRoomListData[index]['lastMessageCreatedAt'].toDate())),
               ],
@@ -78,11 +76,13 @@ stream: widget.listData,
               radius: 25,
             ),
             trailing: RaisedButton(
-              child: chatRoomListData[index]['chatFinished'] ? Text('Finished'):Text('Anser'),
+              child: chatRoomListData[index]['chatFinished']
+                  ? Text('Finished')
+                  : Text('Anser'),
               onPressed: () {
                 ChatRoomController.instance.chatContinue(context, {
                   ...chatRoomListData[index].data(),
-                  'chatRoomId': chatRoomListData[index].documentID
+                  'chatRoomId': chatRoomListData[index].id
                 });
               },
             ),

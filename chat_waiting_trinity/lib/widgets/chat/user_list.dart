@@ -5,7 +5,7 @@ import '../../pages/chat/user_profile_page.dart';
 class UserList extends StatelessWidget {
   final String userId;
   final Future<QuerySnapshot> listData;
-  UserList({this.userId, this.listData,Key key}): super(key:key);
+  UserList({this.userId, this.listData, Key key}) : super(key: key);
   //  Future<Map<String,dynamic>> _getMyData() async {
   //    final docRef = await FirebaseFirestore.instance.collection('users').doc(userId).get();
   //    return docRef.data();
@@ -25,11 +25,11 @@ class UserList extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-          final userData = snapshot.data.documents;
+          final userData = snapshot.data.docs;
           var myData;
           var othersData = [];
           userData.map((e) {
-            if (e.documentID == userId) {
+            if (e.id == userId) {
               myData = e;
             } else
               othersData.add(e);
@@ -37,9 +37,7 @@ class UserList extends StatelessWidget {
           print('mydata $myData');
 
           // print('streambuilder: ${userData.length}');
-          return 
-        
-          Column(
+          return Column(
             //  mainAxisAlignment: MainAxisAlignment.center,
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -55,15 +53,14 @@ class UserList extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: 
-                ListView.builder(
+                child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: userData.length,
                   itemBuilder: (ctx, index) => Padding(
                     padding: const EdgeInsets.all(28.0),
                     child: ListTile(
                       // title:Text('User ${userData[index].documentID}'),
-                      key: ValueKey(userData[index].documentID),
+                      key: ValueKey(userData[index].id),
                       title: Text(userData[index]['username']),
                       leading: CircleAvatar(
                         backgroundImage:
@@ -73,18 +70,17 @@ class UserList extends StatelessWidget {
                       onTap: () {
                         Navigator.pushNamed(context, UserProfilePage.routeName,
                             arguments: {
-                              'chatUserId': userData[index].documentID,
+                              'chatUserId': userData[index].id,
                               'chatUserName': userData[index]['username'],
                               'chatUserImageUrl': userData[index]['image_url'],
                             });
-                        print(userData[index].documentID);
+                        print(userData[index].id);
                       },
                     ),
                   ),
                 ),
               ),
             ],
-          
           );
         });
   }

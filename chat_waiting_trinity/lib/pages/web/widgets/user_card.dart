@@ -11,10 +11,18 @@ class UserCard extends StatelessWidget {
           ProfileAvatar(name: 'null'),
           const SizedBox(width: 6.0),
           Text(
-            'username',
+            'user',
             style: const TextStyle(fontSize: 16.0),
             overflow: TextOverflow.ellipsis,
           ),
+          ElevatedButton.icon(
+              onPressed: () {
+                //AuthPage
+                print('logout need to run');
+                // login();
+              },
+              icon: Icon(Icons.logout),
+              label: Text('Logout')),
         ],
       ),
     );

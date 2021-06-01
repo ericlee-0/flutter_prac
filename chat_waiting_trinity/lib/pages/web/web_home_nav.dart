@@ -4,11 +4,11 @@ import 'package:provider/provider.dart';
 
 import './screens/screens.dart';
 import './widgets/widgets.dart';
-import '../chat/auth_page_web.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../pages/chat/auth_page.dart';
-import '../waiting/join_waiting_page.dart';
+
 import '../chat/guest_chat_page.dart';
 import '../../controllers/chatNaviController.dart';
 
@@ -18,13 +18,14 @@ class WebHomeNav extends StatefulWidget {
 }
 
 class _WebHomeNavState extends State<WebHomeNav> {
-  final List<Widget> _screens = [
-    WebHome(),
-    WebContact(),
-    WebLocation(),
-    WebMenu(),
-    WebBusiness(),
-  ];
+  // List<Widget> _screens;
+  // List<IconData> _icons;
+  bool _isAdvisor = false;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   // List<Widget> _screensMobile = [
   //   WebHome(),
   //   WebContact(),
@@ -35,13 +36,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
   //       // body: Container(child: Text('button'),alignment: Alignment.center),
   //       ),
   // ];
-  final List<IconData> _icons = const [
-    Icons.home,
-    Icons.contact_phone,
-    Icons.location_on,
-    Icons.restaurant_menu,
-    Icons.add_business,
-  ];
+
   final List<IconData> _iconsMobile = const [
     Icons.home,
     Icons.contact_phone,
@@ -52,13 +47,6 @@ class _WebHomeNavState extends State<WebHomeNav> {
   ];
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    // _screensMobile =
-  }
 
   void moveToReservation() {
     setState(() {
@@ -72,18 +60,73 @@ class _WebHomeNavState extends State<WebHomeNav> {
     });
   }
 
-  Future showMyDialog(BuildContext context) {
+  void openConsole() {
+    print('openconsole run..');
+    print('_advisor?  $_isAdvisor');
+    if (_isAdvisor)
+      setState(() {
+        _selectedIndex = 2;
+      });
+  }
+
+  // Future showMyDialog(BuildContext context) {
+
+  //   return showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return new AlertDialog(
+  //           content: AuthPageWeb(),
+  //           actions: <Widget>[
+  //             FlatButton(
+  //               child: const Text('Close'),
+  //               onPressed: () {
+
+  //                 Navigator.pop(context);
+  //                 // Navigator.of(context).pop(true);
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       });
+  // }
+
+  Future showLoginDialog(BuildContext context) {
     // print('provider auth? $auth');
 
     return showDialog(
         context: context,
         builder: (BuildContext context) {
           return new AlertDialog(
-            content: AuthPageWeb(),
+            content: StreamBuilder(
+                // stream: Auth.instance.authState,
+                stream: FirebaseAuth.instance.authStateChanges(),
+                builder: (ctx, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (userSnapshot.hasData) {
+                    return Text(
+                      'Success!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          backgroundColor: Colors.blueAccent,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30),
+                    );
+                  }
+                  return AuthPage();
+                }),
             actions: <Widget>[
-              FlatButton(
+              ElevatedButton(
                 child: const Text('Close'),
                 onPressed: () {
+                  setState(() {
+                    if (FirebaseAuth.instance.currentUser.uid ==
+                        'M0clGRrBRMQSfQykuyA72WwHLgG2') _isAdvisor = true;
+                  });
                   Navigator.pop(context);
                   // Navigator.of(context).pop(true);
                 },
@@ -99,45 +142,56 @@ class _WebHomeNavState extends State<WebHomeNav> {
     User user = Provider.of<User>(context);
     print('provider $user');
     print('height: ${screenSize.height}');
-    // StreamBuilder builder = StreamBuilder(
-    //     stream: FirebaseAuth.instance.authStateChanges(),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.connectionState == ConnectionState.waiting) {
-    //         return Center(
-    //           child: CircularProgressIndicator(),
-    //         );
-    //       }
-    //       if (snapshot.hasData) {
-    //         if (_isPopupOpen) {
-    //           _isPopupOpen = false;
-    //           Navigator.pop(context);
-    //         }
-    //         _isAuth = true;
-    //         return SizedBox.shrink();
-    //         // ('webchatcontainer');
-    //       }
-    //       return ButtonGradiant(title: 'chat with agent',onTap: showMyDialog);
-    //     });
+    if (FirebaseAuth.instance.currentUser != null &&
+        FirebaseAuth.instance.currentUser.uid ==
+            'M0clGRrBRMQSfQykuyA72WwHLgG2') {
+      setState(() {
+        _isAdvisor = true;
+      });
+    } else {
+      setState(() {
+        _isAdvisor = false;
+      });
+    }
     return DefaultTabController(
-      length:
-          Responsive.isMobile(context) ? _iconsMobile.length : _icons.length,
+      length: Responsive.isMobile(context) ? _iconsMobile.length : 3,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: !Responsive.isMobile(context)
             ? PreferredSize(
+                //desktop, tablet mode
                 child: CustomAppBar(
-                    icons: _icons,
-                    selectedIndex: _selectedIndex,
-                    onTap: (index) {
-                      setState(() => _selectedIndex = index);
-                    }),
-                preferredSize: Size(screenSize.width * 0.5, 100.0))
+                  icons: [
+                    Icons.home,
+                    // Icons.contact_phone,
+                    // Icons.location_on,
+                    Icons.restaurant_menu,
+                    _isAdvisor
+                        ? Icons.control_camera_sharp
+                        : Icons.add_business,
+                  ],
+                  selectedIndex: _selectedIndex,
+                  onTap: (index) {
+                    setState(() => _selectedIndex = index);
+                  },
+                  isAdvisor: _isAdvisor,
+                  login: showLoginDialog,
+                  openConsole: openConsole,
+                ),
+                preferredSize: Size(screenSize.width * 0.2, 100.0))
             : null,
         body: !Responsive.isMobile(context)
             ? IndexedStack(
+                //desktop, tablet mode
                 // sizing: StackFit.loose,
                 index: _selectedIndex,
-                children: _screens,
+                children: [
+                  WebHome(),
+                  // WebContact(),
+                  // WebLocation(),
+                  WebMenu(),
+                  _isAdvisor ? WebWaitingConsole() : WebBusiness(),
+                ],
               )
             //below part will be use it for chat container activemode
             // ? Row(

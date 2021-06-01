@@ -7,7 +7,6 @@ class Messages extends StatelessWidget {
   final String chatRoomPath;
   Messages(this.chatRoomPath);
 
-  
   @override
   Widget build(BuildContext context) {
     // print('chatroompath $chatRoomPath');
@@ -24,14 +23,15 @@ class Messages extends StatelessWidget {
         if (chatSnapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
-        final chatDocs = chatSnapshot.data.documents;
+        final chatDocs = chatSnapshot.data.docs;
         // print('chatmessage path ${chatDocs[0].reference.path}');
         return ListView.builder(
-          reverse: true,
-          itemCount: chatDocs.length,
-          itemBuilder: (ctx, index) { return MessageBubble(
-              ValueKey(chatDocs[index].documentID), chatDocs[index]);
-          });
+            reverse: true,
+            itemCount: chatDocs.length,
+            itemBuilder: (ctx, index) {
+              return MessageBubble(
+                  ValueKey(chatDocs[index].id), chatDocs[index]);
+            });
       },
     );
   }

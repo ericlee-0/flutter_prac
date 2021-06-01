@@ -253,15 +253,10 @@ class _AuthPageWebState extends State<AuthPageWeb> {
   // }
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<User>(context);
-    return user == null
+    // User user = Provider.of<User>(context);
+    return FirebaseAuth.instance.currentUser == null
         ? AuthFormWeb(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
             _signInWithPhoneWithOTP, _isLoading)
-        : FlatButton(
-          color: Colors.deepOrange,
-            padding: const EdgeInsets.all(5.0),
-            child: Text('Success!'),
-            onPressed: () => Navigator.pop(context),
-          );
+        : Text('Success!');
   }
 }
