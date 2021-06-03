@@ -8,9 +8,11 @@ import '../../widgets/waiting/dropdown_input.dart';
 
 class WaitingConsolePage extends StatefulWidget {
   final String listOption;
+  final String selectedDate;
   final Function(Map<String, dynamic>) messageFn;
 
-  const WaitingConsolePage({Key key, this.listOption, this.messageFn})
+  const WaitingConsolePage(
+      {Key key, this.listOption, this.messageFn, this.selectedDate})
       : super(key: key);
 
   @override
@@ -20,7 +22,8 @@ class WaitingConsolePage extends StatefulWidget {
 class _WaitingConsolePageState extends State<WaitingConsolePage>
     with AutomaticKeepAliveClientMixin<WaitingConsolePage> {
   // ** here{
-  final _docId = DateFormat('yyyy/MM/dd').format(DateTime.now());
+  // String _docId;
+  // final String _docId; = widget.sele
   var _guestStatus = 'pending';
   var _guestMessage = 'no message sent';
   bool _tileOpened = false;
@@ -39,6 +42,17 @@ class _WaitingConsolePageState extends State<WaitingConsolePage>
     'table-in 15 mins',
     'reservation cancelled'
   ];
+  @override
+  void initState() {
+    // _docId = widget.selectedDate;
+    // TODO: implement initState
+    super.initState();
+    // print('sled: ${widget.selectedDate.length}');
+    // if (widget.selectedDate.length != 0)
+
+    // else
+    // _docId = DateFormat('yyyy/MM/dd').format(DateTime.now());
+  }
 
   Widget _waitingTime(Timestamp reservAt) {
     var now = DateTime.now();
@@ -127,12 +141,14 @@ class _WaitingConsolePageState extends State<WaitingConsolePage>
 
   @override
   Widget build(BuildContext context) {
+    // print('_docId : $_docId');
+    // _docId = widget.selectedDate;
     return Container(
         height: MediaQuery.of(context).size.height * 0.8,
         child: StreamBuilder(
           stream: FirebaseFirestore.instance
               .collection('waiting')
-              .doc(_docId)
+              .doc(widget.selectedDate)
               .collection('list')
               .orderBy('reserveAt')
               .snapshots(),

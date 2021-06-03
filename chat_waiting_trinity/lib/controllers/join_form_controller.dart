@@ -111,4 +111,52 @@ class JoinFormController {
       return e;
     }
   }
+
+  // String dateOnPicker(BuildContext context) {
+  //   // String pickedDate;
+  //   DateTime resultTime;
+  //   try {
+  //     showDatePicker(
+  //         context: context,
+  //         initialDate: DateTime.now(),
+  //         firstDate: DateTime.now().subtract(Duration(days: 100)),
+  //         lastDate: DateTime.now().add(
+  //           Duration(days: 100),
+  //         )).then((value) {
+  //       print(value is DateTime);
+  //       resultTime = value;
+  //       if (value is DateTime) return DateFormat('yyyy/MM/dd').format(value);
+  //     });
+  //   } catch (e) {
+  //     print(e);
+  //     return e;
+  //   }
+
+  //   print('resulttime : $resultTime');
+  //   return '';
+  // }
+
+  // Future<void> dateOnPicker(BuildContext context) async {
+  //   try {
+  //     final selectedDate = await showDatePicker(
+  //         context: context,
+  //         initialDate: DateTime.now(),
+  //         firstDate: DateTime.now(),
+  //         lastDate: DateTime.now().add(
+  //           Duration(days: 100),
+  //         ));
+
+  //     DateTime resultTime = DateTime(
+  //       selectedDate.year,
+  //       selectedDate.month,
+  //       selectedDate.day,
+  //     );
+
+  //     return this._pickedDateToString(resultTime);
+  //     //  = _roundUpTime(resultTime);
+  //     // print('date: ${_dateOnController.text}');
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 }

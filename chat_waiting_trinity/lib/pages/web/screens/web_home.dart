@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../pages/chat/auth_page.dart';
-import '../../waiting/join_waiting_page.dart';
-import '../../chat/guest_chat_page.dart';
-import '../../../controllers/chatNaviController.dart';
+// import '../../waiting/join_waiting_page.dart';
+// import '../../chat/guest_chat_page.dart';
+// import '../../../controllers/chatNaviController.dart';
 import '../../waiting/waiting_time_page.dart';
-import './../../waiting/add_reservation_page.dart';
+// import './../../waiting/add_reservation_page.dart';
 import '../../waiting/stepper_test.dart';
+import '../../../widgets/chat/chat_with_admin.dart';
 
 class WebHome extends StatefulWidget {
   final Function toChatFn;
@@ -172,10 +173,10 @@ class _WebHomeState extends State<WebHome> {
                               }
                               if (userSnapshot.hasData) {
                                 // print('id:${FirebaseAuth.instance.currentUser.uid}');
-                                return FirebaseAuth.instance.currentUser.uid ==
-                                        'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
-                                    ? GuestChatPage()
-                                    : ChatNavicontroller();
+                                return ChatWithAdmin(
+                                  popToggleFn: widget.toChatFn,
+                                  // key: PageStorageKey('chatWithAdminscreen'),
+                                );
                                 // : ChatRoomListPage();
                                 // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
                               }

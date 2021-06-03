@@ -12,6 +12,9 @@ import '../../widgets/chat/new_message.dart';
 
 class ChatRoomPage extends StatefulWidget {
   static const routeName = '/chat-room-page';
+  final Map<String, dynamic> chatInfo;
+
+  const ChatRoomPage({Key key, this.chatInfo}) : super(key: key);
   @override
   _ChatRoomPageState createState() => _ChatRoomPageState();
 }
@@ -61,10 +64,12 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   Widget build(BuildContext context) {
     final _user = FirebaseAuth.instance.currentUser;
-    final Map<String, dynamic> args = ModalRoute.of(context).settings.arguments;
+    final Map<String, dynamic> args =
+        ModalRoute.of(context).settings.arguments ?? widget.chatInfo;
     print('chatroompage');
     final isSelf = _user.uid == args['userSelfId'];
-    if (isSelf) {
+    if (isSelf &&
+        (args['chatUserName'] != 'guest' || args['chatUserName'] != 'test')) {
       _read(args['userSelfId'], args['chatRoomId']);
     }
 
@@ -155,8 +160,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                       // print('args ${args['userSelfId']} ${args['chatRoomId']} ');
                       await ChatRoomController.instance.chatFinish(
                           args['chatRoomPath'], args['userSelfName']);
-                          String roomId = args['chatRoomPath'].substring(10,args['chatRoomPath'].length);
-                          // print(roomId);
+                      String roomId = args['chatRoomPath']
+                          .substring(10, args['chatRoomPath'].length);
+                      // print(roomId);
                       await FirebaseFirestore.instance
                           .collection('users')
                           .doc('${args['userSelfId']}/$roomId')

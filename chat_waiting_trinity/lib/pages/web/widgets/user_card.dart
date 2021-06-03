@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './profile_avatar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserCard extends StatelessWidget {
   @override
@@ -18,7 +19,8 @@ class UserCard extends StatelessWidget {
           ElevatedButton.icon(
               onPressed: () {
                 //AuthPage
-                print('logout need to run');
+                // print('logout need to run');
+                FirebaseAuth.instance.signOut();
                 // login();
               },
               icon: Icon(Icons.logout),

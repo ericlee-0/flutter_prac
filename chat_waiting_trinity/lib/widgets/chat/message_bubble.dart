@@ -10,12 +10,10 @@ class MessageBubble extends StatelessWidget {
 
   MessageBubble(this.key, this.chatInfo);
 
-  Future<void> _readMessage(bool isSelf, String path)async {
-    if(!isSelf){
-      await FirebaseFirestore.instance.doc(path).update({'read':true});
-
+  Future<void> _readMessage(bool isSelf, String path) async {
+    if (!isSelf) {
+      await FirebaseFirestore.instance.doc(path).update({'read': true});
     }
-    
   }
 
   @override
@@ -27,7 +25,7 @@ class MessageBubble extends StatelessWidget {
     if (chatInfo['sendUserName'] != 'system') {
       isSelf = _user.uid == chatInfo['sendUserId'];
     }
-    
+
     _readMessage(isSelf, chatInfo.reference.path);
     final DateTime time = chatInfo['createdAt'].toDate();
     final formattedTime = DateFormat('MM/dd HH:mm').format(time);
@@ -105,14 +103,14 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
               // if(chatInfo['sendUserType']!= 'guest' && chatInfo['sendUserType']!= 'advisor')
-              Positioned(
-                top: 0,
-                left: isSelf ? null : 120,
-                right: isSelf ? 120 : null,
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(chatInfo['sendUserImageUrl']),
-                ),
-              ),
+              // Positioned(
+              //   top: 0,
+              //   left: isSelf ? null : 120,
+              //   right: isSelf ? 120 : null,
+              //   child: CircleAvatar(
+              //     backgroundImage: NetworkImage(chatInfo['sendUserImageUrl']),
+              //   ),
+              // ),
             ],
             clipBehavior: Clip.hardEdge,
           );

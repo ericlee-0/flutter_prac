@@ -1,3 +1,4 @@
+import 'package:chat_waiting_trinity/controllers/join_form_controller.dart';
 import 'package:chat_waiting_trinity/controllers/join_waiting_controller.dart';
 import 'package:chat_waiting_trinity/widgets/waiting/waiting_list_options.dart';
 
@@ -9,6 +10,8 @@ import '../../waiting/waiting_time_page.dart';
 import '../../../widgets/waiting/waiting_list_messages.dart';
 import '../../../controllers/chatNaviController.dart';
 import '../../../pages/waiting/stepper_test.dart';
+import '../../../widgets/chat/chat_with_guest_list.dart';
+import 'package:intl/intl.dart';
 
 class WebWaitingConsole extends StatefulWidget {
   @override
@@ -23,6 +26,18 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
   Map<String, dynamic> _messageInfo;
   bool chatOpen = false;
   bool reservationOpen = false;
+  // final now = DateTime.now();
+
+  String _selectedDate = DateFormat('yyyy/MM/dd').format(DateTime.now());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    // _selectedDate = DateFormat('yyyy/MM/dd').format(now);
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -43,8 +58,36 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
     });
   }
 
+  Future<void> _showDialogDate() async {
+    try {
+      final selectedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now().subtract(Duration(days: 100)),
+          lastDate: DateTime.now().add(
+            Duration(days: 100),
+          ));
+
+      DateTime resultTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+      );
+      if (resultTime != null)
+        setState(() {
+          _selectedDate = DateFormat('yyyy/MM/dd').format(resultTime);
+        });
+
+      //  = _roundUpTime(resultTime);
+      // print('date: ${_dateOnController.text}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('selectedData: $_selectedDate');
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(), // on tap -> unfocus
       child: Scaffold(
@@ -72,6 +115,8 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                   // messageList: _messageList,
                   messageInfo: _messageInfo,
                   openReservation: _openReservation,
+                  selectedDate: _selectedDate,
+                  selectDateFn: () => _showDialogDate(),
                   messageFn: (result) {
                     print('messageFn run..');
 
@@ -108,7 +153,13 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                         : AlignmentDirectional.topEnd,
                     duration: Duration(seconds: 1),
                     curve: Curves.fastOutSlowIn,
-                    child: ChatNavicontroller(),
+                    child:
+                        // ChatNavicontroller(),
+
+                        ChatWithGuestList(
+                      advisorId: FirebaseAuth.instance.currentUser.uid,
+                      key: PageStorageKey('GuestChatList'),
+                    ),
                   ),
                 )
               ],
@@ -135,6 +186,8 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
   final Function(String) selectedListFn;
   final Function(Map<String, dynamic>) messageFn;
   final String selectedList;
+  final String selectedDate;
+  final Function selectDateFn;
   // final List<dynamic> messageList;
   final Map<String, dynamic> messageInfo;
   final Function openReservation;
@@ -147,7 +200,9 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
       this.messageFn,
       this.messageInfo,
       // this.messageList,
-      this.openReservation})
+      this.openReservation,
+      this.selectedDate,
+      this.selectDateFn})
       : super(key: key);
 
   @override
@@ -193,6 +248,12 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
                             JoinWaitingController.instance.setWaitingTime(-10);
                           },
                           child: Text('-10')),
+                      Spacer(),
+                      TextButton(
+                          onPressed: () {
+                            selectDateFn();
+                          },
+                          child: Text(selectedDate))
                     ],
                   ),
                 )
@@ -214,6 +275,7 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
               Flexible(
                 flex: 8,
                 child: WaitingConsolePage(
+                  selectedDate: selectedDate,
                   listOption: selectedList,
                   messageFn: messageFn,
                 ),

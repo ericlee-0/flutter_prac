@@ -123,10 +123,11 @@ class _WebHomeNavState extends State<WebHomeNav> {
               ElevatedButton(
                 child: const Text('Close'),
                 onPressed: () {
-                  setState(() {
-                    if (FirebaseAuth.instance.currentUser.uid ==
-                        'M0clGRrBRMQSfQykuyA72WwHLgG2') _isAdvisor = true;
-                  });
+                  if (FirebaseAuth.instance.currentUser != null)
+                    setState(() {
+                      if (FirebaseAuth.instance.currentUser.uid ==
+                          'M0clGRrBRMQSfQykuyA72WwHLgG2') _isAdvisor = true;
+                    });
                   Navigator.pop(context);
                   // Navigator.of(context).pop(true);
                 },
