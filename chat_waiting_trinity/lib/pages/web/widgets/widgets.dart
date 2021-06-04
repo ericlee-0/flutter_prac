@@ -14,3 +14,4 @@ export 'event_list.dart';
 export 'order_online.dart';
 export 'main_title.dart';
 export 'chat_container_web.dart';
+export 'user_card.dart';

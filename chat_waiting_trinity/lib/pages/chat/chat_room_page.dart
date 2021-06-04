@@ -13,8 +13,10 @@ import '../../widgets/chat/new_message.dart';
 class ChatRoomPage extends StatefulWidget {
   static const routeName = '/chat-room-page';
   final Map<String, dynamic> chatInfo;
+  final Function(bool) chatDoneFn;
 
-  const ChatRoomPage({Key key, this.chatInfo}) : super(key: key);
+  const ChatRoomPage({Key key, this.chatInfo, this.chatDoneFn})
+      : super(key: key);
   @override
   _ChatRoomPageState createState() => _ChatRoomPageState();
 }
@@ -169,7 +171,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           // .collection(args['chatRoom'])
                           // .doc(args['chatRoomId'])
                           .update({'chatFinished': true});
-                      Navigator.of(context).pop();
+                      widget.chatDoneFn(true);
+                      // Navigator.of(context).pop();
                       // Navigator.of(context).pop();
                       // Navigator.of(context).pop();
                       // Navigator.of(context).pushNamed(UserProfileImagePicker.routeName);

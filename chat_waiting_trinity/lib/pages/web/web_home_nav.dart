@@ -1,4 +1,5 @@
-import 'package:chat_waiting_trinity/pages/waiting/stepper_test.dart';
+import 'package:chat_waiting_trinity/pages/waiting/add_reservation_page.dart';
+import 'package:chat_waiting_trinity/pages/web/screens/web_home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +11,9 @@ import 'package:flutter/material.dart';
 import '../../pages/chat/auth_page.dart';
 
 import '../chat/guest_chat_page.dart';
-import '../../controllers/chatNaviController.dart';
+// import '../../controllers/chatNaviController.dart';
+import '../../widgets/chat/chat_with_guest_list.dart';
+import '../../widgets/chat/chat_with_admin.dart';
 
 class WebHomeNav extends StatefulWidget {
   @override
@@ -63,10 +66,19 @@ class _WebHomeNavState extends State<WebHomeNav> {
   void openConsole() {
     print('openconsole run..');
     print('_advisor?  $_isAdvisor');
-    if (_isAdvisor)
-      setState(() {
-        _selectedIndex = 2;
-      });
+    if (MediaQuery.of(context).size.width < 800) {
+      //mobile
+      if (_isAdvisor)
+        setState(() {
+          _selectedIndex = 4;
+        });
+    } else {
+      //desktop tablet
+      if (_isAdvisor)
+        setState(() {
+          _selectedIndex = 2;
+        });
+    }
   }
 
   // Future showMyDialog(BuildContext context) {
@@ -117,7 +129,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
                           fontSize: 30),
                     );
                   }
-                  return AuthPage();
+                  return Scaffold(body: AuthPage());
                 }),
             actions: <Widget>[
               ElevatedButton(
@@ -187,7 +199,11 @@ class _WebHomeNavState extends State<WebHomeNav> {
                 // sizing: StackFit.loose,
                 index: _selectedIndex,
                 children: [
-                  WebHome(),
+                  WebHomeTest(
+                    toChatFn: moveToChat,
+                    toReservationFn: moveToReservation,
+                    loginFn: showLoginDialog,
+                  ),
                   // WebContact(),
                   // WebLocation(),
                   WebMenu(),
@@ -223,6 +239,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
                   WebHome(
                     toChatFn: moveToChat,
                     toReservationFn: moveToReservation,
+                    loginFn: showLoginDialog,
                   ),
                   WebContact(),
                   Scaffold(
@@ -240,14 +257,16 @@ class _WebHomeNavState extends State<WebHomeNav> {
                             }
                             if (userSnapshot.hasData) {
                               // return JoinWaitingPage();
-                              return StepperTest();
+                              return AddReservationPage();
                             }
                             return AuthPage();
                           }),
                     ),
                   ),
                   WebMenu(),
-                  WebBusiness(),
+                  _isAdvisor
+                      ? WebWaitingConsole(toReserveFn: moveToReservation)
+                      : WebBusiness(),
                   Scaffold(
                     body: Container(
                         child: StreamBuilder(
@@ -262,9 +281,15 @@ class _WebHomeNavState extends State<WebHomeNav> {
                               if (userSnapshot.hasData) {
                                 // print('id:${FirebaseAuth.instance.currentUser.uid}');
                                 return FirebaseAuth.instance.currentUser.uid ==
-                                        'twn4iAv7bmbYVvFUdQ9Ocyj25Vr1'
-                                    ? GuestChatPage()
-                                    : ChatNavicontroller();
+                                        'M0clGRrBRMQSfQykuyA72WwHLgG2'
+                                    ? ChatWithGuestList(
+                                        advisorId: FirebaseAuth
+                                            .instance.currentUser.uid,
+                                        key: PageStorageKey('GuestChatList'),
+                                      )
+                                    : ChatWithAdmin(
+                                        key: PageStorageKey('ChatWithAdmin'));
+                                // : ChatNavicontroller();
                                 // : ChatRoomListPage();
                                 // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
                               }
@@ -279,7 +304,16 @@ class _WebHomeNavState extends State<WebHomeNav> {
                 padding: const EdgeInsets.only(bottom: 12.0),
                 color: Colors.white,
                 child: CustomTabBar(
-                  icons: _iconsMobile,
+                  icons: [
+                    Icons.home,
+                    Icons.contact_phone,
+                    Icons.add,
+                    Icons.restaurant_menu,
+                    _isAdvisor
+                        ? Icons.control_camera_sharp
+                        : Icons.add_business,
+                    Icons.chat
+                  ],
                   selectedIndex: _selectedIndex,
                   onTap: (index) => setState(
                     () => _selectedIndex = index,

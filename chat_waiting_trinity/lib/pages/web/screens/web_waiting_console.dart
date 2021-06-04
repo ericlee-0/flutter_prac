@@ -1,4 +1,4 @@
-import 'package:chat_waiting_trinity/controllers/join_form_controller.dart';
+// import 'package:chat_waiting_trinity/controllers/join_form_controller.dart';
 import 'package:chat_waiting_trinity/controllers/join_waiting_controller.dart';
 import 'package:chat_waiting_trinity/widgets/waiting/waiting_list_options.dart';
 
@@ -8,12 +8,15 @@ import '../../../pages/web/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import '../../waiting/waiting_time_page.dart';
 import '../../../widgets/waiting/waiting_list_messages.dart';
-import '../../../controllers/chatNaviController.dart';
-import '../../../pages/waiting/stepper_test.dart';
+// import '../../../controllers/chatNaviController.dart';
+import '../../waiting/add_reservation_page.dart';
 import '../../../widgets/chat/chat_with_guest_list.dart';
 import 'package:intl/intl.dart';
 
 class WebWaitingConsole extends StatefulWidget {
+  final Function toReserveFn;
+
+  const WebWaitingConsole({Key key, this.toReserveFn}) : super(key: key);
   @override
   _WebWaitingConsoleState createState() => _WebWaitingConsoleState();
 }
@@ -27,6 +30,8 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
   bool chatOpen = false;
   bool reservationOpen = false;
   // final now = DateTime.now();
+  bool _rightDrawerOpen = false;
+  bool _leftDrawerOpen = false;
 
   String _selectedDate = DateFormat('yyyy/MM/dd').format(DateTime.now());
 
@@ -55,6 +60,18 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
     print('reservation clicked');
     setState(() {
       reservationOpen = !reservationOpen;
+    });
+  }
+
+  _rightDrawerToggle() {
+    setState(() {
+      _rightDrawerOpen = !_rightDrawerOpen;
+    });
+  }
+
+  _leftDrawerToggle() {
+    setState(() {
+      _leftDrawerOpen = !_leftDrawerOpen;
     });
   }
 
@@ -103,29 +120,98 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
               : SizedBox.shrink(),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           body: Responsive(
-            mobile: _WebWaitingConsoleMobile(
-              scrollController: _trackingScrollController,
-            ),
-            desktop: Stack(
+            mobile: Stack(
               children: [
-                _WebWaitingConsoleDesktop(
+                _WebWaitingConsoleMobile(
                   scrollController: _trackingScrollController,
-                  selectedListFn: _selectListOption,
+                  rightDrawerOpenFn: () => _rightDrawerToggle(),
+                  leftDrawerOpenFn: () => _leftDrawerToggle(),
                   selectedList: _selectList,
-                  // messageList: _messageList,
-                  messageInfo: _messageInfo,
-                  openReservation: _openReservation,
                   selectedDate: _selectedDate,
                   selectDateFn: () => _showDialogDate(),
                   messageFn: (result) {
                     print('messageFn run..');
-
+                    _rightDrawerToggle();
                     setState(() {
-                      // _messageList = result['message'];
                       _messageInfo = result;
                     });
                   },
                 ),
+                _leftDrawerOpen
+                    ? Positioned(
+                        left: 0.0,
+                        child: Container(
+                          width: 300,
+                          decoration:
+                              new BoxDecoration(color: Colors.green[50]),
+                          child: Column(
+                            children: [
+                              OutlinedButton.icon(
+                                  onPressed: () => _leftDrawerToggle(),
+                                  icon: Icon(Icons.close),
+                                  label: Text('Option Box')),
+                              WaitingListOption(
+                                selectList: _selectListOption,
+                                reserveFn: widget.toReserveFn,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+                _rightDrawerOpen
+                    ? Positioned(
+                        right: 0.0,
+                        child: Container(
+                            width: 350,
+                            decoration:
+                                new BoxDecoration(color: Colors.green[50]),
+                            child: Column(
+                              children: [
+                                OutlinedButton.icon(
+                                    onPressed: () => _rightDrawerToggle(),
+                                    icon: Icon(Icons.close),
+                                    label: Text('Message Box')),
+                                WaitingListMessages(
+                                  messageInfo: _messageInfo,
+                                ),
+                              ],
+                            )),
+                      )
+                    : SizedBox.shrink(),
+              ],
+            ),
+            desktop: Stack(
+              children: [
+                // _WebWaitingConsoleDesktop(
+                //   scrollController: _trackingScrollController,
+                //   selectedListFn: _selectListOption,
+                //   selectedList: _selectList,
+                //   messageInfo: _messageInfo,
+                //   openReservationFn: _openReservation,
+                //   selectedDate: _selectedDate,
+                //   selectDateFn: () => _showDialogDate(),
+                //   messageFn: (result) {
+                //     print('messageFn run..');
+
+                //     setState(() {
+                //       _messageInfo = result;
+                //     });
+                //   },
+                // ),
+                _WebWaitingConsoleDesktop(
+                    _trackingScrollController,
+                    _selectListOption,
+                    _selectList,
+                    _messageInfo,
+                    _openReservation,
+                    _selectedDate,
+                    _showDialogDate, (result) {
+                  setState(() {
+                    _messageInfo = result;
+                  });
+                }),
+
                 Container(
                   alignment: Alignment.center,
                   child: AnimatedContainer(
@@ -137,7 +223,7 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                       //     : AlignmentDirectional.topEnd,
                       duration: Duration(seconds: 1),
                       curve: Curves.fastOutSlowIn,
-                      child: StepperTest(
+                      child: AddReservationPage(
                           closeReservationFn: _openReservation,
                           userId: FirebaseAuth.instance.currentUser.uid)),
                 ),
@@ -171,39 +257,121 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
 
 class _WebWaitingConsoleMobile extends StatelessWidget {
   final TrackingScrollController scrollController;
+  final Function rightDrawerOpenFn;
+  final Function leftDrawerOpenFn;
+  final String selectedList;
+  final String selectedDate;
+  final Function selectDateFn;
+  final Function(Map<String, dynamic>) messageFn;
 
-  const _WebWaitingConsoleMobile({Key key, this.scrollController})
+  const _WebWaitingConsoleMobile(
+      {Key key,
+      @required this.scrollController,
+      @required this.rightDrawerOpenFn,
+      @required this.leftDrawerOpenFn,
+      @required this.selectedList,
+      @required this.selectedDate,
+      @required this.selectDateFn,
+      @required this.messageFn})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: () => leftDrawerOpenFn(),
+                  child: Text('Option Box')),
+              Text(
+                'Waiting Console',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    // backgroundColor: Colors.blueAccent,
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30),
+              ),
+              ElevatedButton(
+                  onPressed: () => rightDrawerOpenFn(),
+                  child: Text('Message Box')),
+            ],
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              WaitingTimePage(),
+              Spacer(),
+              ElevatedButton(
+                  onPressed: () {
+                    // print('add 10 mins.');
+                    JoinWaitingController.instance.setWaitingTime(10);
+                  },
+                  child: Text('+10')),
+              ElevatedButton(
+                  onPressed: () {
+                    // print('sub 10 mins.');
+                    JoinWaitingController.instance.setWaitingTime(-10);
+                  },
+                  child: Text('-10')),
+              Spacer(),
+              TextButton(
+                  onPressed: () {
+                    selectDateFn();
+                  },
+                  child: Text(selectedDate))
+            ],
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: WaitingConsolePage(
+            selectedDate: selectedDate,
+            listOption: selectedList,
+            messageFn: messageFn,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            height: 50,
+            color: Colors.grey[350],
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(0, 20.0, 0, 0),
+            child: Text(
+              'Copyright © 2021 Trinity Inc. All rights reserved.  Privacy Policy Terms of Use | Sales and Refunds | Site Map ',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
 class _WebWaitingConsoleDesktop extends StatelessWidget {
   final TrackingScrollController scrollController;
   final Function(String) selectedListFn;
-  final Function(Map<String, dynamic>) messageFn;
   final String selectedList;
+  final Map<String, dynamic> messageInfo;
+  final Function openReservationFn;
   final String selectedDate;
   final Function selectDateFn;
-  // final List<dynamic> messageList;
-  final Map<String, dynamic> messageInfo;
-  final Function openReservation;
+  final Function(Map<String, dynamic>) messageFn;
 
-  const _WebWaitingConsoleDesktop(
-      {Key key,
+  _WebWaitingConsoleDesktop(
       this.scrollController,
       this.selectedListFn,
       this.selectedList,
-      this.messageFn,
       this.messageInfo,
-      // this.messageList,
-      this.openReservation,
+      this.openReservationFn,
       this.selectedDate,
-      this.selectDateFn})
-      : super(key: key);
+      this.selectDateFn,
+      this.messageFn);
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +437,7 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
                 flex: 2,
                 child: WaitingListOption(
                   selectList: selectedListFn,
-                  reserveFn: openReservation,
+                  reserveFn: openReservationFn,
                 ),
               ),
               Flexible(
@@ -293,12 +461,18 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
             ],
           ),
         ),
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-          sliver: SliverToBoxAdapter(
-            child: Text('Footer'),
+        SliverToBoxAdapter(
+          child: Container(
+            height: 50,
+            color: Colors.grey[350],
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(0, 20.0, 0, 0),
+            child: Text(
+              'Copyright © 2021 Trinity Inc. All rights reserved.  Privacy Policy Terms of Use | Sales and Refunds | Site Map ',
+              textAlign: TextAlign.center,
+            ),
           ),
-        )
+        ),
       ],
     );
   }

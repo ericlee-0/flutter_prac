@@ -74,7 +74,7 @@ class CustomAppBar extends StatelessWidget {
                 isAdvisor
                     ? OutlinedButton(
                         child: Text(
-                          'Reservation',
+                          'Console',
                           style: TextStyle(
                               // color: Colors.red[400],
                               fontSize: 15.0,

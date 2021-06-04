@@ -315,6 +315,7 @@ class _WaitingConsolePageState extends State<WaitingConsolePage>
                               onPressed: () {
                                 // print('messagescreen open');
                                 // print('${waitingData[index].reference.path}');
+
                                 widget.messageFn({
                                   // 'message': waitingData[index]['messages'],
                                   'path': waitingData[index].reference.path

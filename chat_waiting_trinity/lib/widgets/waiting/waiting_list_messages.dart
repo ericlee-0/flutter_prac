@@ -5,7 +5,10 @@ class WaitingListMessages extends StatefulWidget {
   // final List messageList;
   final Map<String, dynamic> messageInfo;
 
-  const WaitingListMessages({Key key, this.messageInfo}) : super(key: key);
+  const WaitingListMessages({
+    Key key,
+    this.messageInfo,
+  }) : super(key: key);
 
   @override
   _WaitingListMessagesState createState() => _WaitingListMessagesState();

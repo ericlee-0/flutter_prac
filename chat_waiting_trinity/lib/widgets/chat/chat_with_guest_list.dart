@@ -41,18 +41,22 @@ class _ChatWithGuestListState extends State<ChatWithGuestList> {
         // ChatRoomController.instance.chatContinuewithGuest(_chatInfo)
         ChatRoomPage(
             chatInfo: {
-              'chatRoomId': _chatInfo['chatRoomId'],
-              'chatRoomType': _chatInfo['chatRoomType'],
-              'chatRoomPath': _chatInfo['chatRoomPath'],
-              'chatUserId': _chatInfo['chatUserId'],
-              'chatUserImageUrl': _chatInfo['chatUserImageUrl'],
-              'chatUserName': _chatInfo['chatUserName'],
-              'userSelfId': widget.advisorId,
-              'userSelfImageUrl': '',
-              'userSelfName': 'admin',
-              // 'chatUserImageUrl':userData[index]['image_url'],
-            },
-          )
+                'chatRoomId': _chatInfo['chatRoomId'],
+                'chatRoomType': _chatInfo['chatRoomType'],
+                'chatRoomPath': _chatInfo['chatRoomPath'],
+                'chatUserId': _chatInfo['chatUserId'],
+                'chatUserImageUrl': _chatInfo['chatUserImageUrl'],
+                'chatUserName': _chatInfo['chatUserName'],
+                'userSelfId': widget.advisorId,
+                'userSelfImageUrl': '',
+                'userSelfName': 'admin',
+                // 'chatUserImageUrl':userData[index]['image_url'],
+              },
+            chatDoneFn: (value) {
+              setState(() {
+                _roomChose = !value;
+              });
+            })
         : StreamBuilder(
             stream: FirebaseFirestore.instance
                 .collection('users')

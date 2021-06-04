@@ -4,8 +4,11 @@ class WaitingListOption extends StatelessWidget {
   final Function selectList;
   final Function reserveFn;
 
-  const WaitingListOption({Key key, this.selectList, this.reserveFn})
-      : super(key: key);
+  const WaitingListOption({
+    Key key,
+    this.selectList,
+    this.reserveFn,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
