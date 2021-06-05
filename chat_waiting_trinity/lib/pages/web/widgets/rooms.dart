@@ -8,9 +8,10 @@ import 'package:intl/intl.dart';
 
 class Rooms extends StatelessWidget {
   // it should be ths list of waiting people and button click to full waiting list page
-  final Widget waitingPeople;
+  final String waitingPeople;
+  final Function openJoinFn;
 
-  const Rooms({Key key, this.waitingPeople}) : super(key: key);
+  const Rooms({Key key, this.waitingPeople, this.openJoinFn}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class Rooms extends StatelessWidget {
           color: Colors.white,
           padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
           child: Text(
-            'Current Waiting List',
+            waitingPeople,
             style: TextStyle(
                 color: Colors.red[200],
                 fontSize: 18.0,
@@ -59,7 +60,7 @@ class Rooms extends StatelessWidget {
                 print('no data');
                 return Center(
                   child: OutlinedButton(
-                      onPressed: () => print('join'),
+                      onPressed: () => openJoinFn(),
                       style: OutlinedButton.styleFrom(
                         primary: Colors.white,
                         backgroundColor: Colors.teal[400],
@@ -68,7 +69,7 @@ class Rooms extends StatelessWidget {
                 );
               }
               final docdata = snapshot.data.docs;
-              print(docdata.length);
+              // print(docdata.length);
 
               return Container(
                 height: 80.0,

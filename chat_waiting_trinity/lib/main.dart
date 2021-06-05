@@ -45,6 +45,12 @@ void main() async {
     setupLocator();
   }
   runApp(MyApp());
+  FirebaseMessaging.instance.getToken().then((value) => print(value));
+  FirebaseMessaging.onBackgroundMessage(_firebasemessagingBackgroundHandler);
+}
+
+Future<void> _firebasemessagingBackgroundHandler(RemoteMessage message) {
+  print('Handling a background message ${message.notification.title}');
 }
 
 class MyApp extends StatefulWidget {

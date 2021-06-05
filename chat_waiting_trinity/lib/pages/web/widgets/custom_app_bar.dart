@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CustomAppBar extends StatelessWidget {
+  final TabController controller;
   final List<IconData> icons;
   final int selectedIndex;
   final Function(int) onTap;
@@ -15,6 +16,7 @@ class CustomAppBar extends StatelessWidget {
 
   const CustomAppBar(
       {Key key,
+      this.controller,
       @required this.icons,
       @required this.selectedIndex,
       @required this.onTap,
@@ -52,6 +54,7 @@ class CustomAppBar extends StatelessWidget {
             height: double.infinity,
             width: 200.0,
             child: CustomTabBar(
+                controller: controller,
                 icons: icons,
                 selectedIndex: selectedIndex,
                 onTap: onTap,

@@ -7,20 +7,19 @@ import '../../../pages/waiting/waiting_time_page.dart';
 import '../../../pages/waiting/add_reservation_page.dart';
 import '../../../widgets/chat/chat_with_admin.dart';
 
-class WebHomeTest extends StatefulWidget {
+class WebHome extends StatefulWidget {
   final Function toChatFn;
   final Function toReservationFn;
   final Function loginFn;
 
-  const WebHomeTest(
-      {Key key, this.toChatFn, this.toReservationFn, this.loginFn})
+  const WebHome({Key key, this.toChatFn, this.toReservationFn, this.loginFn})
       : super(key: key);
 
   @override
-  _WebHomeTestState createState() => _WebHomeTestState();
+  _WebHomeState createState() => _WebHomeState();
 }
 
-class _WebHomeTestState extends State<WebHomeTest> {
+class _WebHomeState extends State<WebHome> {
   final TrackingScrollController _trackingScrollController =
       TrackingScrollController();
 
@@ -64,7 +63,7 @@ class _WebHomeTestState extends State<WebHomeTest> {
       child: Scaffold(
         floatingActionButton: ElevatedButton.icon(
             onPressed: () {
-              if (MediaQuery.of(context).size.width <= 800)
+              if (MediaQuery.of(context).size.width <= 900)
                 widget.toChatFn();
               else
                 setState(() {
@@ -210,7 +209,7 @@ class _WebHomeMobile extends StatelessWidget {
       ),
       SliverToBoxAdapter(
         child: Container(
-          padding: EdgeInsets.fromLTRB(50, 15, 50, 15),
+          padding: EdgeInsets.fromLTRB(150, 15, 150, 15),
           child: OutlinedButton(
             child: Text(
               'Reservation',
@@ -238,7 +237,10 @@ class _WebHomeMobile extends StatelessWidget {
           children: [
             // CreatePostContainer(waitTime: 10),
             WaitingTimePage(),
-            Rooms(waitingPeople: Text('list of waiting people')),
+            Rooms(
+              waitingPeople: 'Current Waiting People',
+              openJoinFn: reserveFn,
+            ),
             OrderOnline(),
           ],
         )),
@@ -246,10 +248,13 @@ class _WebHomeMobile extends StatelessWidget {
       SliverToBoxAdapter(
         child: Stories(item: Text('list of Menu items')),
       ),
-      SliverToBoxAdapter(
-        child: Image.asset(
-          'assets/images/store_location.png',
-          fit: BoxFit.fill,
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
+        sliver: SliverToBoxAdapter(
+          child: Image.asset(
+            'assets/images/store_location.png',
+            fit: BoxFit.fill,
+          ),
         ),
       ),
       SliverList(
@@ -351,7 +356,9 @@ class _WebHomeDesktop extends StatelessWidget {
                     ),
                     // CreatePostContainer(waitTime: 10),
                     WaitingTimePage(),
-                    Rooms(waitingPeople: Text('list of waiting people')),
+                    Rooms(
+                        waitingPeople: 'Current Waiting People',
+                        openJoinFn: openReservationFn),
                     OrderOnline(),
                   ],
                 ),

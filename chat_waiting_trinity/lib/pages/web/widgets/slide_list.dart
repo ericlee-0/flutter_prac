@@ -8,8 +8,12 @@ class SlideList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.width >= 1200 ? 600 : 400,
-      color: Colors.white,
-      padding: EdgeInsets.fromLTRB(150, 10, 150, 10),
+      width: MediaQuery.of(context).size.width >= 1200 ? 400 : 270,
+      alignment: Alignment.center,
+      color: Colors.black,
+      padding: MediaQuery.of(context).size.width >= 1200
+          ? EdgeInsets.fromLTRB(150, 10, 150, 10)
+          : EdgeInsets.fromLTRB(10, 10, 10, 10),
       child: ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
           scrollDirection: Axis.horizontal,

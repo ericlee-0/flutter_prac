@@ -1,6 +1,7 @@
 import 'package:chat_waiting_trinity/pages/waiting/add_reservation_page.dart';
 import 'package:chat_waiting_trinity/pages/web/screens/web_home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 
 import './screens/screens.dart';
@@ -20,15 +21,50 @@ class WebHomeNav extends StatefulWidget {
   _WebHomeNavState createState() => _WebHomeNavState();
 }
 
-class _WebHomeNavState extends State<WebHomeNav> {
+class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   // List<Widget> _screens;
   // List<IconData> _icons;
   bool _isAdvisor = false;
+  TabController _topTabController;
+  TabController _bottomTabController;
+  int _selectedIndex = 0;
   @override
   void initState() {
     super.initState();
+    firebaseOnMessage();
+    _topTabController = TabController(length: 3, vsync: this);
+    _bottomTabController = TabController(length: 5, vsync: this);
   }
 
+  void onFirebaseoOpendedApp() {
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      print('onMessageOpenedApp occured. Message is: ');
+      print(event.notification.title);
+    });
+  }
+
+  void firebaseOnMessage() {
+    FirebaseMessaging.onMessage.listen((message) {
+      if (message != null) {
+        final title = message.notification.title;
+        final body = message.notification.body;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Title: $title, Body: $body')),
+        );
+        // showDialog(
+        //     context: context,
+        //     builder: (context) {
+        //       return SimpleDialog(
+        //         contentPadding: EdgeInsets.all(18),
+        //         children: [
+        //           Text('Title: $title'),
+        //           Text('Body: $body'),
+        //         ],
+        //       );
+        //     });
+      }
+    });
+  }
   // List<Widget> _screensMobile = [
   //   WebHome(),
   //   WebContact(),
@@ -42,24 +78,25 @@ class _WebHomeNavState extends State<WebHomeNav> {
 
   final List<IconData> _iconsMobile = const [
     Icons.home,
-    Icons.contact_phone,
     Icons.add,
     Icons.restaurant_menu,
-    Icons.add_business,
+    Icons.contact_phone,
     Icons.chat
   ];
-  int _selectedIndex = 0;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void moveToReservation() {
+    _bottomTabController.animateTo(_selectedIndex = 1);
     setState(() {
-      _selectedIndex = 2;
+      _selectedIndex = 1;
     });
   }
 
   void moveToChat() {
+    _bottomTabController.animateTo(_selectedIndex = 4);
     setState(() {
-      _selectedIndex = 5;
+      _selectedIndex = 4;
     });
   }
 
@@ -70,14 +107,16 @@ class _WebHomeNavState extends State<WebHomeNav> {
       //mobile
       if (_isAdvisor)
         setState(() {
-          _selectedIndex = 4;
+          _selectedIndex = 3;
         });
+      _bottomTabController.animateTo(_selectedIndex = 3);
     } else {
       //desktop tablet
       if (_isAdvisor)
         setState(() {
           _selectedIndex = 2;
         });
+      _topTabController.animateTo(_selectedIndex = 2);
     }
   }
 
@@ -129,7 +168,8 @@ class _WebHomeNavState extends State<WebHomeNav> {
                           fontSize: 30),
                     );
                   }
-                  return Scaffold(body: AuthPage());
+                  return Scaffold(
+                      body: Container(width: 400, child: AuthPage()));
                 }),
             actions: <Widget>[
               ElevatedButton(
@@ -147,6 +187,13 @@ class _WebHomeNavState extends State<WebHomeNav> {
             ],
           );
         });
+  }
+
+  @override
+  void dispose() {
+    _topTabController.dispose();
+    _bottomTabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -174,6 +221,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
             ? PreferredSize(
                 //desktop, tablet mode
                 child: CustomAppBar(
+                  controller: _topTabController,
                   icons: [
                     Icons.home,
                     // Icons.contact_phone,
@@ -181,7 +229,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
                     Icons.restaurant_menu,
                     _isAdvisor
                         ? Icons.control_camera_sharp
-                        : Icons.add_business,
+                        : Icons.contact_phone
                   ],
                   selectedIndex: _selectedIndex,
                   onTap: (index) {
@@ -199,7 +247,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
                 // sizing: StackFit.loose,
                 index: _selectedIndex,
                 children: [
-                  WebHomeTest(
+                  WebHome(
                     toChatFn: moveToChat,
                     toReservationFn: moveToReservation,
                     loginFn: showLoginDialog,
@@ -207,7 +255,7 @@ class _WebHomeNavState extends State<WebHomeNav> {
                   // WebContact(),
                   // WebLocation(),
                   WebMenu(),
-                  _isAdvisor ? WebWaitingConsole() : WebBusiness(),
+                  _isAdvisor ? WebWaitingConsole() : WebContact(),
                 ],
               )
             //below part will be use it for chat container activemode
@@ -241,7 +289,6 @@ class _WebHomeNavState extends State<WebHomeNav> {
                     toReservationFn: moveToReservation,
                     loginFn: showLoginDialog,
                   ),
-                  WebContact(),
                   Scaffold(
                     body: Container(
                       child: StreamBuilder(
@@ -265,8 +312,11 @@ class _WebHomeNavState extends State<WebHomeNav> {
                   ),
                   WebMenu(),
                   _isAdvisor
-                      ? WebWaitingConsole(toReserveFn: moveToReservation)
-                      : WebBusiness(),
+                      ? WebWaitingConsole(
+                          toReserveFn: moveToReservation,
+                          toChatFn: moveToChat,
+                        )
+                      : WebContact(),
                   Scaffold(
                     body: Container(
                         child: StreamBuilder(
@@ -298,20 +348,20 @@ class _WebHomeNavState extends State<WebHomeNav> {
                   ),
                 ],
               ),
-        endDrawer: WebChatDrawer(),
+        // endDrawer: WebChatDrawer(),
         bottomNavigationBar: Responsive.isMobile(context)
             ? Container(
                 padding: const EdgeInsets.only(bottom: 12.0),
                 color: Colors.white,
                 child: CustomTabBar(
+                  controller: _bottomTabController,
                   icons: [
                     Icons.home,
-                    Icons.contact_phone,
                     Icons.add,
                     Icons.restaurant_menu,
                     _isAdvisor
                         ? Icons.control_camera_sharp
-                        : Icons.add_business,
+                        : Icons.contact_phone,
                     Icons.chat
                   ],
                   selectedIndex: _selectedIndex,

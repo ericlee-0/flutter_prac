@@ -15,8 +15,10 @@ import 'package:intl/intl.dart';
 
 class WebWaitingConsole extends StatefulWidget {
   final Function toReserveFn;
+  final Function toChatFn;
 
-  const WebWaitingConsole({Key key, this.toReserveFn}) : super(key: key);
+  const WebWaitingConsole({Key key, this.toReserveFn, this.toChatFn})
+      : super(key: key);
   @override
   _WebWaitingConsoleState createState() => _WebWaitingConsoleState();
 }
@@ -111,9 +113,12 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
           floatingActionButton: (MediaQuery.of(context).size.width > 800)
               ? ElevatedButton.icon(
                   onPressed: () {
-                    setState(() {
-                      chatOpen = !chatOpen;
-                    });
+                    if (MediaQuery.of(context).size.width <= 900)
+                      widget.toChatFn();
+                    else
+                      setState(() {
+                        chatOpen = !chatOpen;
+                      });
                   },
                   icon: Icon(Icons.chat_bubble_outline),
                   label: chatOpen ? Text('Close chat') : Text('Open chat'))
@@ -282,7 +287,7 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               ElevatedButton(
                   onPressed: () => leftDrawerOpenFn(),
@@ -296,9 +301,9 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: 30),
               ),
-              ElevatedButton(
-                  onPressed: () => rightDrawerOpenFn(),
-                  child: Text('Message Box')),
+              // ElevatedButton(
+              //     onPressed: () => rightDrawerOpenFn(),
+              //     child: Text('Message Box')),
             ],
           ),
         ),

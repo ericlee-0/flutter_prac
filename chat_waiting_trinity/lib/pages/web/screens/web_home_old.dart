@@ -352,7 +352,7 @@ class _HomeMobile extends StatelessWidget {
             children: [
               // CreatePostContainer(waitTime: 10),
               WaitingTimePage(),
-              Rooms(waitingPeople: Text('list of waiting people')),
+              Rooms(waitingPeople: 'list of waiting people'),
               OrderOnline(),
             ],
           )),
@@ -478,7 +478,7 @@ class _HomeDesktop extends StatelessWidget {
                       ),
                       // CreatePostContainer(waitTime: 10),
                       WaitingTimePage(),
-                      Rooms(waitingPeople: Text('list of waiting people')),
+                      Rooms(waitingPeople: 'list of waiting people'),
                       OrderOnline(),
                     ],
                   ),
