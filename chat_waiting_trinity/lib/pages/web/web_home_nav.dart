@@ -2,6 +2,7 @@ import 'package:chat_waiting_trinity/pages/waiting/add_reservation_page.dart';
 import 'package:chat_waiting_trinity/pages/web/screens/web_home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 import './screens/screens.dart';
@@ -10,11 +11,13 @@ import './widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../../pages/chat/auth_page.dart';
+import '../../widgets/chat/chat_badge.dart';
 
 import '../chat/guest_chat_page.dart';
 // import '../../controllers/chatNaviController.dart';
 import '../../widgets/chat/chat_with_guest_list.dart';
 import '../../widgets/chat/chat_with_admin.dart';
+import 'package:intl/intl.dart';
 
 class WebHomeNav extends StatefulWidget {
   @override
@@ -28,6 +31,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   TabController _topTabController;
   TabController _bottomTabController;
   int _selectedIndex = 0;
+  int _unFinishedGuestChatNumber = 0;
   @override
   void initState() {
     super.initState();
@@ -175,11 +179,14 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
               ElevatedButton(
                 child: const Text('Close'),
                 onPressed: () {
-                  if (FirebaseAuth.instance.currentUser != null)
+                  if (FirebaseAuth.instance.currentUser != null &&
+                      FirebaseAuth.instance.currentUser.uid ==
+                          'M0clGRrBRMQSfQykuyA72WwHLgG2') {
                     setState(() {
-                      if (FirebaseAuth.instance.currentUser.uid ==
-                          'M0clGRrBRMQSfQykuyA72WwHLgG2') _isAdvisor = true;
+                      _isAdvisor = true;
                     });
+                  }
+
                   Navigator.pop(context);
                   // Navigator.of(context).pop(true);
                 },
@@ -187,6 +194,35 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
             ],
           );
         });
+  }
+
+// final Stream<QuerySnapshot> _getGuestChatCountStream = FirebaseFirestore.instance
+//         .collection('users')
+//         .doc('M0clGRrBRMQSfQykuyA72WwHLgG2')
+//         .collection(docId)
+//         .snapshots();
+
+  Stream<QuerySnapshot> _getUnfinishedGuestChatCountStream() {
+    final now = DateTime.now();
+    final docId = DateFormat('yyyy/MM/dd').format(now);
+    // int counter = 0;
+    print('guestchatcountFn run..');
+
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc('M0clGRrBRMQSfQykuyA72WwHLgG2')
+        .collection(docId)
+        .snapshots();
+    //   .then((event) {
+    // event.docs.forEach((element) {
+    //   // print('${element['unRead']}');
+    //   if (element['chatFinished'] == false) counter++;
+    // });
+    // print('chat? $counter');
+    //   setState(() {
+    //     _unFinishedGuestChatNumber = counter;
+    //   });
+    // });
   }
 
   @override
@@ -208,6 +244,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
       setState(() {
         _isAdvisor = true;
       });
+      // _getUnfinishedGuestChatCount();
     } else {
       setState(() {
         _isAdvisor = false;
@@ -368,6 +405,41 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                   onTap: (index) => setState(
                     () => _selectedIndex = index,
                   ),
+                  unreadChatNum: _isAdvisor
+                      ? StreamBuilder(
+                          stream: _getUnfinishedGuestChatCountStream(),
+                          builder: (context, snapshot) {
+                            Widget count;
+                            int c = 0;
+                            if (snapshot.hasError) {
+                              count = ChatBadge(0);
+                            } else {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.none:
+                                  count = ChatBadge(0);
+                                  break;
+                                case ConnectionState.waiting:
+                                  count = ChatBadge(0);
+                                  break;
+                                case ConnectionState.active:
+                                  snapshot.data.docs.forEach((element) {
+                                    //   // print('${element['unRead']}');
+                                    if (element['chatFinished'] == false) c++;
+                                  });
+                                  count = ChatBadge(c);
+                                  c = 0;
+
+                                  break;
+                                case ConnectionState.done:
+                                  count = ChatBadge(0);
+                                  break;
+                              }
+                            }
+
+                            return count;
+                          })
+                      // ? ChatBadge(_unFinishedGuestChatNumber)
+                      : ChatBadge(0),
                 ),
               )
             : const SizedBox.shrink(),

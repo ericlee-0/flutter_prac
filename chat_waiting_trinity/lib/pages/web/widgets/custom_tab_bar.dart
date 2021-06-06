@@ -6,6 +6,7 @@ class CustomTabBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTap;
   final bool isBottomIndicator;
+  final Widget unreadChatNum;
 
   const CustomTabBar(
       {Key key,
@@ -13,7 +14,8 @@ class CustomTabBar extends StatelessWidget {
       @required this.icons,
       @required this.selectedIndex,
       @required this.onTap,
-      this.isBottomIndicator = false})
+      this.isBottomIndicator = false,
+      this.unreadChatNum})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -41,11 +43,24 @@ class CustomTabBar extends StatelessWidget {
           .map((i, e) => MapEntry(
                 i,
                 Tab(
-                  icon: Icon(
-                    e,
-                    color: i == selectedIndex ? Colors.blue : Colors.black45,
-                    size: 25.0,
-                  ),
+                  icon: i == 4
+                      ? Stack(children: [
+                          Icon(e,
+                              color: i == selectedIndex
+                                  ? Colors.blue
+                                  : Colors.black45),
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            child: unreadChatNum,
+                          )
+                        ])
+                      : Icon(
+                          e,
+                          color:
+                              i == selectedIndex ? Colors.blue : Colors.black45,
+                          size: 25.0,
+                        ),
                 ),
               ))
           .values

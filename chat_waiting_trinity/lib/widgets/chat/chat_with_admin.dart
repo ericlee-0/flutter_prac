@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../controllers/chat_room_controller.dart';
-import '../../pages/chat/chat_room_page.dart';
+import './chat_room.dart';
 
 class ChatWithAdmin extends StatefulWidget {
   final Function popToggleFn;
@@ -49,7 +49,7 @@ class _ChatWithAdminState extends State<ChatWithAdmin> {
   Widget build(BuildContext context) {
     return _isWaiting
         ? _isBegin
-            ? ChatRoomPage(chatInfo: chatRoomData)
+            ? ChatRoom(chatInfo: chatRoomData)
             : Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

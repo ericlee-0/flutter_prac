@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "eslint-plugin-promise": "^5.1.0"
+  },
+  "dependencies": {
+    "firebase-functions": "^3.14.1"
+  }
+}

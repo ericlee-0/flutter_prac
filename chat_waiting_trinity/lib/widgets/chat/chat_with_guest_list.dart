@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/chat_room_controller.dart';
-import '../../pages/chat/chat_room_page.dart';
+import './chat_room.dart';
 
 class ChatWithGuestList extends StatefulWidget {
   final String advisorId;
@@ -39,7 +39,7 @@ class _ChatWithGuestListState extends State<ChatWithGuestList> {
     return _roomChose
         ?
         // ChatRoomController.instance.chatContinuewithGuest(_chatInfo)
-        ChatRoomPage(
+        ChatRoom(
             chatInfo: {
                 'chatRoomId': _chatInfo['chatRoomId'],
                 'chatRoomType': _chatInfo['chatRoomType'],
