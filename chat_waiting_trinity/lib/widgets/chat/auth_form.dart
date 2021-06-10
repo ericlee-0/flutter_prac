@@ -19,7 +19,7 @@ class AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<AuthForm> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(debugLabel: '_authFormKey');
   final _phoneFormKey = GlobalKey<FormState>();
   var _isSignIn = true;
   var _userEmail = '';
@@ -210,7 +210,9 @@ class _AuthFormState extends State<AuthForm> {
             // crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(height: 100,),
+              SizedBox(
+                height: 100,
+              ),
               SizedBox(
                 // width: ,
                 child: RaisedButton(
@@ -276,7 +278,7 @@ class _AuthFormState extends State<AuthForm> {
                           if (widget.isLoading) CircularProgressIndicator(),
                           if (!widget.isLoading)
                             Padding(
-                              padding: const EdgeInsets.only(top:15),
+                              padding: const EdgeInsets.only(top: 15),
                               child: RaisedButton(
                                 child: Text('Login'),
                                 onPressed: () {

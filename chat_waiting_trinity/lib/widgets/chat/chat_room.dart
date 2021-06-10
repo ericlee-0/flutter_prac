@@ -97,11 +97,11 @@ class _ChatRoomState extends State<ChatRoom> {
                             SizedBox(
                               width: 8,
                             ),
-                            Text('Logout')
+                            Text('exit')
                           ],
                         ),
                       ),
-                      value: 'logout',
+                      value: 'exit',
                     ),
                     DropdownMenuItem(
                       child: Container(
@@ -140,19 +140,19 @@ class _ChatRoomState extends State<ChatRoom> {
                                   SizedBox(
                                     width: 8,
                                   ),
-                                  Text('Test Page')
+                                  Text('Finish Chat')
                                 ],
                               ),
                             ),
-                            value: 'test',
+                            value: 'finished',
                           ),
                   ],
                   onChanged: (itemIdentifier) async {
                     if (itemIdentifier == 'edit') {
                       // Navigator.of(context)
                       //     .pushNamed(UserProfileEditPage.routeName);
-                    } else if (itemIdentifier == 'logout') {
-                      FirebaseAuth.instance.signOut();
+                    } else if (itemIdentifier == 'exit') {
+                      // FirebaseAuth.instance.signOut();
                       widget.chatDoneFn(true);
                       // Navigator.of(context).pushNamed('/');
                     } else if (itemIdentifier == 'test') {

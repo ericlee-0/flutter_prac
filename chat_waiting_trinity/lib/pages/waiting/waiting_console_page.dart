@@ -24,29 +24,24 @@ class _WaitingConsolePageState extends State<WaitingConsolePage>
   // ** here{
   // String _docId;
   // final String _docId; = widget.sele
-  var _guestStatus = 'pending';
-  var _guestMessage = 'no message sent';
-  bool _tileOpened = false;
+  var _guestStatus;
+  // var _guestMessage = 'no message sent';
+  // bool _tileOpened = false;
 
-  TextEditingController _hastagController = TextEditingController();
+  // TextEditingController _hastagController = TextEditingController();
   final List<String> _guestStatusList = <String>[
     'pending',
     'waiting',
     'checkedIn',
     'done',
   ];
-  final List<String> _guestMessageList = <String>[
-    'no message sent',
-    'table-ready',
-    'table-in 5 mins',
-    'table-in 15 mins',
-    'reservation cancelled'
-  ];
+
   @override
   void initState() {
     // _docId = widget.selectedDate;
     // TODO: implement initState
     super.initState();
+    _guestStatus = 'pending';
     // print('sled: ${widget.selectedDate.length}');
     // if (widget.selectedDate.length != 0)
 

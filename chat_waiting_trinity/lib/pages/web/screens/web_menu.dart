@@ -121,12 +121,16 @@ class _WebMenuState extends State<WebMenu> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
           body: Responsive(
-        mobile: _MenuDesktop(
-          scrollController: _trackingScrollController,
-          appitizers: _appitazers,
-          dishes: _dishes,
-          desserts: _desserts,
-          drinks: _drinks,
+        mobile: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: _MenuDesktop(
+            scrollController: _trackingScrollController,
+            appitizers: _appitazers,
+            dishes: _dishes,
+            desserts: _desserts,
+            drinks: _drinks,
+          ),
         ),
         desktop: _MenuDesktop(
           scrollController: _trackingScrollController,
@@ -245,10 +249,15 @@ class _MenuDesktop extends StatelessWidget {
           controller: scrollController,
           slivers: [
             SliverToBoxAdapter(
-              child: Image.asset(
-                'assets/images/main_image.png',
-                fit: BoxFit.fill,
-              ),
+              child: MediaQuery.of(context).size.width < 900
+                  ? Image.asset(
+                      'assets/images/main_image_mobile.png',
+                      fit: BoxFit.fill,
+                    )
+                  : Image.asset(
+                      'assets/images/main_image.png',
+                      fit: BoxFit.fill,
+                    ),
             ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(10, 10.0, 0, 5.0),

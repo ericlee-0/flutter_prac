@@ -10,8 +10,10 @@ class CustomAppBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTap;
   final bool isAdvisor;
-  final Function login;
+  final Function logInFn;
+  final Function logOutFn;
   final Function openConsole;
+  final String userName;
   // final Function()
 
   const CustomAppBar(
@@ -21,8 +23,10 @@ class CustomAppBar extends StatelessWidget {
       @required this.selectedIndex,
       @required this.onTap,
       @required this.isAdvisor,
-      @required this.login,
-      @required this.openConsole})
+      @required this.logInFn,
+      @required this.logOutFn,
+      @required this.openConsole,
+      this.userName})
       : super(key: key);
 
   @override
@@ -69,11 +73,14 @@ class CustomAppBar extends StatelessWidget {
                         onPressed: () {
                           //AuthPage
                           print('login page need to run');
-                          login(context);
+                          logInFn(context);
                         },
                         icon: Icon(Icons.login),
                         label: Text('Login'))
-                    : UserCard(),
+                    : UserCard(
+                        userName: userName,
+                        logOutFn: logOutFn,
+                      ),
                 isAdvisor
                     ? OutlinedButton(
                         child: Text(

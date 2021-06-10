@@ -18,8 +18,12 @@ class WebContact extends StatelessWidget {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
           body: Responsive(
-        mobile: _ContactDesktop(
-          scrollController: _trackingScrollController,
+        mobile: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: _ContactDesktop(
+            scrollController: _trackingScrollController,
+          ),
         ),
         desktop: _ContactDesktop(
           scrollController: _trackingScrollController,

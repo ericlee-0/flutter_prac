@@ -4,3 +4,4 @@ export 'web_business.dart';
 export 'web_location.dart';
 export 'web_menu.dart';
 export 'web_waiting_console.dart';
+export 'web_add_reserve.dart';

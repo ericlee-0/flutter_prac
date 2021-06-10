@@ -23,7 +23,7 @@ class Rooms extends StatelessWidget {
           height: 40.0,
           width: double.infinity,
           color: Colors.white,
-          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+          padding: EdgeInsets.fromLTRB(50, 10, 0, 10),
           child: Text(
             waitingPeople,
             style: TextStyle(
@@ -88,7 +88,7 @@ class Rooms extends StatelessWidget {
                           child: Row(
                             children: [
                               OutlinedButton(
-                                  onPressed: () => print('join'),
+                                  onPressed: () => openJoinFn(),
                                   style: OutlinedButton.styleFrom(
                                     primary: Colors.white,
                                     backgroundColor: Colors.teal[400],

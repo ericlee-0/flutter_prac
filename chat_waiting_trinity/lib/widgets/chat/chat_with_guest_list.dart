@@ -94,8 +94,9 @@ class _ChatWithGuestListState extends State<ChatWithGuestList> {
                             ],
                           ),
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                chatRoomListData[index]['chatUserImageUrl']),
+                            backgroundImage: Image.asset(
+                              'assets/images/main_image.png',
+                            ).image,
                             radius: 25,
                           ),
                           trailing: ElevatedButton(

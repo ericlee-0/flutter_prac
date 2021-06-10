@@ -11,44 +11,55 @@ import '../../../widgets/waiting/waiting_list_messages.dart';
 // import '../../../controllers/chatNaviController.dart';
 import '../../waiting/add_reservation_page.dart';
 import '../../../widgets/chat/chat_with_guest_list.dart';
+import '../../../widgets/chat/chat_with_admin.dart';
 import 'package:intl/intl.dart';
 
-class WebWaitingConsole extends StatefulWidget {
-  final Function toReserveFn;
+class WebHomeNew extends StatefulWidget {
   final Function toChatFn;
-  final Function loginFn;
+  final Function toReserveFn;
 
-  const WebWaitingConsole(
-      {Key key, this.toReserveFn, this.toChatFn, this.loginFn})
-      : super(key: key);
+  final Function loginFn;
+  final String userName;
+
+  const WebHomeNew({
+    Key key,
+    this.toChatFn,
+    this.toReserveFn,
+    this.loginFn,
+    this.userName,
+  }) : super(key: key);
   @override
-  _WebWaitingConsoleState createState() => _WebWaitingConsoleState();
+  _WebHomeNewState createState() => _WebHomeNewState();
 }
 
-class _WebWaitingConsoleState extends State<WebWaitingConsole> {
+class _WebHomeNewState extends State<WebHomeNew> {
   final TrackingScrollController _trackingScrollController =
       TrackingScrollController();
-  String _selectList;
+
   // List<dynamic> _messageList = [];
-  Map<String, dynamic> _messageInfo;
-  bool chatOpen;
-  bool reservationOpen;
-  // final now = DateTime.now();
-  bool _rightDrawerOpen;
-  bool _leftDrawerOpen;
+
+  bool chatOpen = false;
+  bool reservationOpen = false;
+
+  bool _rightDrawerOpen = false;
+  bool _leftDrawerOpen = false;
+  List eventListItems = [
+    {
+      'type': 'E',
+      'creator': 'Gyubee Dundas',
+      'image': 'assets/images/event.jpeg',
+      'detail':
+          'this event is created by duddas haha so i have no idear other location and contents is not decided yet. we will figure it out sooner or later',
+    }
+  ];
 
   String _selectedDate = DateFormat('yyyy/MM/dd').format(DateTime.now());
-
+  String _selectList = 'active';
+  Map<String, dynamic> _messageInfo;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _selectList = 'active';
-    chatOpen = false;
-    reservationOpen = false;
-    // final now = DateTime.now();
-    _rightDrawerOpen = false;
-    _leftDrawerOpen = false;
 
     // _selectedDate = DateFormat('yyyy/MM/dd').format(now);
   }
@@ -67,10 +78,13 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
   }
 
   _openReservation() {
-    print('reservation clicked');
-    setState(() {
-      reservationOpen = !reservationOpen;
-    });
+    FirebaseAuth.instance.currentUser == null
+        ? widget.loginFn(context)
+        :
+        // print('reservation clicked');
+        setState(() {
+            reservationOpen = !reservationOpen;
+          });
   }
 
   _rightDrawerToggle() {
@@ -118,10 +132,10 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(), // on tap -> unfocus
       child: Scaffold(
-          floatingActionButton: (MediaQuery.of(context).size.width > 900)
+          floatingActionButton: (MediaQuery.of(context).size.width > 500)
               ? ElevatedButton.icon(
                   onPressed: () {
-                    if (MediaQuery.of(context).size.width <= 900)
+                    if (MediaQuery.of(context).size.width <= 500)
                       widget.toChatFn();
                     else
                       setState(() {
@@ -131,14 +145,14 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                   icon: Icon(Icons.chat_bubble_outline),
                   label: chatOpen ? Text('Close chat') : Text('Open chat'))
               : SizedBox.shrink(),
-          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           body: Responsive(
             mobile: SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: Stack(
                 children: [
-                  _WebWaitingConsoleMobile(
+                  _WebHomeNewMobile(
                     scrollController: _trackingScrollController,
                     rightDrawerOpenFn: () => _rightDrawerToggle(),
                     leftDrawerOpenFn: () => _leftDrawerToggle(),
@@ -152,6 +166,10 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                         _messageInfo = result;
                       });
                     },
+                    eventListItems: eventListItems,
+                    reserveFn: widget.toReserveFn,
+                    loginFn: widget.loginFn,
+                    userName: widget.userName,
                   ),
                   _leftDrawerOpen
                       ? Positioned(
@@ -200,23 +218,7 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
             ),
             desktop: Stack(
               children: [
-                // _WebWaitingConsoleDesktop(
-                //   scrollController: _trackingScrollController,
-                //   selectedListFn: _selectListOption,
-                //   selectedList: _selectList,
-                //   messageInfo: _messageInfo,
-                //   openReservationFn: _openReservation,
-                //   selectedDate: _selectedDate,
-                //   selectDateFn: () => _showDialogDate(),
-                //   messageFn: (result) {
-                //     print('messageFn run..');
-
-                //     setState(() {
-                //       _messageInfo = result;
-                //     });
-                //   },
-                // ),
-                _WebWaitingConsoleDesktop(
+                _WebHomeNewDesktop(
                   _trackingScrollController,
                   _selectListOption,
                   _selectList,
@@ -231,51 +233,63 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
                       },
                     );
                   },
-                  widget.loginFn,
+                  // widget.loginFn,
+                  eventListItems,
                 ),
+                reservationOpen
+                    ? FirebaseAuth.instance.currentUser == null
+                        ? widget.loginFn(context)
+                        : Container(
+                            alignment: Alignment.center,
+                            child: AnimatedContainer(
+                              width: reservationOpen ? 400.0 : 0.0,
+                              height: reservationOpen ? 600.0 : 0.0,
+                              color: reservationOpen
+                                  ? Colors.blue[100]
+                                  : Colors.white,
+                              // alignment: reservationOpen
+                              //     ? Alignment.bottomRight
+                              //     : AlignmentDirectional.topEnd,
+                              duration: Duration(seconds: 1),
+                              curve: Curves.fastOutSlowIn,
+                              child: AddReservationPage(
+                                closeReservationFn: _openReservation,
+                                userId: FirebaseAuth.instance.currentUser.uid,
+                                key: PageStorageKey('addReservationStroageKey'),
+                              ),
+                            ),
+                          )
+                    : SizedBox.shrink(),
+                chatOpen
+                    ? FirebaseAuth.instance.currentUser == null
+                        ? widget.loginFn(context)
+                        : Container(
+                            padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
+                            alignment: Alignment.bottomLeft,
+                            child: AnimatedContainer(
+                                width: chatOpen ? 400.0 : 0.0,
+                                height: chatOpen ? 600.0 : 0.0,
+                                color:
+                                    chatOpen ? Colors.grey[100] : Colors.white,
+                                alignment: chatOpen
+                                    ? Alignment.bottomLeft
+                                    : AlignmentDirectional.topEnd,
+                                duration: Duration(seconds: 1),
+                                curve: Curves.fastOutSlowIn,
+                                child:
+                                    // ChatNavicontroller(),
+                                    ChatWithAdmin(
+                                  popToggleFn: widget.toChatFn,
+                                  key: PageStorageKey('chatWithAdminscreen'),
+                                )
 
-                Container(
-                  alignment: Alignment.center,
-                  child: AnimatedContainer(
-                    width: reservationOpen ? 400.0 : 0.0,
-                    height: reservationOpen ? 600.0 : 0.0,
-                    color: reservationOpen ? Colors.blue[100] : Colors.white,
-                    // alignment: reservationOpen
-                    //     ? Alignment.bottomRight
-                    //     : AlignmentDirectional.topEnd,
-                    duration: Duration(seconds: 1),
-                    curve: Curves.fastOutSlowIn,
-                    child: AddReservationPage(
-                      closeReservationFn: _openReservation,
-                      userId: FirebaseAuth.instance.currentUser != null
-                          ? FirebaseAuth.instance.currentUser.uid
-                          : null,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
-                  alignment: Alignment.bottomLeft,
-                  child: AnimatedContainer(
-                    width: chatOpen ? 400.0 : 0.0,
-                    height: chatOpen ? 600.0 : 0.0,
-                    color: chatOpen ? Colors.grey[100] : Colors.white,
-                    alignment: chatOpen
-                        ? Alignment.bottomLeft
-                        : AlignmentDirectional.topEnd,
-                    duration: Duration(seconds: 1),
-                    curve: Curves.fastOutSlowIn,
-                    child:
-                        // ChatNavicontroller(),
-
-                        ChatWithGuestList(
-                      advisorId: FirebaseAuth.instance.currentUser != null
-                          ? FirebaseAuth.instance.currentUser.uid
-                          : null,
-                      key: PageStorageKey('GuestChatList'),
-                    ),
-                  ),
-                )
+                                //   ChatWithGuestList(
+                                // advisorId: FirebaseAuth.instance.currentUser.uid
+                                //     ,
+                                // key: PageStorageKey('GuestChatList'),
+                                ),
+                          )
+                    : SizedBox.shrink(),
               ],
             ),
           )),
@@ -283,7 +297,7 @@ class _WebWaitingConsoleState extends State<WebWaitingConsole> {
   }
 }
 
-class _WebWaitingConsoleMobile extends StatelessWidget {
+class _WebHomeNewMobile extends StatelessWidget {
   final TrackingScrollController scrollController;
   final Function rightDrawerOpenFn;
   final Function leftDrawerOpenFn;
@@ -291,8 +305,12 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
   final String selectedDate;
   final Function selectDateFn;
   final Function(Map<String, dynamic>) messageFn;
+  final List<dynamic> eventListItems;
+  final Function reserveFn;
+  final Function loginFn;
+  final String userName;
 
-  const _WebWaitingConsoleMobile({
+  const _WebHomeNewMobile({
     Key key,
     @required this.scrollController,
     @required this.rightDrawerOpenFn,
@@ -301,6 +319,10 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
     @required this.selectedDate,
     @required this.selectDateFn,
     @required this.messageFn,
+    this.eventListItems,
+    this.reserveFn,
+    this.loginFn,
+    this.userName,
   }) : super(key: key);
 
   @override
@@ -308,6 +330,101 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
     return CustomScrollView(
       controller: scrollController,
       slivers: [
+        SliverAppBar(
+          brightness: Brightness.light,
+          backgroundColor: Colors.white,
+          title: SizedBox(
+            height: 80,
+            width: 150,
+            child: Image.asset(
+              'assets/images/logo_150_113.png',
+            ),
+          ),
+          centerTitle: false,
+          floating: true,
+          actions: [
+            FirebaseAuth.instance.currentUser == null
+                ? CircleButton(
+                    onPressed: () {
+                      //AuthPage
+                      print('login page need to run');
+                      loginFn(context);
+                    },
+                    icon: Icons.login,
+                    iconSize: 30.0,
+                  )
+                : UserCard(
+                    userName: userName,
+                  ),
+          ],
+        ),
+        SliverToBoxAdapter(
+          child: Image.asset(
+            'assets/images/main_image_mobile.png',
+            fit: BoxFit.fill,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            padding: MediaQuery.of(context).size.width < 500
+                ? EdgeInsets.fromLTRB(10, 15, 10, 15)
+                : EdgeInsets.fromLTRB(150, 15, 150, 15),
+            child: OutlinedButton(
+              child: Text(
+                'Reservation',
+                style: TextStyle(
+                    // color: Colors.red[400],
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.blue[600],
+                shadowColor: Colors.red,
+                elevation: 10,
+              ),
+              onPressed: () {
+                reserveFn();
+              },
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(0, 10.0, 0, 5.0),
+          sliver: SliverToBoxAdapter(
+              child: Column(
+            children: [
+              // CreatePostContainer(waitTime: 10),
+              WaitingTimePage(),
+              Rooms(
+                waitingPeople: 'Current Waiting People',
+                openJoinFn: reserveFn,
+              ),
+              OrderOnline(),
+            ],
+          )),
+        ),
+        SliverToBoxAdapter(
+          child: Stories(item: Text('list of Menu items')),
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
+          sliver: SliverToBoxAdapter(
+            child: Image.asset(
+              'assets/images/store_location.png',
+              fit: BoxFit.fill,
+            ),
+          ),
+        ),
+        SliverList(
+            delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            //here will be event container. using as listview
+            //final Post post = posts[index];
+            return PostContainer(item: eventListItems[index]);
+          },
+          childCount: eventListItems.length,
+        )),
         SliverToBoxAdapter(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -381,7 +498,7 @@ class _WebWaitingConsoleMobile extends StatelessWidget {
   }
 }
 
-class _WebWaitingConsoleDesktop extends StatelessWidget {
+class _WebHomeNewDesktop extends StatelessWidget {
   final TrackingScrollController scrollController;
   final Function(String) selectedListFn;
   final String selectedList;
@@ -390,9 +507,10 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
   final String selectedDate;
   final Function selectDateFn;
   final Function(Map<String, dynamic>) messageFn;
-  final Function loginFn;
 
-  _WebWaitingConsoleDesktop(
+  final List<dynamic> eventListItems;
+
+  _WebHomeNewDesktop(
       this.scrollController,
       this.selectedListFn,
       this.selectedList,
@@ -401,7 +519,7 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
       this.selectedDate,
       this.selectDateFn,
       this.messageFn,
-      this.loginFn);
+      this.eventListItems);
 
   @override
   Widget build(BuildContext context) {
@@ -409,6 +527,75 @@ class _WebWaitingConsoleDesktop extends StatelessWidget {
     return CustomScrollView(
       controller: scrollController,
       slivers: [
+        SliverToBoxAdapter(
+          child: Image.asset(
+            'assets/images/main_image.png',
+            fit: BoxFit.fill,
+          ),
+        ),
+        SliverToBoxAdapter(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Spacer(),
+            Flexible(
+              flex: 9,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/store_location.png',
+                      fit: BoxFit.fill,
+                    ),
+                    Stories(item: Text('list of Menu items')),
+                    EventList(item: eventListItems)
+                  ],
+                ),
+              ),
+            ),
+            // const Spacer(),
+            Flexible(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        child: OutlinedButton(
+                          child: Text(
+                            'Reservation',
+                            style: TextStyle(
+                                // color: Colors.red[400],
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            primary: Colors.white,
+                            backgroundColor: Colors.blue[600],
+                            shadowColor: Colors.red,
+                            elevation: 10,
+                          ),
+                          onPressed: () {
+                            print('reservationFn run..');
+                            openReservationFn();
+                          },
+                        ),
+                      ),
+                      // CreatePostContainer(waitTime: 10),
+                      WaitingTimePage(),
+                      Rooms(
+                          waitingPeople: 'Current Waiting People',
+                          openJoinFn: openReservationFn),
+                      OrderOnline(),
+                    ],
+                  ),
+                )),
+            const Spacer(),
+          ],
+        )),
         SliverPadding(
           padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
           sliver: SliverToBoxAdapter(

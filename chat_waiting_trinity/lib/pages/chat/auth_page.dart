@@ -9,7 +9,6 @@ import '../../widgets/chat/auth_form.dart';
 import 'package:flutter/foundation.dart';
 // import 'package:firebase/firebase.dart' as fb;
 
-
 class AuthPage extends StatefulWidget {
   @override
   _AuthPageState createState() => _AuthPageState();
@@ -18,8 +17,15 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   final _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  bool _isLoading = false;
+  bool _isLoading;
   // File _imageFile;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _isLoading = false;
+  }
 
   void _submitAuthForm(
     String email,
@@ -43,7 +49,8 @@ class _AuthPageState extends State<AuthPage> {
             email: email, password: password);
 
         // print('authResut: $authResult');
-        await _registerUser(userId:authResult.user.uid, userName:username, userEmail:email);
+        await _registerUser(
+            userId: authResult.user.uid, userName: username, userEmail: email);
         // final ref = FirebaseStorage.instance
         //     .ref() //access root clould strage
         //     .child('user_image') //sub folder
@@ -80,8 +87,11 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  Future<void> _registerUser({String userId,
-      String userName='guest' , String userEmail='noEmail', String phone=''}) async {
+  Future<void> _registerUser(
+      {String userId,
+      String userName = 'guest',
+      String userEmail = 'noEmail',
+      String phone = ''}) async {
     try {
       // print('registerUser $userId');
       String imageUrl;
@@ -95,7 +105,8 @@ class _AuthPageState extends State<AuthPage> {
         //     .child('user_image_default.png'); //f
         // imageUrl = await ref.getDownloadURL();
         // imageUrl = imageUrl.toString();
-        imageUrl = 'https://firebasestorage.googleapis.com/v0/b/chat-waiting-trinity.appspot.com/o/user_image%2Fuser_image_default.png?alt=media&token=a89351f1-39dc-419a-a0d4-8ff9fd226823';
+        imageUrl =
+            'https://firebasestorage.googleapis.com/v0/b/chat-waiting-trinity.appspot.com/o/user_image%2Fuser_image_default.png?alt=media&token=a89351f1-39dc-419a-a0d4-8ff9fd226823';
       } else {
         ref = FirebaseStorage.instance
             .ref() //access root clould strage
@@ -110,10 +121,10 @@ class _AuthPageState extends State<AuthPage> {
         // 'username': userName == null ? 'guest': userName,
         // 'email': userEmail == null ? 'noEmail':userEmail,
         // 'image_url': imageUrl,
-        'username':userName,
+        'username': userName,
         'email': userEmail,
         'image_url': imageUrl,
-        'phoneNo':phone
+        'phoneNo': phone
       });
     } catch (e) {
       print(e);
@@ -143,7 +154,9 @@ class _AuthPageState extends State<AuthPage> {
       assert(_user.uid == currentUser.uid);
 
       await _registerUser(
-          userId:authResult.user.uid, userName:currentUser.displayName, userEmail:currentUser.email);
+          userId: authResult.user.uid,
+          userName: currentUser.displayName,
+          userEmail: currentUser.email);
       // final ref = FirebaseStorage.instance
       //     .ref() //access root clould strage
       //     .child('user_image') //sub folder
@@ -186,7 +199,8 @@ class _AuthPageState extends State<AuthPage> {
       final User _user = authResult.user;
       final User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
-      await _registerUser(userId:authResult.user.uid,phone:_user.phoneNumber);
+      await _registerUser(
+          userId: authResult.user.uid, phone: _user.phoneNumber);
     } catch (err) {
       if (err != null) {
         Scaffold.of(ctx).showSnackBar(
@@ -214,7 +228,8 @@ class _AuthPageState extends State<AuthPage> {
       final User _user = authResult.user;
       final User currentUser = _auth.currentUser;
       assert(_user.uid == currentUser.uid);
-      await _registerUser(userId:authResult.user.uid,phone: _user.phoneNumber);
+      await _registerUser(
+          userId: authResult.user.uid, phone: _user.phoneNumber);
       setState(() {
         _isLoading = false;
       });
@@ -244,6 +259,6 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return AuthForm(_submitAuthForm, _signInWithGoogle, _signInWithPhone,
-          _signInWithPhoneWithOTP, _isLoading);
+        _signInWithPhoneWithOTP, _isLoading);
   }
 }

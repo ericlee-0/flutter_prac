@@ -1,5 +1,5 @@
 import 'package:chat_waiting_trinity/pages/waiting/add_reservation_page.dart';
-import 'package:chat_waiting_trinity/pages/web/screens/web_home.dart';
+import 'package:chat_waiting_trinity/pages/web/screens/web_home_new.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,17 +27,23 @@ class WebHomeNav extends StatefulWidget {
 class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   // List<Widget> _screens;
   // List<IconData> _icons;
-  bool _isAdvisor = false;
+  bool _isAdvisor;
   TabController _topTabController;
   TabController _bottomTabController;
-  int _selectedIndex = 0;
-  int _unFinishedGuestChatNumber = 0;
+  int _selectedIndex;
+  // int _unFinishedGuestChatNumber = 0;
+  Map<String, dynamic> _userInfo;
+  bool _logIn;
   @override
   void initState() {
     super.initState();
     firebaseOnMessage();
     _topTabController = TabController(length: 3, vsync: this);
     _bottomTabController = TabController(length: 5, vsync: this);
+    _userInfo = {'name': 'guest'};
+    _selectedIndex = 0;
+    _isAdvisor = false;
+    _logIn = false;
   }
 
   void onFirebaseoOpendedApp() {
@@ -88,7 +94,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
     Icons.chat
   ];
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void moveToReservation() {
     _bottomTabController.animateTo(_selectedIndex = 1);
@@ -107,7 +113,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   void openConsole() {
     print('openconsole run..');
     print('_advisor?  $_isAdvisor');
-    if (MediaQuery.of(context).size.width < 800) {
+    if (MediaQuery.of(context).size.width < 900) {
       //mobile
       if (_isAdvisor)
         setState(() {
@@ -144,6 +150,27 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   //         );
   //       });
   // }
+  Future<void> _getUserInfo(userId) async {
+    var snapshot;
+    try {
+      snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      // print(userId);
+      // print('name: ${snapshot.data()['username']}');
+
+      setState(() {
+        _logIn = true;
+        _userInfo['name'] = snapshot.data()['username'];
+        if (FirebaseAuth.instance.currentUser.uid ==
+            'M0clGRrBRMQSfQykuyA72WwHLgG2') _isAdvisor = true;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
   Future showLoginDialog(BuildContext context) {
     // print('provider auth? $auth');
@@ -162,6 +189,8 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                     );
                   }
                   if (userSnapshot.hasData) {
+                    _getUserInfo(FirebaseAuth.instance.currentUser.uid);
+
                     return Text(
                       'Success!',
                       textAlign: TextAlign.center,
@@ -179,13 +208,13 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
               ElevatedButton(
                 child: const Text('Close'),
                 onPressed: () {
-                  if (FirebaseAuth.instance.currentUser != null &&
-                      FirebaseAuth.instance.currentUser.uid ==
-                          'M0clGRrBRMQSfQykuyA72WwHLgG2') {
-                    setState(() {
-                      _isAdvisor = true;
-                    });
-                  }
+                  // if (FirebaseAuth.instance.currentUser != null &&
+                  //     FirebaseAuth.instance.currentUser.uid ==
+                  //         'M0clGRrBRMQSfQykuyA72WwHLgG2') {
+                  //   setState(() {
+                  //     _isAdvisor = true;
+                  //   });
+                  // }
 
                   Navigator.pop(context);
                   // Navigator.of(context).pop(true);
@@ -196,6 +225,14 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
         });
   }
 
+  void _logOut() {
+    FirebaseAuth.instance.signOut();
+    setState(() {
+      _logIn = false;
+      _isAdvisor = false;
+      _userInfo = {'name': 'guest'};
+    });
+  }
 // final Stream<QuerySnapshot> _getGuestChatCountStream = FirebaseFirestore.instance
 //         .collection('users')
 //         .doc('M0clGRrBRMQSfQykuyA72WwHLgG2')
@@ -232,50 +269,122 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // Widget _selectedScreen(_selectedIndex) {
+  //   switch (_selectedIndex) {
+  //     case 0:
+  //       return WebHome(
+  //         toChatFn: moveToChat,
+  //         toReservationFn: moveToReservation,
+  //         loginFn: showLoginDialog,
+  //         userName: _userInfo['name'],
+  //       );
+  //       break;
+
+  //     case 1:
+  //       return WebAddReserve(
+  //         loginFn: showLoginDialog,
+  //         userName: _userInfo['name'],
+  //       );
+  //       break;
+
+  //     case 2:
+  //       return WebMenu();
+  //       break;
+
+  //     case 3:
+  //       return _isAdvisor
+  //           ? WebWaitingConsole(
+  //               toReserveFn: moveToReservation,
+  //               toChatFn: moveToChat,
+  //             )
+  //           : WebContact();
+  //       break;
+
+  //     case 4:
+  //       return Scaffold(
+  //         body: Container(
+  //             width: MediaQuery.of(context).size.width,
+  //             height: MediaQuery.of(context).size.height,
+  //             child: StreamBuilder(
+  //                 stream: FirebaseAuth.instance.authStateChanges(),
+  //                 builder: (ctx, userSnapshot) {
+  //                   if (userSnapshot.connectionState ==
+  //                       ConnectionState.waiting) {
+  //                     return Center(
+  //                       child: CircularProgressIndicator(),
+  //                     );
+  //                   }
+  //                   if (userSnapshot.hasData) {
+  //                     // print('id:${FirebaseAuth.instance.currentUser.uid}');
+  //                     return FirebaseAuth.instance.currentUser.uid ==
+  //                             'M0clGRrBRMQSfQykuyA72WwHLgG2'
+  //                         ? ChatWithGuestList(
+  //                             advisorId: FirebaseAuth.instance.currentUser.uid,
+  //                             key: PageStorageKey('GuestChatList'),
+  //                           )
+  //                         : ChatWithAdmin(key: PageStorageKey('ChatWithAdmin'));
+  //                   }
+  //                   return AuthPage();
+  //                 })),
+  //       );
+  //       break;
+
+  //     default:
+  //       return WebHome(
+  //         toChatFn: moveToChat,
+  //         toReservationFn: moveToReservation,
+  //         loginFn: showLoginDialog,
+  //         userName: _userInfo['name'],
+  //       );
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    User user = Provider.of<User>(context);
-    print('provider $user');
+    // User user = Provider.of<User>(context);
+    // print('provider $user');
     print('height: ${screenSize.height}');
-    if (FirebaseAuth.instance.currentUser != null &&
-        FirebaseAuth.instance.currentUser.uid ==
-            'M0clGRrBRMQSfQykuyA72WwHLgG2') {
-      setState(() {
-        _isAdvisor = true;
-      });
-      // _getUnfinishedGuestChatCount();
-    } else {
-      setState(() {
-        _isAdvisor = false;
-      });
-    }
+    print('selected index: $_selectedIndex');
+    // if (FirebaseAuth.instance.currentUser != null &&
+    //     FirebaseAuth.instance.currentUser.uid ==
+    //         'M0clGRrBRMQSfQykuyA72WwHLgG2') {
+    //   setState(() {
+    //     _isAdvisor = true;
+    //   });
+    //   // _getUnfinishedGuestChatCount();
+    // } else {
+    //   setState(() {
+    //     _isAdvisor = false;
+    //   });
+    // }
     return DefaultTabController(
       length: Responsive.isMobile(context) ? _iconsMobile.length : 3,
       child: Scaffold(
-        key: _scaffoldKey,
+        // key: _scaffoldKey,
         appBar: !Responsive.isMobile(context)
             ? PreferredSize(
                 //desktop, tablet mode
                 child: CustomAppBar(
-                  controller: _topTabController,
-                  icons: [
-                    Icons.home,
-                    // Icons.contact_phone,
-                    // Icons.location_on,
-                    Icons.restaurant_menu,
-                    _isAdvisor
-                        ? Icons.control_camera_sharp
-                        : Icons.contact_phone
-                  ],
-                  selectedIndex: _selectedIndex,
-                  onTap: (index) {
-                    setState(() => _selectedIndex = index);
-                  },
-                  isAdvisor: _isAdvisor,
-                  login: showLoginDialog,
-                  openConsole: openConsole,
-                ),
+                    controller: _topTabController,
+                    icons: [
+                      Icons.home,
+                      // Icons.contact_phone,
+                      // Icons.location_on,
+                      Icons.restaurant_menu,
+                      _isAdvisor
+                          ? Icons.control_camera_sharp
+                          : Icons.contact_phone
+                    ],
+                    selectedIndex: _selectedIndex,
+                    onTap: (index) {
+                      setState(() => _selectedIndex = index);
+                    },
+                    isAdvisor: _isAdvisor,
+                    logInFn: showLoginDialog,
+                    logOutFn: _logOut,
+                    openConsole: openConsole,
+                    userName: _userInfo['name']),
                 preferredSize: Size(screenSize.width * 0.2, 100.0))
             : null,
         body: !Responsive.isMobile(context)
@@ -287,14 +396,21 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                   WebHome(
                     toChatFn: moveToChat,
                     toReservationFn: moveToReservation,
-                    loginFn: showLoginDialog,
+                    logInFn: showLoginDialog,
                   ),
+                  // WebHomeNew(
+                  //   toChatFn: moveToChat,
+                  //   toReserveFn: moveToReservation,
+                  //   loginFn: showLoginDialog,
+                  //   userName: _userInfo['name'],
+                  // ),
                   // WebContact(),
                   // WebLocation(),
                   WebMenu(),
                   _isAdvisor ? WebWaitingConsole() : WebContact(),
                 ],
               )
+            :
             //below part will be use it for chat container activemode
             // ? Row(
             //     children: [
@@ -317,75 +433,93 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
             //       )
             //     ],
             //   )
-            : IndexedStack(
+            // : _selectedScreen(_selectedIndex),
+
+            IndexedStack(
                 index: _selectedIndex,
                 // children: _screensMobile,
                 children: [
-                  WebHome(
-                    toChatFn: moveToChat,
-                    toReservationFn: moveToReservation,
-                    loginFn: showLoginDialog,
-                  ),
-                  Scaffold(
-                    body: Container(
-                      child: StreamBuilder(
-                          stream:
-                              //  Auth.instance.authState,
-                              FirebaseAuth.instance.authStateChanges(),
-                          builder: (ctx, userSnapshot) {
-                            if (userSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (userSnapshot.hasData) {
-                              // return JoinWaitingPage();
-                              return AddReservationPage();
-                            }
-                            return AuthPage();
-                          }),
+                  AbsorbPointer(
+                    absorbing: _selectedIndex == 0 ? false : true,
+                    child: WebHome(
+                      toChatFn: moveToChat,
+                      toReservationFn: moveToReservation,
+                      logInFn: showLoginDialog,
+                      logOutFn: _logOut,
+                      userName: _userInfo['name'],
                     ),
                   ),
-                  WebMenu(),
-                  _isAdvisor
-                      ? WebWaitingConsole(
-                          toReserveFn: moveToReservation,
-                          toChatFn: moveToChat,
-                        )
-                      : WebContact(),
-                  Scaffold(
-                    body: Container(
-                        child: StreamBuilder(
-                            stream: FirebaseAuth.instance.authStateChanges(),
-                            builder: (ctx, userSnapshot) {
-                              if (userSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-                              if (userSnapshot.hasData) {
-                                // print('id:${FirebaseAuth.instance.currentUser.uid}');
-                                return FirebaseAuth.instance.currentUser.uid ==
-                                        'M0clGRrBRMQSfQykuyA72WwHLgG2'
-                                    ? ChatWithGuestList(
-                                        advisorId: FirebaseAuth
-                                            .instance.currentUser.uid,
-                                        key: PageStorageKey('GuestChatList'),
-                                      )
-                                    : ChatWithAdmin(
-                                        key: PageStorageKey('ChatWithAdmin'));
-                                // : ChatNavicontroller();
-                                // : ChatRoomListPage();
-                                // return  kIsWeb ? GuestChatPage() : ChatRoomListPage();
-                              }
-                              return AuthPage();
-                            })),
+                  AbsorbPointer(
+                    absorbing: _selectedIndex == 1 ? false : true,
+                    child: WebAddReserve(
+                      logInFn: showLoginDialog,
+                      userName: _userInfo['name'],
+                      isLogin: _logIn,
+                      logOutFn: _logOut,
+                    ),
+                  ),
+                  AbsorbPointer(
+                    absorbing: _selectedIndex == 2 ? false : true,
+                    child: WebMenu(),
+                  ),
+                  AbsorbPointer(
+                    absorbing: _selectedIndex == 3 ? false : true,
+                    child: _isAdvisor
+                        ? WebWaitingConsole(
+                            toReserveFn: moveToReservation,
+                            toChatFn: moveToChat,
+                          )
+                        : WebContact(),
+                  ),
+                  AbsorbPointer(
+                    absorbing: _selectedIndex == 4 ? false : true,
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: _logIn
+                            ? _isAdvisor
+                                ? ChatWithGuestList(
+                                    advisorId:
+                                        FirebaseAuth.instance.currentUser.uid,
+                                    key: PageStorageKey('GuestChatListMobile'),
+                                  )
+                                : ChatWithAdmin(
+                                    key: PageStorageKey('ChatWithAdminMobile'))
+                            : Center(
+                                child: ElevatedButton(
+                                child: Text('Login'),
+                                onPressed: () => showLoginDialog(context),
+                              ))
+                        //  StreamBuilder(
+                        //     stream: FirebaseAuth.instance.authStateChanges(),
+                        //     builder: (ctx, userSnapshot) {
+                        //       if (userSnapshot.connectionState ==
+                        //           ConnectionState.waiting) {
+                        //         return Center(
+                        //           child: CircularProgressIndicator(),
+                        //         );
+                        //       }
+                        //       if (userSnapshot.hasData) {
+                        //         // print('id:${FirebaseAuth.instance.currentUser.uid}');
+                        //         return FirebaseAuth
+                        //                     .instance.currentUser.uid ==
+                        //                 'M0clGRrBRMQSfQykuyA72WwHLgG2'
+                        //             ? ChatWithGuestList(
+                        //                 advisorId: FirebaseAuth
+                        //                     .instance.currentUser.uid,
+                        //                 key: PageStorageKey('GuestChatList'),
+                        //               )
+                        //             : ChatWithAdmin(
+                        //                 key: PageStorageKey('ChatWithAdmin'));
+                        //       }
+                        //       return AuthPage();
+                        //     })),
+
+                        ),
                   ),
                 ],
               ),
-        // endDrawer: WebChatDrawer(),
+
         bottomNavigationBar: Responsive.isMobile(context)
             ? Container(
                 padding: const EdgeInsets.only(bottom: 12.0),

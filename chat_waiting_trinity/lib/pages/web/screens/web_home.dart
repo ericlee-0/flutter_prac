@@ -10,9 +10,17 @@ import '../../../widgets/chat/chat_with_admin.dart';
 class WebHome extends StatefulWidget {
   final Function toChatFn;
   final Function toReservationFn;
-  final Function loginFn;
+  final Function logInFn;
+  final Function logOutFn;
+  final String userName;
 
-  const WebHome({Key key, this.toChatFn, this.toReservationFn, this.loginFn})
+  const WebHome(
+      {Key key,
+      this.toChatFn,
+      this.toReservationFn,
+      this.logInFn,
+      this.logOutFn,
+      this.userName})
       : super(key: key);
 
   @override
@@ -23,10 +31,10 @@ class _WebHomeState extends State<WebHome> {
   final TrackingScrollController _trackingScrollController =
       TrackingScrollController();
 
-  bool chatOpen = false;
-  bool reservationOpen = false;
+  bool chatOpen;
+  bool reservationOpen;
 
-  List eventListItems = [
+  final List eventListItems = [
     {
       'type': 'E',
       'creator': 'Gyubee Dundas',
@@ -40,6 +48,8 @@ class _WebHomeState extends State<WebHome> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    chatOpen = false;
+    reservationOpen = false;
   }
 
   _openReservation() {
@@ -73,11 +83,17 @@ class _WebHomeState extends State<WebHome> {
             icon: Icon(Icons.chat_bubble_outline),
             label: chatOpen ? Text('Close chat') : Text('Open chat')),
         body: Responsive(
-          mobile: _WebHomeMobile(
-            scrollController: _trackingScrollController,
-            eventListItems: eventListItems,
-            reserveFn: widget.toReservationFn,
-            loginFn: widget.loginFn,
+          mobile: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: _WebHomeMobile(
+              scrollController: _trackingScrollController,
+              eventListItems: eventListItems,
+              reserveFn: widget.toReservationFn,
+              logInFn: widget.logInFn,
+              logOutFn: widget.logOutFn,
+              userName: widget.userName,
+            ),
           ),
           desktop: Stack(
             children: [
@@ -116,39 +132,56 @@ class _WebHomeState extends State<WebHome> {
                       }),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
-                alignment: Alignment.bottomRight,
-                child: AnimatedContainer(
-                  width: chatOpen ? 400.0 : 0.0,
-                  height: chatOpen ? 600.0 : 0.0,
-                  color: chatOpen ? Colors.grey[100] : Colors.white,
-                  alignment: chatOpen
-                      ? Alignment.bottomLeft
-                      : AlignmentDirectional.topEnd,
-                  duration: Duration(seconds: 1),
-                  curve: Curves.fastOutSlowIn,
-                  child: StreamBuilder(
-                      stream:
-                          //  Auth.instance.authState,
-                          FirebaseAuth.instance.authStateChanges(),
-                      builder: (ctx, userSnapshot) {
-                        if (userSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (userSnapshot.hasData) {
-                          return ChatWithAdmin(
-                            popToggleFn: widget.toChatFn,
-                            key: PageStorageKey('chatWithAdminscreen'),
-                          );
-                        }
-                        return AuthPage();
-                      }),
-                  // ChatNavicontroller(),
-                ),
+              Positioned(
+                bottom: 10,
+                right: 10,
+                child: chatOpen
+                    ? Container(
+                        // padding: EdgeInsets.fromLTRB(0, 0, 50, 50),
+                        // alignment: Alignment.bottomRight,
+                        // child: AnimatedContainer(
+                        //   width: chatOpen ? 400.0 : 0.0,
+                        //   height: chatOpen ? 600.0 : 0.0,
+                        //   color: chatOpen ? Colors.grey[100] : Colors.white,
+                        //   alignment: chatOpen
+                        //       ? Alignment.bottomLeft
+                        //       : AlignmentDirectional.topEnd,
+                        //   duration: Duration(seconds: 1),
+                        //   curve: Curves.fastOutSlowIn,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                        ),
+                        width: 400,
+                        height: 600,
+                        child: Column(
+                          children: [
+                            Text('Chat Screen'),
+                            StreamBuilder(
+                                stream:
+                                    //  Auth.instance.authState,
+                                    FirebaseAuth.instance.authStateChanges(),
+                                builder: (ctx, userSnapshot) {
+                                  if (userSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  if (userSnapshot.hasData) {
+                                    return ChatWithAdmin(
+                                      popToggleFn: widget.toChatFn,
+                                      key:
+                                          PageStorageKey('chatWithAdminscreen'),
+                                    );
+                                  }
+                                  return AuthPage();
+                                }),
+                          ],
+                        ),
+                        // ChatNavicontroller(),
+                        // ),
+                      )
+                    : SizedBox.shrink(),
               )
             ],
           ),
@@ -162,14 +195,18 @@ class _WebHomeMobile extends StatelessWidget {
   final TrackingScrollController scrollController;
   final List<dynamic> eventListItems;
   final Function reserveFn;
-  final Function loginFn;
+  final Function logInFn;
+  final Function logOutFn;
+  final String userName;
 
   const _WebHomeMobile(
       {Key key,
       this.scrollController,
       this.eventListItems,
       this.reserveFn,
-      this.loginFn})
+      this.logInFn,
+      this.logOutFn,
+      this.userName})
       : super(key: key);
 
   @override
@@ -177,7 +214,7 @@ class _WebHomeMobile extends StatelessWidget {
     return CustomScrollView(controller: scrollController, slivers: [
       SliverAppBar(
         brightness: Brightness.light,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         title: SizedBox(
           height: 80,
           width: 150,
@@ -193,23 +230,28 @@ class _WebHomeMobile extends StatelessWidget {
                   onPressed: () {
                     //AuthPage
                     print('login page need to run');
-                    loginFn(context);
+                    logInFn(context);
                   },
                   icon: Icons.login,
                   iconSize: 30.0,
                 )
-              : UserCard(),
+              : UserCard(
+                  userName: userName,
+                  logOutFn: logOutFn,
+                ),
         ],
       ),
       SliverToBoxAdapter(
         child: Image.asset(
-          'assets/images/main_image.png',
+          'assets/images/main_image_mobile.png',
           fit: BoxFit.fill,
         ),
       ),
       SliverToBoxAdapter(
         child: Container(
-          padding: EdgeInsets.fromLTRB(150, 15, 150, 15),
+          padding: MediaQuery.of(context).size.width < 900
+              ? EdgeInsets.fromLTRB(10, 15, 10, 15)
+              : EdgeInsets.fromLTRB(150, 15, 150, 15),
           child: OutlinedButton(
             child: Text(
               'Reservation',

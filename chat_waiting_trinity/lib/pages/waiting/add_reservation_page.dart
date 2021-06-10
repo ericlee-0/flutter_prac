@@ -31,54 +31,29 @@ List<GlobalKey<FormState>> formKeys = [
 ];
 
 class _AddReservationPageState extends State<AddReservationPage> {
-  int _currentStep = 0;
+  int _currentStep;
   var _selectedReserveTime;
   // String _waitingStatus;
-  bool _isWaiting = true;
-  bool _isLoading = false;
+  bool _isWaiting;
+  bool _isLoading;
   var _reservationNumber;
-  bool _hasDone = false;
+  bool _hasDone;
+  final TextEditingController _reserveAtController = TextEditingController();
+  final TextEditingController _dateOnController = TextEditingController();
+  final TextEditingController _timeAtController = TextEditingController();
 
-  TextEditingController _reserveAtController = TextEditingController();
-  TextEditingController _dateOnController = TextEditingController();
-  TextEditingController _timeAtController = TextEditingController();
   Map<int, List<TextFormField>> step1Index = {};
   List<TextFormField> step1;
   List<TextFormField> step1_1;
   // List<TextFormField> step3;
 
-  List<TextFormField> step0 = [
-    TextFormField(
-      key: ValueKey('guest_people'),
-      initialValue: '0',
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (int.parse(value) < 1) {
-          return 'Please choose number of people.';
-        } else if (int.parse(value) < 6) {
-          //need to go to waiting
-          print('toWaiting working?');
-
-          answers['Number'] = int.parse(value);
-
-          return null;
-        } else if (int.parse(value) > 20) {
-          return 'more than 10 people need to contact to the restaurant.';
-        }
-
-        answers['Number'] = int.parse(value);
-        return null;
-      },
-      decoration: InputDecoration(labelText: 'People'),
-      // obscureText: true,
-      onSaved: (value) {
-        // _people = value;
-      },
-    ),
-  ];
+  List<TextFormField> step0;
+  List<TextFormField> step3;
 
   @override
   void initState() {
+    super.initState();
+
     step1Index = {
       0: [
         TextFormField(
@@ -159,49 +134,84 @@ class _AddReservationPageState extends State<AddReservationPage> {
     step1 = step1Index['0'];
     step1_1 = step1Index['1'];
 
-    super.initState();
+    _currentStep = 0;
+
+    _isWaiting = true;
+    _isLoading = false;
+
+    _hasDone = false;
+
+    step0 = [
+      TextFormField(
+        key: ValueKey('guest_people'),
+        initialValue: '0',
+        keyboardType: TextInputType.number,
+        validator: (value) {
+          if (int.parse(value) < 1) {
+            return 'Please choose number of people.';
+          } else if (int.parse(value) < 6) {
+            //need to go to waiting
+            print('toWaiting working?');
+
+            answers['Number'] = int.parse(value);
+
+            return null;
+          } else if (int.parse(value) > 20) {
+            return 'more than 10 people need to contact to the restaurant.';
+          }
+
+          answers['Number'] = int.parse(value);
+          return null;
+        },
+        decoration: InputDecoration(labelText: 'People'),
+        // obscureText: true,
+        onSaved: (value) {
+          // _people = value;
+        },
+      ),
+    ];
+    step3 = [
+      TextFormField(
+        key: ValueKey('guest_name'),
+        // autocorrect: false,
+        textCapitalization: TextCapitalization.words,
+        enableSuggestions: false,
+        validator: (value) {
+          if (value.isEmpty || value.length < 2) {
+            return 'Prease name at least 2 characters';
+          }
+
+          answers['Name'] = value;
+          return null;
+        },
+        keyboardType: TextInputType.text,
+        decoration: InputDecoration(
+          labelText: 'Name',
+        ),
+        onSaved: (value) {
+          // _name = value;
+        },
+      ),
+      TextFormField(
+        key: ValueKey('guest_phone'),
+        keyboardType: TextInputType.phone,
+        validator: (value) {
+          if (value.isEmpty || value.length != 10) {
+            return 'phone must be 10 digits long.';
+          }
+
+          answers['Phone'] = value;
+          return null;
+        },
+        decoration: InputDecoration(labelText: 'phone'),
+        // obscureText: true,
+        onSaved: (value) {
+          // _phone = '+1' + value;
+        },
+      ),
+    ];
   }
 
-  List<TextFormField> step3 = [
-    TextFormField(
-      key: ValueKey('guest_name'),
-      // autocorrect: false,
-      textCapitalization: TextCapitalization.words,
-      enableSuggestions: false,
-      validator: (value) {
-        if (value.isEmpty || value.length < 2) {
-          return 'Prease name at least 2 characters';
-        }
-
-        answers['Name'] = value;
-        return null;
-      },
-      keyboardType: TextInputType.text,
-      decoration: InputDecoration(
-        labelText: 'Name',
-      ),
-      onSaved: (value) {
-        // _name = value;
-      },
-    ),
-    TextFormField(
-      key: ValueKey('guest_phone'),
-      keyboardType: TextInputType.phone,
-      validator: (value) {
-        if (value.isEmpty || value.length != 10) {
-          return 'phone must be 10 digits long.';
-        }
-
-        answers['Phone'] = value;
-        return null;
-      },
-      decoration: InputDecoration(labelText: 'phone'),
-      // obscureText: true,
-      onSaved: (value) {
-        // _phone = '+1' + value;
-      },
-    ),
-  ];
   Future<void> _showMyDialog() async {
     return showDialog<void>(
       context: context,
@@ -363,6 +373,7 @@ class _AddReservationPageState extends State<AddReservationPage> {
 
   Future<void> _checkDualReservation() async {
     print('checkdualreservationFn process..');
+    print('user id : ${widget.userId}');
     var result = await JoinWaitingController.instance
         .searchListById(widget.userId, answers['Time']);
     if (widget.userId == 'M0clGRrBRMQSfQykuyA72WwHLgG2')
@@ -440,16 +451,48 @@ class _AddReservationPageState extends State<AddReservationPage> {
           Text(
             'Reservation Number : $_reservationNumber',
           ),
-          ElevatedButton(
-            child: Text('Close'),
-            onPressed: () {
-              // Navigator.of(context).pushNamed('/home');
-              widget.closeReservationFn();
-            },
-          )
+          Row(children: [
+            MediaQuery.of(context).size.width < 900
+                ? SizedBox.shrink()
+                : ElevatedButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                      // Navigator.of(context).pushNamed('/home');
+                      widget.closeReservationFn();
+                    },
+                  ),
+            Spacer(),
+            ElevatedButton(
+              child: Text('Create New One'),
+              onPressed: () {
+                // Navigator.of(context).pushNamed('/home');
+                formKeys.forEach((element) {
+                  element.currentState?.reset();
+                });
+                setState(() {
+                  _currentStep = 0;
+                  _isWaiting = true;
+                  _isLoading = false;
+                  _hasDone = false;
+                });
+
+                // _formKeyScreen2.currentState?.reset();
+                // widget.closeReservationFn();
+              },
+            )
+          ]),
         ],
       ),
     ));
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _reserveAtController.dispose();
+    _dateOnController.dispose();
+    _timeAtController.dispose();
   }
 
   @override
