@@ -37,6 +37,7 @@ import './pages/chat/guest_chat_page.dart';
 import './controllers/sms_controller.dart';
 
 import 'pages/web/web_home_nav.dart';
+import './route/route_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +61,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final _routerDelegate = ScreenRouterDelegate();
+  final _routeInformationParser = ScreenRouteInformationParser();
   var _userId;
 
   @override
@@ -98,46 +101,58 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (ctx) => Auth(),
+      providers: [
+        ChangeNotifierProvider(
+          create: (ctx) => Auth(),
+        ),
+        StreamProvider<User>.value(
+            value: FirebaseAuth.instance.authStateChanges()),
+      ],
+      child: MaterialApp.router(
+        title: 'Book Review App',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          appBarTheme: AppBarTheme(
+            color: Colors.white,
+            iconTheme: IconThemeData(color: Colors.black),
+            elevation: 0,
           ),
-          StreamProvider<User>.value(
-              value: FirebaseAuth.instance.authStateChanges()),
-        ],
-        child:
-            //  kIsWeb
-            //     ?
-            MaterialApp(
-          title: 'Chat_Wainting_Trinity',
-          debugShowCheckedModeBanner: false,
-          theme: _theme(),
-          home: WebHomeNav(),
-          routes: {
-            '/home': (ctx) => WebHomeNav(),
-            GuestChatPage.routeName: (ctx) => GuestChatPage(),
-            ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
-          },
-        )
-        // :
-        // MaterialApp(
-        //     title: 'Chat_Wainting_Trinity',
-        //     theme: _theme(),
-        //     home: MyHomePage(),
-        //     routes: {
-        //       '/home': (ctx) => MyHomePage(),
-        //       UserProfileEditPage.routeName: (ctx) =>
-        //           UserProfileEditPage(Auth.instance.userId),
-        //       // UserListPage.routeName: (ctx) => UserListPage(),
-        //       ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
-        //       ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
-        //       UserProfilePage.routeName: (ctx) => UserProfilePage(),
-        //       GuestChatPage.routeName: (ctx) => GuestChatPage(),
-        //       // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
-        //       // WaitingListPage.routeName: (ctx) => WaitingListPage()
-        //     },
-        //   ),
-        );
+        ),
+        routerDelegate: _routerDelegate,
+        routeInformationParser: _routeInformationParser,
+      ),
+
+      //     MaterialApp(
+      //   title: 'Chat_Wainting_Trinity',
+      //   debugShowCheckedModeBanner: false,
+      //   theme: _theme(),
+      //   home: WebHomeNav(),
+      //   routes: {
+      //     '/home': (ctx) => WebHomeNav(),
+      //     GuestChatPage.routeName: (ctx) => GuestChatPage(),
+      //     ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+      //   },
+      // )
+      // :
+      // MaterialApp(
+      //     title: 'Chat_Wainting_Trinity',
+      //     theme: _theme(),
+      //     home: MyHomePage(),
+      //     routes: {
+      //       '/home': (ctx) => MyHomePage(),
+      //       UserProfileEditPage.routeName: (ctx) =>
+      //           UserProfileEditPage(Auth.instance.userId),
+      //       // UserListPage.routeName: (ctx) => UserListPage(),
+      //       ChatRoomListPage.routeName: (ctx) => ChatRoomListPage(),
+      //       ChatRoomPage.routeName: (ctx) => ChatRoomPage(),
+      //       UserProfilePage.routeName: (ctx) => UserProfilePage(),
+      //       GuestChatPage.routeName: (ctx) => GuestChatPage(),
+      //       // UserProfileImagePicker.routeName:(ctx)=>UserProfileImagePicker(),
+      //       // WaitingListPage.routeName: (ctx) => WaitingListPage()
+      //     },
+      //   ),
+    );
   }
 }
 

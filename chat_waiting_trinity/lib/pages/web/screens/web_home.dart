@@ -13,6 +13,7 @@ class WebHome extends StatefulWidget {
   final Function logInFn;
   final Function logOutFn;
   final String userName;
+  final bool isLogin;
 
   const WebHome(
       {Key key,
@@ -20,7 +21,8 @@ class WebHome extends StatefulWidget {
       this.toReservationFn,
       this.logInFn,
       this.logOutFn,
-      this.userName})
+      this.userName,
+      this.isLogin})
       : super(key: key);
 
   @override
@@ -105,32 +107,20 @@ class _WebHomeState extends State<WebHome> {
               Container(
                 alignment: Alignment.center,
                 child: AnimatedContainer(
-                  width: reservationOpen ? 400.0 : 0.0,
-                  height: reservationOpen ? 600.0 : 0.0,
-                  color: reservationOpen ? Colors.blue[100] : Colors.white,
-                  duration: Duration(seconds: 1),
-                  curve: Curves.fastOutSlowIn,
-                  child: StreamBuilder(
-                      stream:
-                          //  Auth.instance.authState,
-                          FirebaseAuth.instance.authStateChanges(),
-                      builder: (ctx, userSnapshot) {
-                        if (userSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (userSnapshot.hasData) {
-                          // return JoinWaitingPage();
-                          // return AddReservationPage();
-                          return AddReservationPage(
-                              closeReservationFn: _openReservation,
-                              userId: FirebaseAuth.instance.currentUser.uid);
-                        }
-                        return AuthPage();
-                      }),
-                ),
+                    width: reservationOpen ? 400.0 : 0.0,
+                    height: reservationOpen ? 600.0 : 0.0,
+                    color: reservationOpen ? Colors.blue[100] : Colors.white,
+                    duration: Duration(seconds: 1),
+                    curve: Curves.fastOutSlowIn,
+                    child: widget.isLogin
+                        ? AddReservationPage(
+                            userId: FirebaseAuth.instance.currentUser.uid,
+                          )
+                        : Center(
+                            child: ElevatedButton(
+                                onPressed: () => widget.logInFn(context),
+                                child: Text('Login')),
+                          )),
               ),
               Positioned(
                 bottom: 10,
@@ -149,38 +139,21 @@ class _WebHomeState extends State<WebHome> {
                         //   duration: Duration(seconds: 1),
                         //   curve: Curves.fastOutSlowIn,
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: Colors.green[100],
                         ),
                         width: 400,
                         height: 600,
-                        child: Column(
-                          children: [
-                            Text('Chat Screen'),
-                            StreamBuilder(
-                                stream:
-                                    //  Auth.instance.authState,
-                                    FirebaseAuth.instance.authStateChanges(),
-                                builder: (ctx, userSnapshot) {
-                                  if (userSnapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  if (userSnapshot.hasData) {
-                                    return ChatWithAdmin(
-                                      popToggleFn: widget.toChatFn,
-                                      key:
-                                          PageStorageKey('chatWithAdminscreen'),
-                                    );
-                                  }
-                                  return AuthPage();
-                                }),
-                          ],
-                        ),
+                        child: widget.isLogin
+                            ? ChatWithAdmin(
+                                key: PageStorageKey('ChatWithAdminDesktop'))
+                            : Center(
+                                child: ElevatedButton(
+                                child: Text('Login'),
+                                onPressed: () => widget.logInFn(context),
+                              ))
                         // ChatNavicontroller(),
                         // ),
-                      )
+                        )
                     : SizedBox.shrink(),
               )
             ],

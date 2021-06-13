@@ -20,6 +20,9 @@ import '../../widgets/chat/chat_with_admin.dart';
 import 'package:intl/intl.dart';
 
 class WebHomeNav extends StatefulWidget {
+  final int selectedTitle;
+
+  const WebHomeNav({Key key, this.selectedTitle}) : super(key: key);
   @override
   _WebHomeNavState createState() => _WebHomeNavState();
 }
@@ -41,7 +44,9 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
     _topTabController = TabController(length: 3, vsync: this);
     _bottomTabController = TabController(length: 5, vsync: this);
     _userInfo = {'name': 'guest'};
-    _selectedIndex = 0;
+    widget.selectedTitle != null
+        ? _selectedIndex = widget.selectedTitle
+        : _selectedIndex = 0;
     _isAdvisor = false;
     _logIn = false;
   }
@@ -339,6 +344,22 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
   //   }
   // }
 
+  int _tabLength() {
+    if (Responsive.isMobile(context)) {
+      if (_isAdvisor) {
+        return 6;
+      } else {
+        return 5;
+      }
+    } else {
+      if (_isAdvisor) {
+        return 4;
+      } else {
+        return 3;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -359,7 +380,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
     //   });
     // }
     return DefaultTabController(
-      length: Responsive.isMobile(context) ? _iconsMobile.length : 3,
+      length: Responsive.isMobile(context) ? 5 : 3,
       child: Scaffold(
         // key: _scaffoldKey,
         appBar: !Responsive.isMobile(context)
@@ -372,9 +393,10 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                       // Icons.contact_phone,
                       // Icons.location_on,
                       Icons.restaurant_menu,
+
                       _isAdvisor
                           ? Icons.control_camera_sharp
-                          : Icons.contact_phone
+                          : Icons.contact_phone,
                     ],
                     selectedIndex: _selectedIndex,
                     onTap: (index) {
@@ -397,6 +419,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                     toChatFn: moveToChat,
                     toReservationFn: moveToReservation,
                     logInFn: showLoginDialog,
+                    isLogin: _logIn,
                   ),
                   // WebHomeNew(
                   //   toChatFn: moveToChat,
@@ -407,6 +430,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                   // WebContact(),
                   // WebLocation(),
                   WebMenu(),
+
                   _isAdvisor ? WebWaitingConsole() : WebContact(),
                 ],
               )
@@ -447,6 +471,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                       logInFn: showLoginDialog,
                       logOutFn: _logOut,
                       userName: _userInfo['name'],
+                      isLogin: _logIn,
                     ),
                   ),
                   AbsorbPointer(
@@ -473,49 +498,53 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                   ),
                   AbsorbPointer(
                     absorbing: _selectedIndex == 4 ? false : true,
-                    child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: _logIn
-                            ? _isAdvisor
-                                ? ChatWithGuestList(
-                                    advisorId:
-                                        FirebaseAuth.instance.currentUser.uid,
-                                    key: PageStorageKey('GuestChatListMobile'),
-                                  )
-                                : ChatWithAdmin(
-                                    key: PageStorageKey('ChatWithAdminMobile'))
-                            : Center(
-                                child: ElevatedButton(
-                                child: Text('Login'),
-                                onPressed: () => showLoginDialog(context),
-                              ))
-                        //  StreamBuilder(
-                        //     stream: FirebaseAuth.instance.authStateChanges(),
-                        //     builder: (ctx, userSnapshot) {
-                        //       if (userSnapshot.connectionState ==
-                        //           ConnectionState.waiting) {
-                        //         return Center(
-                        //           child: CircularProgressIndicator(),
-                        //         );
-                        //       }
-                        //       if (userSnapshot.hasData) {
-                        //         // print('id:${FirebaseAuth.instance.currentUser.uid}');
-                        //         return FirebaseAuth
-                        //                     .instance.currentUser.uid ==
-                        //                 'M0clGRrBRMQSfQykuyA72WwHLgG2'
-                        //             ? ChatWithGuestList(
-                        //                 advisorId: FirebaseAuth
-                        //                     .instance.currentUser.uid,
-                        //                 key: PageStorageKey('GuestChatList'),
-                        //               )
-                        //             : ChatWithAdmin(
-                        //                 key: PageStorageKey('ChatWithAdmin'));
-                        //       }
-                        //       return AuthPage();
-                        //     })),
+                    child: SingleChildScrollView(
+                      child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          child: _logIn
+                              ? _isAdvisor
+                                  ? ChatWithGuestList(
+                                      advisorId:
+                                          FirebaseAuth.instance.currentUser.uid,
+                                      key:
+                                          PageStorageKey('GuestChatListMobile'),
+                                    )
+                                  : ChatWithAdmin(
+                                      key:
+                                          PageStorageKey('ChatWithAdminMobile'))
+                              : Center(
+                                  child: ElevatedButton(
+                                  child: Text('Login'),
+                                  onPressed: () => showLoginDialog(context),
+                                ))
+                          //  StreamBuilder(
+                          //     stream: FirebaseAuth.instance.authStateChanges(),
+                          //     builder: (ctx, userSnapshot) {
+                          //       if (userSnapshot.connectionState ==
+                          //           ConnectionState.waiting) {
+                          //         return Center(
+                          //           child: CircularProgressIndicator(),
+                          //         );
+                          //       }
+                          //       if (userSnapshot.hasData) {
+                          //         // print('id:${FirebaseAuth.instance.currentUser.uid}');
+                          //         return FirebaseAuth
+                          //                     .instance.currentUser.uid ==
+                          //                 'M0clGRrBRMQSfQykuyA72WwHLgG2'
+                          //             ? ChatWithGuestList(
+                          //                 advisorId: FirebaseAuth
+                          //                     .instance.currentUser.uid,
+                          //                 key: PageStorageKey('GuestChatList'),
+                          //               )
+                          //             : ChatWithAdmin(
+                          //                 key: PageStorageKey('ChatWithAdmin'));
+                          //       }
+                          //       return AuthPage();
+                          //     })),
 
-                        ),
+                          ),
+                    ),
                   ),
                 ],
               ),
@@ -533,7 +562,7 @@ class _WebHomeNavState extends State<WebHomeNav> with TickerProviderStateMixin {
                     _isAdvisor
                         ? Icons.control_camera_sharp
                         : Icons.contact_phone,
-                    Icons.chat
+                    Icons.chat,
                   ],
                   selectedIndex: _selectedIndex,
                   onTap: (index) => setState(
